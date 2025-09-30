@@ -1,25 +1,32 @@
 
 export interface User {
-  id: string;
-  email: string;
+    id: number;
+    email: string;
 }
 
 export interface Document {
-  id: string;
-  title: string;
-  content: string;
-  ownerId: string;
-  createdAt: string;
-  updatedAt: string;
+    id: number;
+    title: string;
+    content: string;
+    created_at: string;
+    updated_at: string;
+    signing_token: string | null;
+    signatures: Signature[];
+    signing_token_expires: string | null;
+    signed_at: string | null;
+    deadline: string | null;
 }
 
 export interface Signature {
-  id: string;
-  documentId: string;
-  userId: string;
-  user: User;
-  signatureData: string;
-  signedAt: string;
+    id: string;
+    user: User;
+    signature_data: {
+      strokes: Stroke[];
+      timestamp: string;
+      expires_at: string;
+      document_hash: string;
+    };
+    signed_at: string;
 }
 
 export interface Point {

@@ -69,7 +69,7 @@ const DashboardPage: React.FC = () => {
         {documents?.map((doc) => (
           <Link to={`/documents/${doc.id}`} key={doc.id} className="block bg-dark-card p-6 rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all">
             <h2 className="text-xl font-semibold text-brand-primary truncate">{doc.title}</h2>
-            <p className="text-dark-text-secondary mt-2">Created: {new Date(doc.createdAt).toLocaleDateString()}</p>
+            <p className="text-dark-text-secondary mt-2">Created: {new Date(doc.created_at).toLocaleDateString()}</p>
           </Link>
         ))}
       </div>

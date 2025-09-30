@@ -91,10 +91,10 @@ const DocumentDetailPage: React.FC = () => {
             {signatures && signatures.length > 0 ? (
               signatures.map((sig) => (
                 <li key={sig.id} className="flex items-center space-x-4">
-                    <div dangerouslySetInnerHTML={{ __html: sig.signature_svg }} className="w-24 h-12 p-1 bg-white rounded object-contain"/>
+                  <img src={`${sig.signature_image_base64}`} alt="Signature" className="w-24 h-12 p-1 rounded object-contain"/>
                   <div>
                     <p className="font-semibold text-dark-text">{sig.user?.email}</p>
-                    <p className="text-sm text-dark-text-secondary">Signed on {new Date(sig.signed_at).toLocaleString()}</p>
+                    <p className="text-sm text-dark-text-secondary">Signed on {new Date(sig.created_at).toLocaleString()}</p>
                   </div>
                 </li>
               ))

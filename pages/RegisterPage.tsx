@@ -11,20 +11,20 @@ const RegisterPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const mutation = useMutation<User, Error, { fullName: string; email: string; password: string }>({
-    mutationFn: (newUser) => api.post('/api/auth/register', newUser).then(res => res.data),
+  const mutation = useMutation<User, Error, { email: string; password: string }>({
+    mutationFn: (newUser) => api.post('/api/users/register', newUser).then(res => res.data),
     onSuccess: () => {
       alert('Registration successful! Please login.');
       navigate('/login');
     },
     onError: (error) => {
-      alert('Registration failed: ' + (error.response?.data?.message || error.message));
+      alert('Registration failed: ' + (error?.message));
     }
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    mutation.mutate({ fullName, email, password });
+    mutation.mutate({ email, password });
   };
 
   return (
@@ -32,18 +32,6 @@ const RegisterPage: React.FC = () => {
       <div className="max-w-md w-full bg-dark-card shadow-lg rounded-lg p-8">
         <h2 className="text-3xl font-bold text-center text-brand-primary mb-8">Create your Account</h2>
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="fullName"  className="block text-sm font-medium text-dark-text-secondary">Full Name</label>
-            <input
-              id="fullName"
-              name="fullName"
-              type="text"
-              required
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-brand-primary focus:border-brand-primary sm:text-sm"
-            />
-          </div>
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-dark-text-secondary">Email address</label>
             <input
