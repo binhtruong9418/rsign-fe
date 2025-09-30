@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import api from '../services/api';
 import { useAuthStore } from '../store/authStore';
@@ -15,13 +15,14 @@ const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
   const login = useAuthStore((state) => state.login);
 
   const mutation = useMutation<any, Error, { email: string; password: string }>({
     mutationFn: (credentials) => api.post('/api/users/login', credentials).then(res => res.data),
     onSuccess: (data) => {
       login(data.user, data.token);
-      navigate('/dashboard');
+      navigate(location.state?.from || '/dashboard');
     },
     onError: (error) => {
         alert('Login failed: ' + (error?.message || 'Unknown error'));

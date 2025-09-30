@@ -20,7 +20,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route path="/sign/:token" element={<SignDocumentPage />} />
+          <Route path="/sign/:token" element={<ProtectedRoute><SignDocumentPage /></ProtectedRoute>} />
 
           <Route element={<Layout />}>
             <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
