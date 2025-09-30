@@ -6,11 +6,9 @@ import { LogOut, User as UserIcon, LayoutDashboard, Home } from 'lucide-react';
 
 const Header: React.FC = () => {
   const { isAuthenticated, user, logout } = useAuthStore();
-  const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
   };
 
   return (

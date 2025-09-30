@@ -15,14 +15,15 @@ const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-  const location = useLocation();
   const login = useAuthStore((state) => state.login);
 
   const mutation = useMutation<LoginResponse, Error, { email: string; password: string }>({
     mutationFn: (credentials) => api.post('/api/users/login', credentials).then(res => res.data),
     onSuccess: (data) => {
       login(data.user, data.token);
-      navigate(location.state?.from || '/');
+      const redirectAfterLogin = sessionStorage.getItem('redirectAfterLogin');
+      navigate(redirectAfterLogin || '/dashboard');
+      sessionStorage.removeItem('redirectAfterLogin');
     },
     onError: (error: any) => {
       alert('Login failed: ' + (error?.response?.data?.message || 'Unknown error'));

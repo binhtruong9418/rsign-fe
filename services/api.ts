@@ -27,7 +27,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       useAuthStore.getState().logout();
-      window.location.hash = '/login';
+      window.location.pathname = '/login';
     }
     return Promise.reject(error);
   }
