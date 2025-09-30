@@ -33,7 +33,7 @@ const DocumentDetailPage: React.FC = () => {
 
   const signatures = document?.signatures;
   const signingToken = document?.signing_token;
-  const signUrl = signingToken ? `${window.location.origin}/#/sign/${signingToken}` : '';
+  const signUrl = signingToken ? `${window.location.origin}/sign/${signingToken}` : '';
 
   const copyToClipboard = () => {
     if (signUrl) {

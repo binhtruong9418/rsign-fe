@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import api from '../services/api';
@@ -18,14 +18,14 @@ const LoginPage: React.FC = () => {
   const location = useLocation();
   const login = useAuthStore((state) => state.login);
 
-  const mutation = useMutation<any, Error, { email: string; password: string }>({
+  const mutation = useMutation<LoginResponse, Error, { email: string; password: string }>({
     mutationFn: (credentials) => api.post('/api/users/login', credentials).then(res => res.data),
     onSuccess: (data) => {
       login(data.user, data.token);
-      navigate(location.state?.from || '/dashboard');
+      navigate(location.state?.from || '/');
     },
-    onError: (error) => {
-        alert('Login failed: ' + (error?.message || 'Unknown error'));
+    onError: (error: any) => {
+      alert('Login failed: ' + (error?.response?.data?.message || 'Unknown error'));
     }
   });
 
@@ -81,7 +81,7 @@ const LoginPage: React.FC = () => {
         </form>
         <p className="mt-6 text-center text-sm text-dark-text-secondary">
           Not a member?{' '}
-          <Link to="/register" className="font-medium text-brand-primary hover:text-brand-secondary">
+          <Link to='/register' className="font-medium text-brand-primary hover:text-brand-secondary">
             Register here
           </Link>
         </p>

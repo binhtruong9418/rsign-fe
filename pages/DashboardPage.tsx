@@ -31,8 +31,8 @@ const DashboardPage: React.FC = () => {
       setTitle('');
       setContent('');
     },
-    onError: (error) => {
-        alert('Failed to create document: ' + (error?.message || 'Unknown error'));
+    onError: (error: any) => {
+      alert('Failed to create document: ' + (error?.response?.data?.message || 'Unknown error'));
     }
   });
 

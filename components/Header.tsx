@@ -35,7 +35,7 @@ const Header: React.FC = () => {
                 </Link>
                 <div className="flex items-center space-x-2 text-dark-text-secondary">
                     <UserIcon size={18}/>
-                    <span>{user?.fullName}</span>
+                    <span>{user?.email}</span>
                 </div>
                 <button
                   onClick={handleLogout}
