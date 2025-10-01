@@ -1,169 +1,179 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { Stroke, Point } from '../types';
-import { Play } from 'lucide-react';
+import React, { useRef, useEffect, useImperativeHandle, forwardRef, useState } from 'react';
+import { Stroke } from '../types';
+
+export interface SignatureViewerRef {
+    download: () => void;
+    playback: () => void;
+}
 
 interface SignatureViewerProps {
     strokes: Stroke[];
+    documentTitle?: string;
 }
 
-interface PointWithStrokeProps extends Point {
-    color: string;
-    width: number;
-    strokeId: string;
-}
-
-const SignatureViewer: React.FC<SignatureViewerProps> = ({ strokes }) => {
+const SignatureViewer = forwardRef<SignatureViewerRef, SignatureViewerProps>(({ strokes, documentTitle = 'signature' }, ref) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const containerRef = useRef<HTMLDivElement>(null);
     const [isPlaying, setIsPlaying] = useState(false);
-    const animationFrameId = useRef<number | null>(null);
 
-    const getCanvasContext = () => {
-        return canvasRef.current?.getContext('2d');
-    };
+    const drawStaticSignature = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
+        if (!strokes || strokes.length === 0) return;
 
-    const drawStaticSignature = () => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const ctx = getCanvasContext();
-        if (!ctx) return;
+        const allPoints = strokes.flatMap(s => s.points);
+        if (allPoints.length === 0) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            return;
+        };
 
-        const { width, height } = canvas.getBoundingClientRect();
-        ctx.clearRect(0, 0, width, height);
+        const minX = Math.min(...allPoints.map(p => p.x));
+        const maxX = Math.max(...allPoints.map(p => p.x));
+        const minY = Math.min(...allPoints.map(p => p.y));
+        const maxY = Math.max(...allPoints.map(p => p.y));
 
-        strokes.forEach(stroke => {
-            if (stroke.points.length < 2) return;
-            ctx.strokeStyle = stroke.color;
-            ctx.lineWidth = stroke.width;
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            ctx.beginPath();
-            ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
-            for (let i = 1; i < stroke.points.length; i++) {
-                ctx.lineTo(stroke.points[i].x, stroke.points[i].y);
-            }
-            ctx.stroke();
-        });
-    };
+        const signatureWidth = (maxX - minX) || 1;
+        const signatureHeight = (maxY - minY) || 1;
 
-    const replaySignature = () => {
-        if (isPlaying || !strokes || strokes.length === 0) return;
-        setIsPlaying(true);
+        const padding = 20;
+        const rect = canvas.getBoundingClientRect();
+        const canvasWidth = rect.width;
+        const canvasHeight = rect.height;
 
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const ctx = getCanvasContext();
-        if (!ctx) return;
-
-        const { width, height } = canvas.getBoundingClientRect();
-        ctx.clearRect(0, 0, width, height);
-
-        const allPoints: PointWithStrokeProps[] = strokes.flatMap(stroke =>
-            stroke.points.map(p => ({ ...p, color: stroke.color, width: stroke.width, strokeId: stroke.id }))
+        const scale = Math.min(
+            (canvasWidth - padding * 2) / signatureWidth,
+            (canvasHeight - padding * 2) / signatureHeight
         );
 
-        if (allPoints.length < 2) {
-            drawStaticSignature();
-            setIsPlaying(false);
-            return;
-        }
+        const offsetX = (canvasWidth - signatureWidth * scale) / 2 - minX * scale;
+        const offsetY = (canvasHeight - signatureHeight * scale) / 2 - minY * scale;
 
-        allPoints.sort((a, b) => a.timestamp - b.timestamp);
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
 
-        const totalDuration = allPoints[allPoints.length - 1].timestamp - allPoints[0].timestamp;
-        const animationDuration = Math.min(totalDuration, 3000); // Max 3 seconds replay
-        const speedFactor = totalDuration > 0 ? totalDuration / animationDuration : 1;
-
-        let startTime: number | null = null;
-        let lastPointIndex = 0;
-
-        const animate = (timestamp: number) => {
-            if (!startTime) startTime = timestamp;
-            const elapsedTime = timestamp - startTime;
-
-            const currentTimestampInSignature = allPoints[0].timestamp + (elapsedTime * speedFactor);
-
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-
-            for (let i = lastPointIndex; i < allPoints.length - 1; i++) {
-                if (allPoints[i+1].timestamp <= currentTimestampInSignature) {
-                    const p1 = allPoints[i];
-                    const p2 = allPoints[i+1];
-
-                    if (p1.strokeId === p2.strokeId) {
-                        ctx.beginPath();
-                        ctx.moveTo(p1.x, p1.y);
-                        ctx.lineTo(p2.x, p2.y);
-                        ctx.strokeStyle = p1.color;
-                        ctx.lineWidth = p1.width;
-                        ctx.stroke();
-                    }
-                    lastPointIndex = i;
-                } else {
-                    break;
+        strokes.forEach(stroke => {
+            ctx.strokeStyle = stroke.color;
+            ctx.lineWidth = stroke.width * scale;
+            ctx.beginPath();
+            if (stroke.points.length > 0) {
+                ctx.moveTo(stroke.points[0].x * scale + offsetX, stroke.points[0].y * scale + offsetY);
+                for (let i = 1; i < stroke.points.length; i++) {
+                    ctx.lineTo(stroke.points[i].x * scale + offsetX, stroke.points[i].y * scale + offsetY);
                 }
+                ctx.stroke();
             }
-
-            if (currentTimestampInSignature < allPoints[allPoints.length - 1].timestamp) {
-                animationFrameId.current = requestAnimationFrame(animate);
-            } else {
-                drawStaticSignature();
-                setIsPlaying(false);
-            }
-        };
-        animationFrameId.current = requestAnimationFrame(animate);
+        });
     };
 
     useEffect(() => {
         const canvas = canvasRef.current;
-        if (!canvas || !containerRef.current) return;
+        if (!canvas) return;
         const ctx = canvas.getContext('2d');
-        if (!ctx) return;
+        if(!ctx) return;
 
         const resizeCanvas = () => {
-            const { width, height } = containerRef.current.getBoundingClientRect();
-            if (width === 0 || height === 0) return;
             const dpr = window.devicePixelRatio || 1;
-
-            canvas.width = Math.round(width * dpr);
-            canvas.height = Math.round(height * dpr);
-            canvas.style.width = `${width}px`;
-            canvas.style.height = `${height}px`;
-
-            ctx.scale(dpr, dpr);
-            drawStaticSignature();
-        };
+            const rect = canvas.getBoundingClientRect();
+            if (canvas.width !== rect.width * dpr || canvas.height !== rect.height * dpr) {
+                canvas.width = rect.width * dpr;
+                canvas.height = rect.height * dpr;
+                ctx.scale(dpr, dpr);
+            }
+            if(!isPlaying) {
+                drawStaticSignature(ctx, canvas);
+            }
+        }
 
         const observer = new ResizeObserver(resizeCanvas);
-        observer.observe(containerRef.current);
+        observer.observe(canvas);
         resizeCanvas();
 
-        return () => {
-            observer.disconnect();
-            if (animationFrameId.current) {
-                cancelAnimationFrame(animationFrameId.current);
+        return () => observer.disconnect();
+
+    }, [strokes, isPlaying]);
+
+    const handlePlayback = async () => {
+        if (isPlaying || !strokes || strokes.length === 0) return;
+
+        const canvas = canvasRef.current;
+        const ctx = canvas?.getContext('2d');
+        if (!canvas || !ctx) return;
+
+        setIsPlaying(true);
+
+        const allPoints = strokes.flatMap(s => s.points);
+        const minX = Math.min(...allPoints.map(p => p.x));
+        const maxX = Math.max(...allPoints.map(p => p.x));
+        const minY = Math.min(...allPoints.map(p => p.y));
+        const maxY = Math.max(...allPoints.map(p => p.y));
+        const signatureWidth = (maxX - minX) || 1;
+        const signatureHeight = (maxY - minY) || 1;
+        const padding = 20;
+        const rect = canvas.getBoundingClientRect();
+        const canvasWidth = rect.width;
+        const canvasHeight = rect.height;
+        const scale = Math.min((canvasWidth - padding * 2) / signatureWidth, (canvasHeight - padding * 2) / signatureHeight);
+        const offsetX = (canvasWidth - signatureWidth * scale) / 2 - minX * scale;
+        const offsetY = (canvasHeight - signatureHeight * scale) / 2 - minY * scale;
+
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        for (const stroke of strokes) {
+            if (stroke.points.length < 2) continue;
+
+            ctx.strokeStyle = stroke.color;
+            ctx.lineWidth = stroke.width * scale;
+            ctx.beginPath();
+            ctx.moveTo(stroke.points[0].x * scale + offsetX, stroke.points[0].y * scale + offsetY);
+
+            for (let i = 1; i < stroke.points.length; i++) {
+                const p1 = stroke.points[i - 1];
+                const p2 = stroke.points[i];
+                const delay = p2.timestamp - p1.timestamp;
+                await new Promise(resolve => setTimeout(resolve, Math.min(delay, 200)));
+                ctx.lineTo(p2.x * scale + offsetX, p2.y * scale + offsetY);
+                ctx.stroke();
             }
-        };
-    }, [strokes]);
+        }
+
+        setTimeout(() => {
+            setIsPlaying(false);
+        }, 500);
+    };
+
+    const handleDownload = () => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        const downloadCanvas = document.createElement('canvas');
+        downloadCanvas.width = canvas.width;
+        downloadCanvas.height = canvas.height;
+        const ctx = downloadCanvas.getContext('2d');
+        if (!ctx) return;
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, downloadCanvas.width, downloadCanvas.height);
+        ctx.drawImage(canvas, 0, 0);
+
+        const link = document.createElement('a');
+        link.download = `${documentTitle.replace(/\s+/g, '_')}-signature.png`;
+        link.href = downloadCanvas.toDataURL('image/png');
+        link.click();
+    };
+
+    useImperativeHandle(ref, () => ({
+        download: handleDownload,
+        playback: handlePlayback,
+    }));
 
     return (
-        <div ref={containerRef} className="w-full h-full relative">
-            <canvas ref={canvasRef} />
-            <div className="absolute inset-0 flex items-center justify-center bg-transparent">
-                {!isPlaying && (
-                    <button
-                        onClick={replaySignature}
-                        className="bg-black bg-opacity-50 text-white rounded-full p-4 hover:bg-opacity-75 transition-opacity opacity-50 hover:opacity-100 disabled:opacity-20"
-                        disabled={!strokes || strokes.length === 0}
-                        aria-label="Replay Signature"
-                    >
-                        <Play size={48} />
-                    </button>
-                )}
-            </div>
+        <div className="relative w-full h-full">
+            <canvas
+                ref={canvasRef}
+                className="w-full h-full"
+            />
         </div>
     );
-};
+});
 
 export default SignatureViewer;

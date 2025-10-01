@@ -27,6 +27,7 @@ export interface Signature {
       document_hash: string;
     };
     signed_at: string;
+    created_at: string;
 }
 
 export interface Point {
