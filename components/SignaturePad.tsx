@@ -35,8 +35,8 @@ const SignaturePad = forwardRef<SignaturePadRef, SignaturePadProps>(({ strokeCol
     ctx.lineJoin = 'round';
 
     strokesRef.current.forEach(stroke => {
-      ctx.strokeStyle = stroke.color;
-      ctx.lineWidth = stroke.width;
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = strokeWidth;
       ctx.beginPath();
       if (stroke.points.length > 0) {
         ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
@@ -101,8 +101,6 @@ const SignaturePad = forwardRef<SignaturePadRef, SignaturePadProps>(({ strokeCol
 
       const newStroke: Stroke = {
         id: crypto.randomUUID(),
-        color: strokeColor,
-        width: strokeWidth,
         points: [{ x: coords.x, y: coords.y, timestamp: performance.now() }],
       };
       currentStroke.current = newStroke;

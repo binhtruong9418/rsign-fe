@@ -67,27 +67,36 @@ const DashboardPage: React.FC = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {documents?.map((doc) => (
-          <Link to={`/documents/${doc.id}`} key={doc.id} className="block bg-dark-card p-6 rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all">
-            <h2 className="text-xl font-semibold text-brand-primary truncate">{doc.title}</h2>
-            <p className="text-dark-text-secondary mt-2">Created: {new Date(doc.created_at).toLocaleDateString()}</p>
-          </Link>
+            <Link to={`/documents/${doc.id}`} key={doc.id}
+                  className="block bg-dark-card p-6 rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all">
+              <div className="flex justify-between items-start">
+                <h2 className="text-xl font-semibold text-brand-primary truncate pr-2">{doc.title}</h2>
+                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                    doc.status === 'COMPLETED' ? 'bg-green-500 text-white' : 'bg-yellow-500 text-black'
+                }`}>
+                    {doc.status}
+                </span>
+              </div>
+              <p className="text-dark-text-secondary mt-2">Created: {new Date(doc.createdAt).toLocaleDateString()}</p>
+            </Link>
         ))}
       </div>
-      
+
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-dark-card p-8 rounded-lg shadow-xl w-full max-w-2xl m-4">
-            <h2 className="text-2xl font-bold mb-4">Create New Document</h2>
-            <form onSubmit={handleCreateDocument}>
-              <div className="mb-4">
-                <label htmlFor="title" className="block text-sm font-medium text-dark-text-secondary mb-1">Title</label>
-                <input
-                  id="title"
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  required
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-brand-primary focus:border-brand-primary"
+          <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+            <div className="bg-dark-card p-8 rounded-lg shadow-xl w-full max-w-2xl m-4">
+              <h2 className="text-2xl font-bold mb-4">Create New Document</h2>
+              <form onSubmit={handleCreateDocument}>
+                <div className="mb-4">
+                  <label htmlFor="title"
+                         className="block text-sm font-medium text-dark-text-secondary mb-1">Title</label>
+                  <input
+                      id="title"
+                      type="text"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      required
+                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-brand-primary focus:border-brand-primary"
                 />
               </div>
               <div className="mb-6">

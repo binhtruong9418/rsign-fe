@@ -2,32 +2,35 @@
 export interface User {
     id: number;
     email: string;
+    fullName?: string;
 }
 
 export interface Document {
     id: number;
     title: string;
     content: string;
-    created_at: string;
-    updated_at: string;
-    signing_token: string | null;
-    signatures: Signature[];
-    signing_token_expires: string | null;
-    signed_at: string | null;
+    createdAt: string;
+    updatedAt: string;
+    signingToken: string | null;
+    signature: Signature;
+    signingTokenExpires: string | null;
+    signedAt: string | null;
     deadline: string | null;
+    status: string;
 }
 
 export interface Signature {
     id: string;
     user: User;
-    signature_data: {
+    signatureData: {
       strokes: Stroke[];
       timestamp: string;
-      expires_at: string;
-      document_hash: string;
+      expiresAt: string;
+      documentHash: string;
+      color: string;
+      width: number;
     };
-    signed_at: string;
-    created_at: string;
+    createdAt: string;
 }
 
 export interface Point {
@@ -38,7 +41,5 @@ export interface Point {
 
 export interface Stroke {
     id: string;
-    color: string;
     points: Point[];
-    width: number;
 }

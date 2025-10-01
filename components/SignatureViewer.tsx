@@ -9,9 +9,11 @@ export interface SignatureViewerRef {
 interface SignatureViewerProps {
     strokes: Stroke[];
     documentTitle?: string;
+    strokeColor: string;
+    strokeWidth: number;
 }
 
-const SignatureViewer = forwardRef<SignatureViewerRef, SignatureViewerProps>(({ strokes, documentTitle = 'signature' }, ref) => {
+const SignatureViewer = forwardRef<SignatureViewerRef, SignatureViewerProps>(({ strokes, strokeColor, strokeWidth, documentTitle = 'signature' }, ref) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [isPlaying, setIsPlaying] = useState(false);
 
@@ -50,8 +52,8 @@ const SignatureViewer = forwardRef<SignatureViewerRef, SignatureViewerProps>(({ 
         ctx.lineJoin = 'round';
 
         strokes.forEach(stroke => {
-            ctx.strokeStyle = stroke.color;
-            ctx.lineWidth = stroke.width * scale;
+            ctx.strokeStyle = strokeColor;
+            ctx.lineWidth = strokeWidth * scale;
             ctx.beginPath();
             if (stroke.points.length > 0) {
                 ctx.moveTo(stroke.points[0].x * scale + offsetX, stroke.points[0].y * scale + offsetY);
@@ -121,8 +123,8 @@ const SignatureViewer = forwardRef<SignatureViewerRef, SignatureViewerProps>(({ 
         for (const stroke of strokes) {
             if (stroke.points.length < 2) continue;
 
-            ctx.strokeStyle = stroke.color;
-            ctx.lineWidth = stroke.width * scale;
+            ctx.strokeStyle = strokeColor;
+            ctx.lineWidth = strokeWidth * scale;
             ctx.beginPath();
             ctx.moveTo(stroke.points[0].x * scale + offsetX, stroke.points[0].y * scale + offsetY);
 
