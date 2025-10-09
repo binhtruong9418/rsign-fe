@@ -101,7 +101,7 @@ const SignaturePad = forwardRef<SignaturePadRef, SignaturePadProps>(({ strokeCol
 
       const newStroke: Stroke = {
         id: crypto.randomUUID(),
-        points: [{ x: coords.x, y: coords.y, timestamp: performance.now() }],
+        points: [{ x: coords.x, y: coords.y, timestamp: Date.now() }],
       };
       currentStroke.current = newStroke;
 
@@ -125,7 +125,7 @@ const SignaturePad = forwardRef<SignaturePadRef, SignaturePadProps>(({ strokeCol
       currentStroke.current.points.push({
         x: coords.x,
         y: coords.y,
-        timestamp: performance.now(),
+        timestamp: Date.now(),
       });
     }
   };

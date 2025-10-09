@@ -1,0 +1,2 @@
+export const DEFAULT_SIGNATURE_COLOR = '#0000FF';
+export const DEFAULT_SIGNATURE_WIDTH = 2;

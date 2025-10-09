@@ -7,6 +7,7 @@ import {Document} from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import {Copy, X, Signature, FileText, AlertCircle, Download, Play, CheckCircle} from 'lucide-react';
 import SignatureViewer, {SignatureViewerRef} from '../components/SignatureViewer';
+import { DEFAULT_SIGNATURE_COLOR, DEFAULT_SIGNATURE_WIDTH } from '@/helper/constant';
 
 const fetchDocument = async (id: string): Promise<Document> => {
     const {data} = await api.get(`/api/documents/${id}`);
@@ -59,8 +60,8 @@ const DocumentDetailPage: React.FC = () => {
                                 ref={signatureViewerRef}
                                 strokes={document?.signature.signatureData.strokes}
                                 documentTitle={document.title}
-                                strokeColor={document?.signature.signatureData.color || '#000000'}
-                                strokeWidth={document?.signature.signatureData.width || 2}
+                                strokeColor={document?.signature.signatureData.color || DEFAULT_SIGNATURE_COLOR}
+                                strokeWidth={document?.signature.signatureData.width || DEFAULT_SIGNATURE_WIDTH}
                             />
                         </div>
                         <div className="mt-4 pt-4 border-t border-gray-700">
