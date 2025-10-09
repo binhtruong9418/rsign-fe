@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import api from '../services/api';
@@ -8,7 +8,7 @@ import SignaturePad, { SignaturePadRef } from '../components/SignaturePad';
 import { CheckCircle, ArrowLeft } from 'lucide-react';
 import { AxiosError } from 'axios';
 import { DEFAULT_SIGNATURE_COLOR, DEFAULT_SIGNATURE_WIDTH } from '../helper/constant';
-import DocViewer from '@cyntler/react-doc-viewer';
+import DocViewer, { DocViewerRenderers } from '@cyntler/react-doc-viewer';
 
 type View = 'document' | 'sign';
 
@@ -21,7 +21,6 @@ const SignDocumentPage: React.FC = () => {
     const { token } = useParams<{ token: string }>();
     const navigate = useNavigate();
     const [view, setView] = useState<View>('document');
-    const [hasAgreed, setHasAgreed] = useState(false);
     const signaturePadRef = useRef<SignaturePadRef>(null);
 
     useEffect(() => {
@@ -49,6 +48,12 @@ const SignDocumentPage: React.FC = () => {
         queryKey: ['documentByToken', token],
         queryFn: () => fetchDocumentByToken(token),
     });
+
+
+    const docs = useMemo(() => {
+        if (!documentData?.fileUrl) return [];
+        return [{ uri: documentData.fileUrl, fileName: documentData.title }];
+    }, [documentData?.fileUrl, documentData?.title]);
 
     const signMutation = useMutation<void, AxiosError<{ message: string }>,
         {
@@ -117,7 +122,8 @@ const SignDocumentPage: React.FC = () => {
                                 <div className="flex-grow overflow-y-auto min-h-0 border border-gray-700 rounded-md p-4 bg-gray-900/50">
                                     {documentData.fileUrl ? (
                                         <DocViewer
-                                            documents={[{ uri: documentData.fileUrl, fileName: documentData.title }]}
+                                            documents={docs}
+                                            pluginRenderers={DocViewerRenderers}    
                                             config={{
                                                 header: { disableHeader: true },
                                                 pdfVerticalScrollByDefault: true,
@@ -131,22 +137,8 @@ const SignDocumentPage: React.FC = () => {
                                     )}
                                 </div>
                                 <div className="mt-4 pt-4 border-t border-gray-700">
-                                    <div className="flex items-center mb-4">
-                                        <input
-                                            type="checkbox"
-                                            id="agreement"
-                                            checked={hasAgreed}
-                                            onChange={(e) => setHasAgreed(e.target.checked)}
-                                            className="h-5 w-5 rounded border-gray-500 bg-gray-700 text-brand-primary focus:ring-brand-secondary"
-                                            aria-describedby="agreement-description"
-                                        />
-                                        <label id="agreement-description" htmlFor="agreement" className="ml-3 block text-sm font-medium text-dark-text-secondary">
-                                            I have read and agree to be legally bound by this document.
-                                        </label>
-                                    </div>
                                     <button
                                         onClick={() => setView('sign')}
-                                        disabled={!hasAgreed}
                                         className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-lg font-medium text-white bg-brand-primary hover:bg-brand-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-dark-card focus:ring-brand-primary disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         Proceed to Sign
