@@ -161,20 +161,40 @@ const DocumentDetailPage: React.FC = () => {
 
             {/* Sidebar: Document Content & Actions */}
             <div className="bg-dark-card p-6 rounded-lg shadow-lg flex flex-col">
+
                 <div>
-                    <div className="flex items-center space-x-4 mb-2">
-                        <h1 className="text-2xl font-bold text-brand-primary truncate" title={document.title}>{document.title}</h1>
-                        <span className={`px-3 py-1 text-sm font-semibold rounded-full ${document.status === 'COMPLETED' ? 'bg-green-500 text-white' : 'bg-yellow-500 text-black'
-                            }`}>
-                            {document.status}
-                        </span>
+                    <div className="mb-4">
+                        <h1 className="text-2xl font-bold text-brand-primary break-words" title={document.title}>{document.title}</h1>
+                        <div className="mt-2">
+                            <span className={`px-3 py-1 text-sm font-semibold rounded-full ${document.status === 'COMPLETED' ? 'bg-green-500 text-white' : 'bg-yellow-500 text-black'
+                                }`}>
+                                {document.status}
+                            </span>
+                        </div>
                     </div>
-                    <p className="text-sm text-dark-text-secondary mb-2">
-                        Authority: {document.competentAuthority}
-                    </p>
-                    <p className="text-sm text-dark-text-secondary mb-4">
-                        Created on {new Date(document.createdAt).toLocaleString()}
-                    </p>
+
+                    <div className="space-y-2 text-sm border-t border-gray-700 pt-4">
+                        <div className="flex justify-between items-start gap-4">
+                            <p className="text-dark-text-secondary">Authority:</p>
+                            <p className="font-medium text-dark-text text-right break-words">{document.competentAuthority}</p>
+                        </div>
+                        <div className="flex justify-between items-start gap-4">
+                            <p className="text-dark-text-secondary">Created:</p>
+                            <p className="font-medium text-dark-text text-right">{new Date(document.createdAt).toLocaleString()}</p>
+                        </div>
+                        {document.deadline && (
+                            <div className="flex justify-between items-start gap-4">
+                                <p className="text-dark-text-secondary">Deadline:</p>
+                                <p className="font-medium text-dark-text text-right">{new Date(document.deadline).toLocaleString()}</p>
+                            </div>
+                        )}
+                        {document.signedAt && (
+                            <div className="flex justify-between items-start gap-4">
+                                <p className="text-dark-text-secondary">Signed:</p>
+                                <p className="font-medium text-dark-text text-right">{new Date(document.signedAt).toLocaleString()}</p>
+                            </div>
+                        )}
+                    </div>
                 </div>
                 <div className="flex-grow my-4 min-h-[250px]">
                     {document.fileUrl ? (
