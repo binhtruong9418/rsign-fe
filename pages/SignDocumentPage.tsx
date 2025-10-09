@@ -125,7 +125,11 @@ const SignDocumentPage: React.FC = () => {
                                             documents={docs}
                                             pluginRenderers={DocViewerRenderers}    
                                             config={{
-                                                header: { disableHeader: true },
+                                                header: {
+                                                    disableHeader: true ,
+                                                    disableFileName: true,
+                                                    retainURLParams: false,
+                                                },
                                                 pdfVerticalScrollByDefault: true,
                                             }}
                                             className="w-full h-full"

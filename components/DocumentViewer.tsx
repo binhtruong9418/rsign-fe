@@ -28,8 +28,8 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ isOpen, onClose, docume
                         documents={[{ uri: documentUri, fileName: documentTitle }]}
                         config={{
                             header: {
-                                disableHeader: false,
-                                disableFileName: false,
+                                disableHeader: true,
+                                disableFileName: true,
                                 retainURLParams: false,
                             },
                             pdfVerticalScrollByDefault: true,
