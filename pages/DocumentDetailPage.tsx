@@ -127,7 +127,7 @@ const DocumentDetailPage: React.FC = () => {
                             />
                         </div>
                         <div className="mt-4 pt-4 border-t border-gray-700">
-                            <p className="font-semibold text-dark-text">Signed by: {document?.signature.user?.email}</p>
+                            <p className="font-semibold text-dark-text">Signed by: {document?.signature.signer?.email}</p>
                             <p className="text-sm text-dark-text-secondary">Signed
                                 on: {new Date(document?.signedAt).toLocaleString()}</p>
                             <div className="flex items-center space-x-4 mt-4">
@@ -161,7 +161,7 @@ const DocumentDetailPage: React.FC = () => {
 
             {/* Sidebar: Document Content & Actions */}
             <div className="bg-dark-card p-6 rounded-lg shadow-lg flex flex-col">
-                <div className="flex-grow">
+                <div>
                     <div className="flex items-center space-x-4 mb-2">
                         <h1 className="text-2xl font-bold text-brand-primary truncate" title={document.title}>{document.title}</h1>
                         <span className={`px-3 py-1 text-sm font-semibold rounded-full ${document.status === 'COMPLETED' ? 'bg-green-500 text-white' : 'bg-yellow-500 text-black'

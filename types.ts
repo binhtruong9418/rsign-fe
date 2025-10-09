@@ -23,7 +23,7 @@ export interface Document {
 
 export interface Signature {
     id: string;
-    user: User;
+    signer: User;
     signatureData: {
       strokes: Stroke[];
       timestamp: string;
