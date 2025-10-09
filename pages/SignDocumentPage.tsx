@@ -8,6 +8,7 @@ import SignaturePad, { SignaturePadRef } from '../components/SignaturePad';
 import { CheckCircle, ArrowLeft } from 'lucide-react';
 import { AxiosError } from 'axios';
 import { DEFAULT_SIGNATURE_COLOR, DEFAULT_SIGNATURE_WIDTH } from '../helper/constant';
+import DocViewer from '@cyntler/react-doc-viewer';
 
 type View = 'document' | 'sign';
 
@@ -56,15 +57,15 @@ const SignDocumentPage: React.FC = () => {
             width: number;
             color: string;
         }>({
-        mutationFn: (signature) => api.post('/api/signatures/sign', signature),
-        onSuccess: () => {
-            alert('Document signed successfully!');
-            navigate('/');
-        },
-        onError: (error) => {
-            alert('Failed to sign document: ' + (error.response?.data?.message || error.message));
-        }
-    });
+            mutationFn: (signature) => api.post('/api/signatures/sign', signature),
+            onSuccess: () => {
+                alert('Document signed successfully!');
+                navigate('/');
+            },
+            onError: (error) => {
+                alert('Failed to sign document: ' + (error.response?.data?.message || error.message));
+            }
+        });
 
     const handleSubmitSignature = () => {
         const strokesData = signaturePadRef.current?.getSignature();
@@ -114,9 +115,20 @@ const SignDocumentPage: React.FC = () => {
                                     Review: {documentData.title}
                                 </h1>
                                 <div className="flex-grow overflow-y-auto min-h-0 border border-gray-700 rounded-md p-4 bg-gray-900/50">
-                                    <div className="prose prose-invert max-w-none prose-p:text-dark-text prose-headings:text-dark-text">
-                                        <p>{documentData.content}</p>
-                                    </div>
+                                    {documentData.fileUrl ? (
+                                        <DocViewer
+                                            documents={[{ uri: documentData.fileUrl, fileName: documentData.title }]}
+                                            config={{
+                                                header: { disableHeader: true },
+                                                pdfVerticalScrollByDefault: true,
+                                            }}
+                                            className="w-full h-full"
+                                        />
+                                    ) : (
+                                        <div className="prose prose-invert max-w-none prose-p:text-dark-text prose-headings:text-dark-text p-4">
+                                            <p>{documentData.content}</p>
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="mt-4 pt-4 border-t border-gray-700">
                                     <div className="flex items-center mb-4">

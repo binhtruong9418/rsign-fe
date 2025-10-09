@@ -8,7 +8,7 @@ export interface User {
 export interface Document {
     id: number;
     title: string;
-    content: string;
+    content?: string;
     createdAt: string;
     updatedAt: string;
     signingToken: string | null;
@@ -17,6 +17,8 @@ export interface Document {
     signedAt: string | null;
     deadline: string | null;
     status: string;
+    fileUrl?: string;
+    competentAuthority: string;
 }
 
 export interface Signature {
