@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { QRCodeCanvas } from 'qrcode.react';
 import api from '../services/api';
 import { Document } from '../types';
@@ -19,16 +19,76 @@ const DocumentDetailPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
     const [isViewerOpen, setIsViewerOpen] = useState(false);
+    const [timer, setTimer] = useState(0);
     const signatureViewerRef = useRef<SignatureViewerRef>(null);
+    const queryClient = useQueryClient();
 
     if (!id) {
         return <p>Document ID is missing.</p>;
     }
 
-    const { data: document, isLoading: isLoadingDoc, error: docError } = useQuery<Document, Error>({
+    const { data: document, isLoading: isLoadingDoc, error: docError, } = useQuery<Document, Error>({
         queryKey: ['document', id],
         queryFn: () => fetchDocument(id),
     });
+
+
+    const refreshTokenMutation = useMutation<Document, Error>({
+        mutationFn: () => api.post(`/api/documents/refresh-signing-token/${id}`).then(res => res.data),
+        onSuccess: (newDocumentData) => {
+            queryClient.setQueryData(['document', id], (oldData: any) => ({
+                ...oldData,
+                signingToken: newDocumentData.signingToken,
+                signingTokenExpires: newDocumentData.signingTokenExpires
+            }));
+        },
+        onError: (error) => {
+            console.error('Failed to refresh token', error);
+            alert('Failed to generate a new signing link. Please close and try again.');
+        }
+    });
+
+
+
+    useEffect(() => {
+        if (!isShareModalOpen || !document?.signingTokenExpires) {
+            setTimer(0);
+            return;
+        }
+
+        const calculateAndSetTimer = () => {
+            const expires = new Date(document.signingTokenExpires!).getTime();
+            const now = new Date().getTime();
+            const remaining = Math.floor((expires - now) / 1000);
+
+            if (remaining <= 0) {
+                setTimer(0);
+                if (!refreshTokenMutation.isPending) {
+                    refreshTokenMutation.mutate();
+                }
+            } else {
+                setTimer(remaining);
+            }
+        };
+
+        calculateAndSetTimer();
+        const intervalId = setInterval(calculateAndSetTimer, 1000);
+
+        return () => clearInterval(intervalId);
+
+    }, [isShareModalOpen, document?.signingTokenExpires, refreshTokenMutation]);
+
+    const openShareModal = () => {
+        if (document?.signingTokenExpires) {
+            console.log('Document signing token expires at:', document.signingTokenExpires);
+            const expires = new Date(document.signingTokenExpires).getTime();
+            const now = new Date().getTime();
+            if (expires - now <= 0 && !refreshTokenMutation.isPending) {
+                refreshTokenMutation.mutate();
+            }
+        }
+        setIsShareModalOpen(true);
+    };
 
     const signUrl = document?.signingToken ? `${window.location.origin}/sign/${document?.signingToken}` : '';
 
@@ -141,7 +201,7 @@ const DocumentDetailPage: React.FC = () => {
                 </div>
                 <div className="mt-auto pt-6 border-t border-gray-700">
                     <button
-                        onClick={() => document.status !== 'COMPLETED' && setIsShareModalOpen(true)}
+                        onClick={() => document.status !== 'COMPLETED' && openShareModal()}
                         disabled={document.status === 'COMPLETED'}
                         className="w-full bg-brand-primary text-white font-bold py-3 px-4 rounded-lg hover:bg-brand-secondary flex items-center justify-center space-x-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -179,6 +239,9 @@ const DocumentDetailPage: React.FC = () => {
                                     <div className="bg-white p-4 rounded-lg flex justify-center">
                                         <QRCodeCanvas value={signUrl} size={200} />
                                     </div>
+                                    <p className="mt-4 text-center text-sm text-yellow-400 font-medium">
+                                        Link expires in {timer} seconds
+                                    </p>
                                     <div className="mt-4 relative">
                                         <input
                                             type="text"
