@@ -7,7 +7,7 @@ import { Document } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { Copy, X, Signature, FileText, AlertCircle, Download, Play, CheckCircle } from 'lucide-react';
 import SignatureViewer, { SignatureViewerRef } from '../components/SignatureViewer';
-import { DEFAULT_SIGNATURE_COLOR, DEFAULT_SIGNATURE_WIDTH } from '@/helper/constant';
+import { DEFAULT_SIGNATURE_COLOR, DEFAULT_SIGNATURE_WIDTH } from '../constants/app';
 import DocumentViewer from '../components/DocumentViewer';
 
 const fetchDocument = async (id: string): Promise<Document> => {

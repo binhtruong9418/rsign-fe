@@ -1,0 +1,89 @@
+// User interfaces
+export interface User {
+    id: number;
+    email: string;
+    fullName?: string;
+}
+
+// Document interfaces
+export interface Document {
+    id: number;
+    title: string;
+    content?: string;
+    createdAt: string;
+    updatedAt: string;
+    signingToken: string | null;
+    signature: Signature;
+    signingTokenExpires: string | null;
+    signedAt: string | null;
+    deadline: string | null;
+    status: DocumentStatus;
+    fileUrl?: string;
+    competentAuthority: string;
+}
+
+// Signature interfaces
+export interface Signature {
+    id: string;
+    signer: User;
+    signatureData: {
+        strokes: Stroke[];
+        timestamp: string;
+        expiresAt: string;
+        documentHash: string;
+        color: string;
+        width: number;
+    };
+    createdAt: string;
+}
+
+export interface Point {
+    x: number;
+    y: number;
+    timestamp: number;
+}
+
+export interface Stroke {
+    id: string;
+    points: Point[];
+}
+
+// Enums and types
+export type DocumentStatus = "PENDING" | "COMPLETED" | "EXPIRED";
+export type ViewType = "document" | "sign";
+
+// API response interfaces
+export interface LoginResponse {
+    token: string;
+    user: User;
+}
+
+export interface ApiError {
+    message: string;
+    status?: number;
+}
+
+// Form interfaces
+export interface LoginFormData {
+    email: string;
+    password: string;
+}
+
+export interface CreateDocumentFormData {
+    title: string;
+    content: string;
+    competentAuthority: string;
+    file: File | null;
+}
+
+// Component prop interfaces
+export interface ModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+}
+
+export interface FileUploadProps {
+    onFileSelected?: (file: File | null) => void;
+    acceptedTypes?: string;
+    maxSize?: number;
+}

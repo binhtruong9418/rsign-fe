@@ -1,15 +1,7 @@
 
-import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useMutation } from '@tanstack/react-query';
-import api from '../services/api';
-import { useAuthStore } from '../store/authStore';
-import { User } from '../types';
-
-interface LoginResponse {
-  token: string;
-  user: User;
-}
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useLogin, useHustLogin } from '../hooks/useAuth';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -17,44 +9,29 @@ const LoginPage: React.FC = () => {
   const [isHustModalOpen, setIsHustModalOpen] = useState(false);
   const [hustEmail, setHustEmail] = useState('');
   const [hustPassword, setHustPassword] = useState('');
-  const navigate = useNavigate();
-  const login = useAuthStore((state) => state.login);
 
-  const mutation = useMutation<LoginResponse, Error, { email: string; password: string }>({
-    mutationFn: (credentials) => api.post('/api/users/login', credentials).then(res => res.data),
-    onSuccess: (data) => {
-      login(data.user, data.token);
-      const redirectAfterLogin = sessionStorage.getItem('redirectAfterLogin');
-      navigate(redirectAfterLogin || '/dashboard');
-      sessionStorage.removeItem('redirectAfterLogin');
-    },
-    onError: (error: any) => {
-      alert('Login failed: ' + (error?.response?.data?.message || 'Unknown error'));
-    }
-  });
-
-
-  const hustMutation = useMutation<LoginResponse, Error, { email: string; password: string }>({
-    mutationFn: (credentials) => api.post('/api/users/login-hust', credentials).then(res => res.data),
-    onSuccess: (data) => {
-      login(data.user, data.token);
-      setIsHustModalOpen(false);
-      navigate('/dashboard');
-    },
-    onError: (error: any) => {
-      alert('HUST Login failed: ' + (error.response?.data?.message || error.message));
-    }
-  });
+  const loginMutation = useLogin();
+  const hustMutation = useHustLogin();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    mutation.mutate({ email, password });
+    loginMutation.mutate({ email, password }, {
+      onError: (error: any) => {
+        alert('Login failed: ' + (error?.response?.data?.message || 'Unknown error'));
+      }
+    });
   };
-
 
   const handleHustSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    hustMutation.mutate({ email: hustEmail, password: hustPassword });
+    hustMutation.mutate({ email: hustEmail, password: hustPassword }, {
+      onSuccess: () => {
+        setIsHustModalOpen(false);
+      },
+      onError: (error: any) => {
+        alert('HUST Login failed: ' + (error.response?.data?.message || error.message));
+      }
+    });
   };
 
   return (
@@ -78,7 +55,7 @@ const LoginPage: React.FC = () => {
             />
           </div>
           <div>
-            <label htmlFor="password"  className="block text-sm font-medium text-dark-text-secondary">
+            <label htmlFor="password" className="block text-sm font-medium text-dark-text-secondary">
               Password
             </label>
             <input
@@ -95,10 +72,10 @@ const LoginPage: React.FC = () => {
           <div>
             <button
               type="submit"
-              disabled={mutation.isPending}
+              disabled={loginMutation.isPending}
               className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-brand-primary hover:bg-brand-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-dark-card focus:ring-brand-primary disabled:opacity-50"
             >
-              {mutation.isPending ? 'Signing in...' : 'Sign in'}
+              {loginMutation.isPending ? 'Signing in...' : 'Sign in'}
             </button>
           </div>
         </form>

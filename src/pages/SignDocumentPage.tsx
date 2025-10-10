@@ -1,0 +1,95 @@
+import React, { useState, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { SignaturePadRef } from '../components/SignaturePad';
+import { useDocumentByToken, useSignDocument } from '../hooks/useDocumentQueries';
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
+import LoadingSpinner from '../components/LoadingSpinner';
+import CompletedDocumentView from '../components/sign/CompletedDocumentView';
+import DocumentReviewView from '../components/sign/DocumentReviewView';
+import SignatureView from '../components/sign/SignatureView';
+import { DEFAULT_SIGNATURE_COLOR, DEFAULT_SIGNATURE_WIDTH } from '../constants/app';
+
+type View = 'document' | 'sign';
+
+const SignDocumentPage: React.FC = () => {
+    const { token } = useParams<{ token: string }>();
+    const navigate = useNavigate();
+    const [view, setView] = useState<View>('document');
+    const signaturePadRef = useRef<SignaturePadRef>(null);
+
+    // Use body scroll lock hook
+    useBodyScrollLock(view === 'sign');
+
+    // Use document hooks
+    const { data: documentData, isLoading, error } = useDocumentByToken(token || '');
+    const signMutation = useSignDocument();
+
+    if (!token) {
+        return <p className="text-center text-red-500">Signing token is missing.</p>;
+    }
+
+    const handleSubmitSignature = () => {
+        const strokesData = signaturePadRef.current?.getSignature();
+        if (strokesData && token) {
+            signMutation.mutate({
+                strokes: strokesData,
+                signingToken: token,
+                width: DEFAULT_SIGNATURE_WIDTH,
+                color: DEFAULT_SIGNATURE_COLOR
+            }, {
+                onSuccess: () => {
+                    alert('Document signed successfully!');
+                    navigate('/');
+                },
+                onError: (error) => {
+                    alert('Failed to sign document: ' + (error.response?.data?.message || error.message));
+                }
+            });
+        } else {
+            alert('Please provide a signature.');
+        }
+    };
+
+    const handleClearSignature = () => {
+        signaturePadRef.current?.clear();
+    };
+
+    const containerClasses = view === 'sign'
+        ? 'h-screen w-screen sm:h-full sm:max-h-[95vh] sm:max-w-4xl sm:rounded-lg'
+        : 'max-w-4xl h-full max-h-[95vh] rounded-lg';
+
+    const paddingClasses = view === 'sign'
+        ? 'p-4'
+        : 'p-4 sm:p-6';
+
+    return (
+        <div className={`min-h-screen bg-dark-bg flex items-center justify-center ${view === 'sign' ? 'p-0' : 'p-2 sm:p-4'}`}>
+            <div className={`w-full bg-dark-card shadow-xl flex flex-col ${containerClasses} ${paddingClasses}`}>
+                {isLoading && <LoadingSpinner />}
+                {error && <p className="text-red-500 text-center">Error loading document: {error.message}</p>}
+                {documentData && (
+                    <>
+                        {documentData.status === 'COMPLETED' ? (
+                            <CompletedDocumentView document={documentData} />
+                        ) : view === 'document' ? (
+                            <DocumentReviewView
+                                document={documentData}
+                                onProceedToSign={() => setView('sign')}
+                            />
+                        ) : (
+                            <SignatureView
+                                onBack={() => setView('document')}
+                                onClear={handleClearSignature}
+                                onSubmit={handleSubmitSignature}
+                                isSubmitting={signMutation.isPending}
+                                signaturePadRef={signaturePadRef}
+                            />
+                        )}
+                    </>
+                )}
+            </div>
+        </div>
+    );
+};
+
+export default SignDocumentPage;
