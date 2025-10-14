@@ -50,7 +50,22 @@ export interface Stroke {
 
 // Enums and types
 export type DocumentStatus = "PENDING" | "COMPLETED" | "EXPIRED";
-export type ViewType = "document" | "sign";
+
+// Pagination interfaces
+export interface PaginatedResponse<T> {
+    data: T[];
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+}
+
+export interface DocumentQueryParams {
+    page?: number;
+    limit?: number;
+    status?: DocumentStatus | 'ALL';
+    search?: string;
+}
 
 // API response interfaces
 export interface LoginResponse {

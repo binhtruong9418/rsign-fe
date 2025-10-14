@@ -9,6 +9,8 @@ import { Copy, X, Signature, FileText, AlertCircle, Download, Play, CheckCircle 
 import SignatureViewer, { SignatureViewerRef } from '../components/SignatureViewer';
 import { DEFAULT_SIGNATURE_COLOR, DEFAULT_SIGNATURE_WIDTH } from '../constants/app';
 import DocumentViewer from '../components/DocumentViewer';
+import {formatDate} from "@/utils";
+import { showToast } from '../utils/toast';
 
 const fetchDocument = async (id: string): Promise<Document> => {
     const { data } = await api.get(`/api/documents/${id}`);
@@ -44,7 +46,7 @@ const DocumentDetailPage: React.FC = () => {
         },
         onError: (error) => {
             console.error('Failed to refresh token', error);
-            alert('Failed to generate a new signing link. Please close and try again.');
+            showToast.error('Failed to generate a new signing link. Please close and try again.');
         }
     });
 
@@ -80,7 +82,6 @@ const DocumentDetailPage: React.FC = () => {
 
     const openShareModal = () => {
         if (document?.signingTokenExpires) {
-            console.log('Document signing token expires at:', document.signingTokenExpires);
             const expires = new Date(document.signingTokenExpires).getTime();
             const now = new Date().getTime();
             if (expires - now <= 0 && !refreshTokenMutation.isPending) {
@@ -95,9 +96,9 @@ const DocumentDetailPage: React.FC = () => {
     const copyToClipboard = () => {
         if (signUrl) {
             navigator.clipboard.writeText(signUrl).then(() => {
-                alert('Signing link copied to clipboard!');
+                showToast.success('Signing link copied to clipboard!');
             }, (err) => {
-                alert('Failed to copy link.');
+                showToast.error('Failed to copy link.');
                 console.error('Could not copy text: ', err);
             });
         }
@@ -129,7 +130,7 @@ const DocumentDetailPage: React.FC = () => {
                         <div className="mt-4 pt-4 border-t border-gray-700">
                             <p className="font-semibold text-dark-text">Signed by: {document?.signature.signer?.email}</p>
                             <p className="text-sm text-dark-text-secondary">Signed
-                                on: {new Date(document?.signedAt).toLocaleString()}</p>
+                                on: {formatDate(document?.signedAt)}</p>
                             <div className="flex items-center space-x-4 mt-4">
                                 <button
                                     onClick={handleDownload}
@@ -180,7 +181,7 @@ const DocumentDetailPage: React.FC = () => {
                         </div>
                         <div className="flex justify-between items-start gap-4">
                             <p className="text-dark-text-secondary">Created:</p>
-                            <p className="font-medium text-dark-text text-right">{new Date(document.createdAt).toLocaleString()}</p>
+                            <p className="font-medium text-dark-text text-right">{formatDate(document.createdAt)}</p>
                         </div>
                         {document.deadline && (
                             <div className="flex justify-between items-start gap-4">
@@ -191,7 +192,7 @@ const DocumentDetailPage: React.FC = () => {
                         {document.signedAt && (
                             <div className="flex justify-between items-start gap-4">
                                 <p className="text-dark-text-secondary">Signed:</p>
-                                <p className="font-medium text-dark-text text-right">{new Date(document.signedAt).toLocaleString()}</p>
+                                <p className="font-medium text-dark-text text-right">{formatDate(document.signedAt)}</p>
                             </div>
                         )}
                     </div>

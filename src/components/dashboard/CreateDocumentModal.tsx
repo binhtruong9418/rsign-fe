@@ -3,6 +3,7 @@ import { useFileUpload } from '../../hooks/useFileUpload';
 import { useCreateDocument } from '../../hooks/useDocumentQueries';
 import FileUploadArea from './FileUploadArea';
 import DocumentViewer from '../DocumentViewer';
+import { showToast } from '../../utils/toast';
 
 interface CreateDocumentModalProps {
     isOpen: boolean;
@@ -29,23 +30,26 @@ const CreateDocumentModal: React.FC<CreateDocumentModalProps> = ({ isOpen, onClo
         openFileDialog,
     } = useFileUpload();
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        createDocumentMutation.mutate(
-            { title, content, file, competentAuthority },
-            {
-                onSuccess: () => {
-                    onClose();
-                    setTitle('');
-                    setContent('');
-                    setCompetentAuthority('');
-                    clearFile();
-                },
-                onError: (error: any) => {
-                    alert('Failed to create document: ' + (error?.response?.data?.message || 'Unknown error'));
-                }
-            }
-        );
+
+        try {
+            await createDocumentMutation.mutateAsync({
+                title,
+                content,
+                competentAuthority,
+                file: file
+            });
+
+            // Reset form
+            setTitle('');
+            setContent('');
+            setCompetentAuthority('');
+            clearFile();
+            onClose();
+        } catch (error: any) {
+            showToast.error('Failed to create document: ' + (error?.response?.data?.message || 'Unknown error'));
+        }
     };
 
     const handleRemoveFile = () => {

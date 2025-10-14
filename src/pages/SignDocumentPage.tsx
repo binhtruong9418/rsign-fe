@@ -8,6 +8,7 @@ import CompletedDocumentView from '../components/sign/CompletedDocumentView';
 import DocumentReviewView from '../components/sign/DocumentReviewView';
 import SignatureView from '../components/sign/SignatureView';
 import { DEFAULT_SIGNATURE_COLOR, DEFAULT_SIGNATURE_WIDTH } from '../constants/app';
+import { showToast } from '../utils/toast';
 
 type View = 'document' | 'sign';
 
@@ -38,15 +39,15 @@ const SignDocumentPage: React.FC = () => {
                 color: DEFAULT_SIGNATURE_COLOR
             }, {
                 onSuccess: () => {
-                    alert('Document signed successfully!');
+                    showToast.success('Document signed successfully!');
                     navigate('/');
                 },
                 onError: (error) => {
-                    alert('Failed to sign document: ' + (error.response?.data?.message || error.message));
+                    showToast.error('Failed to sign document: ' + (error.response?.data?.message || error.message));
                 }
             });
         } else {
-            alert('Please provide a signature.');
+            showToast.warning('Please provide a signature.');
         }
     };
 

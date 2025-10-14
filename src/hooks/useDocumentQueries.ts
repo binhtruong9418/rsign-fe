@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Document, Stroke } from "../types";
+import { Document, Stroke, PaginatedResponse, DocumentQueryParams } from "../types";
 import { AxiosError } from "axios";
 import { documentService } from "../services/document/documentService";
 import { signatureService } from "../services/document/signatureService";
@@ -14,11 +14,11 @@ export const useDocumentByToken = (token: string) => {
     });
 };
 
-// Hook for fetching user's documents
-export const useMyDocuments = () => {
-    return useQuery<Document[], Error>({
-        queryKey: ["myDocuments"],
-        queryFn: documentService.getMyDocuments,
+// Hook for fetching user's documents with pagination
+export const useMyDocuments = (params: DocumentQueryParams = {}) => {
+    return useQuery<PaginatedResponse<Document>, Error>({
+        queryKey: ["myDocuments", params],
+        queryFn: () => documentService.getMyDocuments(params),
     });
 };
 

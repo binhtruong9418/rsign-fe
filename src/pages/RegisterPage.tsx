@@ -1,8 +1,8 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import api from '../services/api';
+import { showToast } from '../utils/toast';
 import { User } from '../types';
 
 const RegisterPage: React.FC = () => {
@@ -14,11 +14,11 @@ const RegisterPage: React.FC = () => {
   const mutation = useMutation<User, Error, { email: string; password: string }>({
     mutationFn: (newUser) => api.post('/api/users/register', newUser).then(res => res.data),
     onSuccess: () => {
-      alert('Registration successful! Please login.');
+      showToast.success('Registration successful! Please login.');
       navigate('/login', { state: location.state });
     },
     onError: (error: any) => {
-      alert('Registration failed: ' + (error?.response?.data?.message || 'Unknown error'));
+      showToast.error('Registration failed: ' + (error?.response?.data?.message || 'Unknown error'));
     }
   });
 
