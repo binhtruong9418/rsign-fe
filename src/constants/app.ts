@@ -35,6 +35,9 @@ export const API_ENDPOINTS = {
     MY_DOCUMENTS: "/api/documents/created/me",
     DOCUMENTS: "/api/documents",
     DOCUMENT_BY_TOKEN: "/api/documents/get-by-token",
+    DOCUMENT_BY_SESSION: "/api/documents/signing-session",
     GENERATE_PRESIGNED_URL: "/api/documents/generate-presigned-url",
     SIGN_DOCUMENT: "/api/signatures/sign",
+    SIGN_DOCUMENT_SESSION: "/api/documents/sign",
+    CREATE_SIGNING_SESSION: "/api/documents/create-signing-session",
 } as const;

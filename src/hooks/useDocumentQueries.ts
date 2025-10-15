@@ -14,6 +14,16 @@ export const useDocumentByToken = (token: string) => {
     });
 };
 
+// Hook for fetching document by session ID
+export const useDocumentBySessionId = (sessionId: string) => {
+    return useQuery<Document, Error>({
+        queryKey: ["documentBySessionId", sessionId],
+        queryFn: () => documentService.getBySessionId(sessionId),
+        enabled: !!sessionId,
+        retry: false,
+    });
+};
+
 // Hook for fetching user's documents with pagination
 export const useMyDocuments = (params: DocumentQueryParams = {}) => {
     return useQuery<PaginatedResponse<Document>, Error>({
@@ -43,7 +53,7 @@ export const useCreateDocument = () => {
     });
 };
 
-// Hook for signing documents
+// Hook for signing documents (legacy token-based)
 export const useSignDocument = () => {
     return useMutation<
         void,
@@ -56,5 +66,21 @@ export const useSignDocument = () => {
         }
     >({
         mutationFn: signatureService.signDocument,
+    });
+};
+
+// Hook for signing documents using session ID
+export const useSignDocumentBySession = () => {
+    return useMutation<
+        void,
+        AxiosError<{ message: string }>,
+        {
+            strokes: Stroke[];
+            sessionId: string;
+            width: number;
+            color: string;
+        }
+    >({
+        mutationFn: signatureService.signDocumentBySession,
     });
 };

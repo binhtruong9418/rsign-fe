@@ -12,9 +12,7 @@ export interface Document {
     content?: string;
     createdAt: string;
     updatedAt: string;
-    signingToken: string | null;
     signature: Signature;
-    signingTokenExpires: string | null;
     signedAt: string | null;
     deadline: string | null;
     status: DocumentStatus;

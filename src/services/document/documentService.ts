@@ -14,6 +14,16 @@ export const documentService = {
     },
 
     /**
+     * Fetch document by signing session ID
+     */
+    getBySessionId: async (sessionId: string): Promise<Document> => {
+        const { data } = await api.get(
+            `${API_ENDPOINTS.DOCUMENT_BY_SESSION}/${sessionId}`
+        );
+        return data;
+    },
+
+    /**
      * Fetch current user's documents with pagination and filtering
      */
     getMyDocuments: async (params: DocumentQueryParams = {}): Promise<PaginatedResponse<Document>> => {

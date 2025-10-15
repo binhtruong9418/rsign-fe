@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { QRCodeCanvas } from 'qrcode.react';
 import api from '../services/api';
 import { Document } from '../types';
@@ -11,6 +11,7 @@ import { DEFAULT_SIGNATURE_COLOR, DEFAULT_SIGNATURE_WIDTH } from '../constants/a
 import DocumentViewer from '../components/DocumentViewer';
 import {formatDate} from "@/utils";
 import { showToast } from '../utils/toast';
+import { AxiosError } from 'axios';
 
 const fetchDocument = async (id: string): Promise<Document> => {
     const { data } = await api.get(`/api/documents/${id}`);
@@ -23,7 +24,6 @@ const DocumentDetailPage: React.FC = () => {
     const [isViewerOpen, setIsViewerOpen] = useState(false);
     const [timer, setTimer] = useState(0);
     const signatureViewerRef = useRef<SignatureViewerRef>(null);
-    const queryClient = useQueryClient();
 
     if (!id) {
         return <p>Document ID is missing.</p>;
@@ -34,39 +34,36 @@ const DocumentDetailPage: React.FC = () => {
         queryFn: () => fetchDocument(id),
     });
 
-
-    const refreshTokenMutation = useMutation<Document, Error>({
-        mutationFn: () => api.post(`/api/documents/refresh-signing-token/${id}`).then(res => res.data),
-        onSuccess: (newDocumentData) => {
-            queryClient.setQueryData(['document', id], (oldData: any) => ({
-                ...oldData,
-                signingToken: newDocumentData.signingToken,
-                signingTokenExpires: newDocumentData.signingTokenExpires
-            }));
+    const {
+        data: signingSession,
+        mutate: signatureSessionMutation,
+        isPending: signatureSessionIsPending,
+    } = useMutation({
+        mutationFn: () => api.post(`/api/documents/create-signing-session/${id}`).then(res => res.data),
+        onSuccess: () => {
+            setIsShareModalOpen(true);
         },
-        onError: (error) => {
-            console.error('Failed to refresh token', error);
-            showToast.error('Failed to generate a new signing link. Please close and try again.');
+        onError: (error: AxiosError<{ message: string }>) => {
+            showToast.error('Failed to create signing session: ' + (error.response?.data?.message || error.message));
         }
-    });
-
-
+    })
 
     useEffect(() => {
-        if (!isShareModalOpen || !document?.signingTokenExpires) {
+        if (!isShareModalOpen || !signingSession?.expires_at) {
             setTimer(0);
             return;
         }
 
         const calculateAndSetTimer = () => {
-            const expires = new Date(document.signingTokenExpires!).getTime();
+            const expires = new Date(signingSession.expires_at).getTime();
             const now = new Date().getTime();
             const remaining = Math.floor((expires - now) / 1000);
 
             if (remaining <= 0) {
                 setTimer(0);
-                if (!refreshTokenMutation.isPending) {
-                    refreshTokenMutation.mutate();
+                // Create new session when expired
+                if (!signatureSessionIsPending) {
+                    signatureSessionMutation();
                 }
             } else {
                 setTimer(remaining);
@@ -78,20 +75,29 @@ const DocumentDetailPage: React.FC = () => {
 
         return () => clearInterval(intervalId);
 
-    }, [isShareModalOpen, document?.signingTokenExpires, refreshTokenMutation]);
+    }, [isShareModalOpen, signingSession?.expires_at, signatureSessionMutation, signatureSessionIsPending]);
 
-    const openShareModal = () => {
-        if (document?.signingTokenExpires) {
-            const expires = new Date(document.signingTokenExpires).getTime();
-            const now = new Date().getTime();
-            if (expires - now <= 0 && !refreshTokenMutation.isPending) {
-                refreshTokenMutation.mutate();
+    const handleSignHereClick = () => {
+        if (document?.status !== 'COMPLETED') {
+            // Check if we have a valid session
+            if (signingSession?.session_id && signingSession?.expires_at) {
+                const expires = new Date(signingSession.expires_at).getTime();
+                const now = new Date().getTime();
+                if (expires - now <= 0) {
+                    // Session expired, create new one
+                    signatureSessionMutation();
+                } else {
+                    // Session valid, open modal
+                    setIsShareModalOpen(true);
+                }
+            } else {
+                // No session, create new one
+                signatureSessionMutation();
             }
         }
-        setIsShareModalOpen(true);
     };
 
-    const signUrl = document?.signingToken ? `${window.location.origin}/sign/${document?.signingToken}` : '';
+    const signUrl = signingSession?.session_id ? `${window.location.origin}/sign/${signingSession.session_id}` : '';
 
     const copyToClipboard = () => {
         if (signUrl) {
@@ -222,11 +228,16 @@ const DocumentDetailPage: React.FC = () => {
                 </div>
                 <div className="mt-auto pt-6 border-t border-gray-700">
                     <button
-                        onClick={() => document.status !== 'COMPLETED' && openShareModal()}
-                        disabled={document.status === 'COMPLETED'}
+                        onClick={handleSignHereClick}
+                        disabled={document.status === 'COMPLETED' || signatureSessionIsPending}
                         className="w-full bg-brand-primary text-white font-bold py-3 px-4 rounded-lg hover:bg-brand-secondary flex items-center justify-center space-x-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {document.status === 'COMPLETED' ? (
+                        {signatureSessionIsPending ? (
+                            <>
+                                <LoadingSpinner />
+                                <span>Creating session...</span>
+                            </>
+                        ) : document.status === 'COMPLETED' ? (
                             <>
                                 <CheckCircle size={20} />
                                 <span>Completed</span>
@@ -255,13 +266,13 @@ const DocumentDetailPage: React.FC = () => {
                             </button>
                         </div>
                         <div className="p-6">
-                            {document?.signingToken ? (
+                            {signingSession?.session_id ? (
                                 <>
                                     <div className="bg-white p-4 rounded-lg flex justify-center">
                                         <QRCodeCanvas value={signUrl} size={200} />
                                     </div>
                                     <p className="mt-4 text-center text-sm text-yellow-400 font-medium">
-                                        Link expires in {timer} seconds
+                                        Session expires in {timer} seconds
                                     </p>
                                     <div className="mt-4 relative">
                                         <input
@@ -280,7 +291,7 @@ const DocumentDetailPage: React.FC = () => {
                                 <div className="text-center text-dark-text-secondary">
                                     <AlertCircle className="mx-auto h-12 w-12" />
                                     <h4 className="mt-2 text-lg">Signing Link Not Available</h4>
-                                    <p className="mt-1 text-sm">A signing link could not be generated for this
+                                    <p className="mt-1 text-sm">A signing session could not be created for this
                                         document.</p>
                                 </div>
                             )}

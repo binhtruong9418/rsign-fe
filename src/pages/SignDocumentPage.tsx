@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { SignaturePadRef } from '../components/SignaturePad';
-import { useDocumentByToken, useSignDocument } from '../hooks/useDocumentQueries';
+import { useDocumentBySessionId, useSignDocumentBySession } from '../hooks/useDocumentQueries';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 import LoadingSpinner from '../components/LoadingSpinner';
 import CompletedDocumentView from '../components/sign/CompletedDocumentView';
@@ -13,7 +13,7 @@ import { showToast } from '../utils/toast';
 type View = 'document' | 'sign';
 
 const SignDocumentPage: React.FC = () => {
-    const { token } = useParams<{ token: string }>();
+    const { sessionId } = useParams<{ sessionId: string }>();
     const navigate = useNavigate();
     const [view, setView] = useState<View>('document');
     const signaturePadRef = useRef<SignaturePadRef>(null);
@@ -22,19 +22,21 @@ const SignDocumentPage: React.FC = () => {
     useBodyScrollLock(view === 'sign');
 
     // Use document hooks
-    const { data: documentData, isLoading, error } = useDocumentByToken(token || '');
-    const signMutation = useSignDocument();
+    const { data: documentData, isLoading, error }: any = useDocumentBySessionId(sessionId || '');
+    const signMutation = useSignDocumentBySession();
 
-    if (!token) {
-        return <p className="text-center text-red-500">Signing token is missing.</p>;
+    console.log(error)
+
+    if (!sessionId) {
+        return <p className="text-center text-red-500">Signing session ID is missing.</p>;
     }
 
     const handleSubmitSignature = () => {
         const strokesData = signaturePadRef.current?.getSignature();
-        if (strokesData && token) {
+        if (strokesData && sessionId) {
             signMutation.mutate({
                 strokes: strokesData,
-                signingToken: token,
+                sessionId: sessionId,
                 width: DEFAULT_SIGNATURE_WIDTH,
                 color: DEFAULT_SIGNATURE_COLOR
             }, {
@@ -67,7 +69,7 @@ const SignDocumentPage: React.FC = () => {
         <div className={`min-h-screen bg-dark-bg flex items-center justify-center ${view === 'sign' ? 'p-0' : 'p-2 sm:p-4'}`}>
             <div className={`w-full bg-dark-card shadow-xl flex flex-col ${containerClasses} ${paddingClasses}`}>
                 {isLoading && <LoadingSpinner />}
-                {error && <p className="text-red-500 text-center">Error loading document: {error.message}</p>}
+                {error && <p className="text-red-500 text-center">Error loading document: {error?.response?.data?.message}</p>}
                 {documentData && (
                     <>
                         {documentData.status === 'COMPLETED' ? (
