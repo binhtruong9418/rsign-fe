@@ -1,15 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { QRCodeCanvas } from 'qrcode.react';
 import api from '../services/api';
-import { Document } from '../types';
+import { Document, InsertSignaturePayload, InsertSignatureResponse, SignaturePosition } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { Copy, X, Signature, FileText, AlertCircle, Download, Play, CheckCircle } from 'lucide-react';
+import { Copy, X, Signature, FileText, AlertCircle, Download, Play, CheckCircle, PenSquare, Eye } from 'lucide-react';
 import SignatureViewer, { SignatureViewerRef } from '../components/SignatureViewer';
 import { DEFAULT_SIGNATURE_COLOR, DEFAULT_SIGNATURE_WIDTH } from '../constants/app';
 import DocumentViewer from '../components/DocumentViewer';
-import {formatDate} from "@/utils";
+import SignaturePlacementModal from '../components/SignaturePlacementModal';
+import { formatDate } from '@/utils';
 import { showToast } from '../utils/toast';
 import { AxiosError } from 'axios';
 
@@ -23,7 +24,11 @@ const DocumentDetailPage: React.FC = () => {
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
     const [isViewerOpen, setIsViewerOpen] = useState(false);
     const [timer, setTimer] = useState(0);
+    const [isInsertModalOpen, setIsInsertModalOpen] = useState(false);
+    const [latestSignedFileUrl, setLatestSignedFileUrl] = useState<string | null>(null);
+    const [viewerSource, setViewerSource] = useState<{ url: string; title: string } | null>(null);
     const signatureViewerRef = useRef<SignatureViewerRef>(null);
+    const queryClient = useQueryClient();
 
     if (!id) {
         return <p>Document ID is missing.</p>;
@@ -46,7 +51,43 @@ const DocumentDetailPage: React.FC = () => {
         onError: (error: AxiosError<{ message: string }>) => {
             showToast.error('Failed to create signing session: ' + (error.response?.data?.message || error.message));
         }
-    })
+    });
+
+    const getParsedSignatureId = () => {
+        const rawId = document?.signature?.id;
+        if (rawId === undefined || rawId === null) {
+            return null;
+        }
+        const numericId = Number(rawId);
+        if (Number.isNaN(numericId)) {
+            return null;
+        }
+        return numericId;
+    };
+
+    const insertSignatureMutation = useMutation<InsertSignatureResponse, AxiosError<{ message: string }>, InsertSignaturePayload>({
+        mutationFn: (payload) => api.post(`/api/documents/${id}/insert-signature`, payload).then(res => res.data),
+        onSuccess: (data) => {
+            showToast.success('Signature inserted successfully.');
+            setLatestSignedFileUrl(data.fileUrl);
+            const signedTitle = document ? `${document.title} (Signed)` : 'Signed Document';
+            setViewerSource({ url: data.fileUrl, title: signedTitle });
+            setIsViewerOpen(true);
+            queryClient.invalidateQueries({ queryKey: ['document', id] });
+            setIsInsertModalOpen(false);
+        },
+        onError: (error) => {
+            showToast.error('Failed to insert signature: ' + (error.response?.data?.message || error.message));
+        },
+    });
+
+    const { reset: resetInsertSignature } = insertSignatureMutation;
+
+    useEffect(() => {
+        if (!isInsertModalOpen) {
+            resetInsertSignature();
+        }
+    }, [isInsertModalOpen, resetInsertSignature]);
 
     useEffect(() => {
         if (!isShareModalOpen || !signingSession?.expires_at) {
@@ -76,6 +117,11 @@ const DocumentDetailPage: React.FC = () => {
         return () => clearInterval(intervalId);
 
     }, [isShareModalOpen, signingSession?.expires_at, signatureSessionMutation, signatureSessionIsPending]);
+
+    useEffect(() => {
+        setLatestSignedFileUrl(null);
+        setViewerSource(null);
+    }, [id]);
 
     const handleSignHereClick = () => {
         if (document?.status !== 'COMPLETED') {
@@ -111,11 +157,34 @@ const DocumentDetailPage: React.FC = () => {
     };
 
     const handleDownload = () => signatureViewerRef.current?.download();
+    const openViewer = (url: string, title?: string) => {
+        if (!url) {
+            return;
+        }
+        const resolvedTitle = title || document?.title || 'Document';
+        setViewerSource({ url, title: resolvedTitle });
+        setIsViewerOpen(true);
+    };
     const handlePlayback = () => signatureViewerRef.current?.playback();
+    const handleInsertSignatureSubmit = (position: SignaturePosition) => {
+        const signatureIdValue = getParsedSignatureId();
+        if (signatureIdValue === null) {
+            showToast.error('Signature is not available for this document.');
+            return;
+        }
+        insertSignatureMutation.mutate({ signatureId: signatureIdValue, position });
+    };
+    const handleInsertModalClose = () => setIsInsertModalOpen(false);
+    const insertSignatureErrorMessage = insertSignatureMutation.isError
+        ? insertSignatureMutation.error?.response?.data?.message || insertSignatureMutation.error?.message
+        : null;
 
     if (isLoadingDoc) return <LoadingSpinner />;
     if (docError) return <p className="text-red-500">Error loading document: {docError.message}</p>;
     if (!document) return <p>Document not found.</p>;
+
+    const signatureIdForPlacement = getParsedSignatureId();
+    const canInsertSignature = Boolean(document.fileUrl && signatureIdForPlacement !== null);
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -203,18 +272,61 @@ const DocumentDetailPage: React.FC = () => {
                         )}
                     </div>
                 </div>
-                <div className="flex-grow my-4 min-h-[250px]">
+                <div className="flex-grow my-4 min-h-[20px]">
                     {document.fileUrl ? (
                         <div className="flex flex-col items-center justify-center h-full text-dark-text-secondary rounded-md border border-dashed border-gray-600 p-4">
                             <FileText size={40} className="text-dark-text-secondary mb-4" />
                             <p className="font-semibold text-dark-text text-center mb-1" title={document.title}>{document.title}</p>
                             <p className="text-sm text-gray-400 mb-4">Click below to view the document.</p>
-                            <button
-                                onClick={() => setIsViewerOpen(true)}
-                                className="mt-auto px-6 py-2 bg-brand-primary text-white font-bold rounded-lg hover:bg-brand-secondary transition-colors"
-                            >
-                                View Document
-                            </button>
+                            <div className="mt-auto flex w-full flex-col gap-2">
+                                <button
+                                    onClick={() => openViewer(document.fileUrl!, document.title)}
+                                    className="w-full px-6 py-2 bg-brand-primary text-white font-bold rounded-lg hover:bg-brand-secondary transition-colors"
+                                >
+                                    View Document
+                                </button>
+                                {document.signature && (
+                                    <button
+                                        onClick={() => setIsInsertModalOpen(true)}
+                                        disabled={!canInsertSignature}
+                                        title={!canInsertSignature ? 'Signature data is not ready for placement yet.' : undefined}
+                                        className="w-full flex items-center justify-center gap-2 px-6 py-2 rounded-lg border border-brand-primary text-brand-primary font-bold transition-colors hover:bg-brand-primary/10 disabled:cursor-not-allowed disabled:border-gray-600 disabled:text-gray-500 disabled:hover:bg-transparent"
+                                    >
+                                        <PenSquare size={18} />
+                                        <span>Insert Signature</span>
+                                    </button>
+                                )}
+                            </div>
+                            {document.signature && !canInsertSignature && (
+                                <p className="mt-2 text-center text-xs text-yellow-400">
+                                    Signature placement unlocks once the final signature ID is available.
+                                </p>
+                            )}
+                            {latestSignedFileUrl && (
+                                <div className="mt-4 w-full rounded-lg border border-green-500/50 bg-green-600/10 p-4 text-sm text-green-200">
+                                    <p className="font-semibold text-green-200">Signed document ready.</p>
+                                    <p className="mt-1 text-xs text-green-100/80">Preview or download the updated document below.</p>
+                                    <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                                        <button
+                                            onClick={() => openViewer(latestSignedFileUrl, document ? `${document.title} (Signed)` : undefined)}
+                                            className="flex items-center justify-center gap-2 rounded-md bg-brand-primary px-4 py-2 text-white transition-colors hover:bg-brand-secondary"
+                                        >
+                                            <Eye size={16} />
+                                            <span>Preview Signed Document</span>
+                                        </button>
+                                        <a
+                                            href={latestSignedFileUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            download
+                                            className="flex items-center justify-center gap-2 rounded-md border border-brand-primary px-4 py-2 text-brand-primary transition-colors hover:bg-brand-primary/10"
+                                        >
+                                            <Download size={16} />
+                                            <span>Download Signed PDF</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     ) : document.content ? (
                         <div className="prose prose-invert max-w-none p-4 h-full overflow-y-auto rounded-md border border-gray-600">
@@ -303,9 +415,20 @@ const DocumentDetailPage: React.FC = () => {
             <DocumentViewer
                 isOpen={isViewerOpen}
                 onClose={() => setIsViewerOpen(false)}
-                documentUri={document.fileUrl || ''}
-                documentTitle={document.title}
+                documentUri={viewerSource?.url || document.fileUrl || ''}
+                documentTitle={viewerSource?.title || document.title}
             />
+            {document.fileUrl && (
+                <SignaturePlacementModal
+                    isOpen={isInsertModalOpen}
+                    onClose={handleInsertModalClose}
+                    documentUri={document.fileUrl}
+                    signatureId={signatureIdForPlacement}
+                    onSubmit={handleInsertSignatureSubmit}
+                    isSubmitting={insertSignatureMutation.isPending}
+                    submitError={insertSignatureErrorMessage}
+                />
+            )}
         </div>
     );
 };

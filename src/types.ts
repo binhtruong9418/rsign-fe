@@ -46,6 +46,24 @@ export interface Stroke {
     points: Point[];
 }
 
+export interface SignaturePosition {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    pageNumber: number;
+}
+
+export interface InsertSignaturePayload {
+    signatureId: number;
+    position: SignaturePosition;
+}
+
+export interface InsertSignatureResponse {
+    fileUrl: string;
+    documentId: number;
+}
+
 // Enums and types
 export type DocumentStatus = "PENDING" | "COMPLETED" | "EXPIRED";
 
