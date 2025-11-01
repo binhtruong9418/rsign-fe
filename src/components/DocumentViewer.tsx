@@ -1,6 +1,6 @@
 import React from 'react';
-import DocViewer from '@cyntler/react-doc-viewer';
 import { X } from 'lucide-react';
+import DocumentContentViewer from './DocumentContentViewer';
 
 interface DocumentViewerProps {
     isOpen: boolean;
@@ -23,18 +23,11 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ isOpen, onClose, docume
                         <X size={24} />
                     </button>
                 </div>
-                <div className="flex-grow p-1 bg-gray-800 overflow-hidden">
-                    <DocViewer
-                        documents={[{ uri: documentUri, fileName: documentTitle }]}
-                        config={{
-                            header: {
-                                disableHeader: true,
-                                disableFileName: true,
-                                retainURLParams: false,
-                            },
-                            pdfVerticalScrollByDefault: true,
-                        }}
-                        className="w-full h-full"
+                <div className="flex-grow overflow-hidden bg-gray-800 p-2">
+                    <DocumentContentViewer
+                        documentUri={documentUri}
+                        documentTitle={documentTitle}
+                        className="h-full"
                     />
                 </div>
             </div>

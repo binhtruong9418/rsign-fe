@@ -1,6 +1,6 @@
 import React from 'react';
 import { Document } from '../../types';
-import DocViewer, { DocViewerRenderers } from '@cyntler/react-doc-viewer';
+import DocumentContentViewer from '../DocumentContentViewer';
 
 interface DocumentReviewViewProps {
     document: Document;
@@ -8,8 +8,6 @@ interface DocumentReviewViewProps {
 }
 
 const DocumentReviewView: React.FC<DocumentReviewViewProps> = ({ document, onProceedToSign }) => {
-    const docs = document.fileUrl ? [{ uri: document.fileUrl, fileName: document.title }] : [];
-
     return (
         <div className="flex flex-col h-full min-h-0">
             <h1 className="text-xl sm:text-2xl font-bold text-dark-text mb-4 truncate" title={document.title}>
@@ -17,18 +15,10 @@ const DocumentReviewView: React.FC<DocumentReviewViewProps> = ({ document, onPro
             </h1>
             <div className="flex-grow overflow-y-auto min-h-0 border border-gray-700 rounded-md p-4 bg-gray-900/50">
                 {document.fileUrl ? (
-                    <DocViewer
-                        documents={docs}
-                        pluginRenderers={DocViewerRenderers}
-                        config={{
-                            header: {
-                                disableHeader: true,
-                                disableFileName: true,
-                                retainURLParams: false,
-                            },
-                            pdfVerticalScrollByDefault: true,
-                        }}
-                        className="w-full h-full"
+                    <DocumentContentViewer
+                        documentUri={document.fileUrl}
+                        documentTitle={document.title}
+                        className="h-full"
                     />
                 ) : (
                     <div className="prose prose-invert max-w-none prose-p:text-dark-text prose-headings:text-dark-text p-4">
