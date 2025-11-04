@@ -11,6 +11,7 @@ import { DEFAULT_SIGNATURE_COLOR, DEFAULT_SIGNATURE_WIDTH } from '../constants/a
 import DocumentViewer from '../components/DocumentViewer';
 import SignaturePlacementModal from '../components/SignaturePlacementModal';
 import { formatDate } from '@/utils';
+import { detectDocumentMediaType, DocumentMediaType } from '../components/DocumentContentViewer';
 import { showToast } from '../utils/toast';
 import { AxiosError } from 'axios';
 
@@ -184,7 +185,9 @@ const DocumentDetailPage: React.FC = () => {
     if (!document) return <p>Document not found.</p>;
 
     const signatureIdForPlacement = getParsedSignatureId();
-    const canInsertSignature = Boolean(document.fileUrl && signatureIdForPlacement !== null);
+    const documentMediaType: DocumentMediaType = document.fileUrl ? detectDocumentMediaType(document.fileUrl) : 'unknown';
+    const supportsPlacement = documentMediaType === 'pdf' || documentMediaType === 'image';
+    const canInsertSignature = Boolean(document.fileUrl && signatureIdForPlacement !== null && supportsPlacement);
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -297,9 +300,11 @@ const DocumentDetailPage: React.FC = () => {
                                     </button>
                                 )}
                             </div>
-                            {document.signature && !canInsertSignature && (
+                            {document.signature && (!supportsPlacement || signatureIdForPlacement === null) && (
                                 <p className="mt-2 text-center text-xs text-yellow-400">
-                                    Signature placement unlocks once the final signature ID is available.
+                                    {supportsPlacement
+                                        ? 'Signature placement unlocks once the final signature ID is available.'
+                                        : 'Signature placement is only available for PDF or image documents.'}
                                 </p>
                             )}
                             {latestSignedFileUrl && (
@@ -423,6 +428,7 @@ const DocumentDetailPage: React.FC = () => {
                     isOpen={isInsertModalOpen}
                     onClose={handleInsertModalClose}
                     documentUri={document.fileUrl}
+                    documentMediaType={documentMediaType}
                     signatureId={signatureIdForPlacement}
                     signatureStrokes={document.signature?.signatureData?.strokes}
                     signatureColor={document.signature?.signatureData?.color || DEFAULT_SIGNATURE_COLOR}

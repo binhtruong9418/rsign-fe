@@ -55,7 +55,7 @@ const ensureDocxPreviewStyles = () => {
   docxPreviewStylesInjected = true;
 };
 
-type DocumentMediaType = 'image' | 'pdf' | 'docx' | 'unknown';
+export type DocumentMediaType = 'image' | 'pdf' | 'docx' | 'unknown';
 
 interface DocumentContentViewerProps {
   documentUri: string;

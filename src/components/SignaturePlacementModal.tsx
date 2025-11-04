@@ -4,6 +4,7 @@ import { GlobalWorkerOptions, getDocument, PDFDocumentProxy, PDFPageProxy } from
 // @ts-ignore - Vite handles ?url imports for static assets
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.js?url';
 import { SignaturePosition, Stroke } from '../types';
+import { DocumentMediaType } from './DocumentContentViewer';
 
 type Selection = {
     x: number;
@@ -20,6 +21,7 @@ interface SignaturePlacementModalProps {
     isOpen: boolean;
     onClose: () => void;
     documentUri: string;
+    documentMediaType: DocumentMediaType;
     signatureId: number | null;
     signatureStrokes?: Stroke[];
     signatureColor?: string;
@@ -135,6 +137,7 @@ const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
     isOpen,
     onClose,
     documentUri,
+    documentMediaType,
     signatureId,
     signatureStrokes,
     signatureColor,
@@ -156,6 +159,7 @@ const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const previewCanvasRef = useRef<HTMLCanvasElement>(null);
     const sidePreviewCanvasRef = useRef<HTMLCanvasElement>(null);
+    const imageRef = useRef<HTMLImageElement>(null);
     const modeRef = useRef<InteractionMode>('idle');
     const dragOffsetRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
     const resizeHandleRef = useRef<Handle | null>(null);
@@ -203,6 +207,9 @@ const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
         };
     }, [signatureStrokes]);
     const hasDrawableSignature = Boolean(signatureGeometry);
+    const isPdfDocument = documentMediaType === 'pdf';
+    const isImageDocument = documentMediaType === 'image';
+    const supportsPlacement = isPdfDocument || isImageDocument;
 
     const updateSelectionForActive = (next: Selection | null | ((current: Selection | null) => Selection | null)) => {
         setSelectionByPage((currentMap) => {
@@ -279,6 +286,36 @@ const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
         renderSidePreview();
     }, [renderSidePreview]);
 
+    const applyImageDimensions = useCallback((img: HTMLImageElement) => {
+        const naturalWidth = img.naturalWidth || img.width;
+        const naturalHeight = img.naturalHeight || img.height;
+
+        if (!naturalWidth || !naturalHeight) {
+            setDocumentError('Unable to read image dimensions for signature placement.');
+            return;
+        }
+
+        const baseScale = Math.min(CANVAS_TARGET_WIDTH / naturalWidth, 2);
+        const safeScale = Number.isFinite(baseScale) && baseScale > 0 ? Math.max(baseScale, 0.1) : 1;
+
+        renderScaleRef.current = safeScale;
+        setRenderedSize({
+            width: naturalWidth * safeScale,
+            height: naturalHeight * safeScale,
+        });
+    }, [setDocumentError]);
+
+    const handleImageLoad = useCallback((event: React.SyntheticEvent<HTMLImageElement>) => {
+        applyImageDimensions(event.currentTarget);
+        setDocumentError(null);
+        setIsPageRendering(false);
+    }, [applyImageDimensions]);
+
+    const handleImageError = useCallback(() => {
+        setDocumentError('Unable to load image preview for signature placement.');
+        setIsPageRendering(false);
+    }, []);
+
     useEffect(() => {
         if (typeof window === 'undefined') {
             return;
@@ -297,44 +334,72 @@ const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
             return;
         }
 
-        let isSubscribed = true;
-        setDocumentError(null);
         setSelectionByPage({});
         setActivePage(1);
         setRenderedSize(null);
+        setDocumentError(null);
+        renderScaleRef.current = 1;
+        setPageCount(1);
+        modeRef.current = 'idle';
 
-        const loadingTask = getDocument({ url: documentUri });
+        if (isPdfDocument) {
+            let isSubscribed = true;
+            setIsPageRendering(true);
+            const loadingTask = getDocument({ url: documentUri });
 
-        loadingTask.promise
-            .then((doc) => {
-                if (!isSubscribed) {
-                    return;
-                }
-                setPdfDoc(doc);
-                setPageCount(doc.numPages);
-            })
-            .catch((error) => {
-                if (!isSubscribed) {
-                    return;
-                }
-                console.error('Failed to load PDF document', error);
-                setDocumentError('Unable to load document preview for signature placement.');
-            });
+            loadingTask.promise
+                .then((doc) => {
+                    if (!isSubscribed) {
+                        return;
+                    }
+                    setPdfDoc(doc);
+                    setPageCount(doc.numPages);
+                })
+                .catch((error) => {
+                    if (!isSubscribed) {
+                        return;
+                    }
+                    console.error('Failed to load PDF document', error);
+                    setDocumentError('Unable to load document preview for signature placement.');
+                    setIsPageRendering(false);
+                });
 
-        return () => {
-            isSubscribed = false;
-            setPdfDoc((currentDoc) => {
-                if (currentDoc) {
-                    currentDoc.destroy();
-                }
-                return null;
-            });
-            loadingTask.destroy();
-        };
-    }, [documentUri, isOpen]);
+            return () => {
+                isSubscribed = false;
+                setPdfDoc((currentDoc) => {
+                    if (currentDoc) {
+                        currentDoc.destroy();
+                    }
+                    return null;
+                });
+                loadingTask.destroy();
+            };
+        }
+
+        setPdfDoc((currentDoc) => {
+            if (currentDoc) {
+                currentDoc.destroy();
+            }
+            return null;
+        });
+
+        if (isImageDocument) {
+            setPageCount(1);
+            setIsPageRendering(true);
+            const imgElement = imageRef.current;
+            if (imgElement && imgElement.complete && imgElement.naturalWidth) {
+                applyImageDimensions(imgElement);
+                setIsPageRendering(false);
+            }
+            return;
+        }
+
+        setIsPageRendering(false);
+        setDocumentError('This document type is not supported for signature placement.');
+    }, [isOpen, documentUri, isPdfDocument, isImageDocument, applyImageDimensions]);
 
     useEffect(() => {
-        if (!pdfDoc || !canvasRef.current) {
+        if (!isPdfDocument || !pdfDoc || !canvasRef.current) {
             return;
         }
 
@@ -391,7 +456,7 @@ const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
             isSubscribed = false;
             setIsPageRendering(false);
         };
-    }, [pdfDoc, activePage]);
+    }, [pdfDoc, activePage, isPdfDocument]);
 
     useEffect(() => {
         if (!isOpen) {
@@ -433,7 +498,13 @@ const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
     };
 
     const handleOverlayPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-        if (modeRef.current !== 'idle' || !containerRef.current || isPageRendering || !renderedSize) {
+        if (
+            !supportsPlacement ||
+            modeRef.current !== 'idle' ||
+            !containerRef.current ||
+            isPageRendering ||
+            !renderedSize
+        ) {
             return;
         }
 
@@ -445,7 +516,7 @@ const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
     };
 
     const handleOverlayPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-        if (modeRef.current !== 'drawing') {
+        if (!supportsPlacement || modeRef.current !== 'drawing') {
             return;
         }
         const point = getRelativePoint(event.clientX, event.clientY);
@@ -454,7 +525,7 @@ const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
     };
 
     const handleOverlayPointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
-        if (modeRef.current !== 'drawing') {
+        if (!supportsPlacement || modeRef.current !== 'drawing') {
             return;
         }
         overlayRef.current?.releasePointerCapture(event.pointerId);
@@ -472,6 +543,9 @@ const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
 
     const beginDrag = (event: React.PointerEvent<HTMLDivElement>) => {
         event.stopPropagation();
+        if (!supportsPlacement) {
+            return;
+        }
         const currentSelection = selectionRef.current;
         if (!currentSelection) {
             return;
@@ -487,6 +561,9 @@ const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
 
     const beginResize = (event: React.PointerEvent<HTMLDivElement>, handle: Handle) => {
         event.stopPropagation();
+        if (!supportsPlacement) {
+            return;
+        }
         const currentSelection = selectionRef.current;
         if (!currentSelection) {
             return;
@@ -499,7 +576,7 @@ const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
     };
 
     const handleInteractionPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-        if (!containerRef.current || modeRef.current === 'idle') {
+        if (!supportsPlacement || !containerRef.current || modeRef.current === 'idle') {
             return;
         }
         event.preventDefault();
@@ -547,7 +624,7 @@ const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
     };
 
     const handleInteractionPointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
-        if (modeRef.current === 'idle') {
+        if (!supportsPlacement || modeRef.current === 'idle') {
             return;
         }
         (event.currentTarget as HTMLDivElement).releasePointerCapture(event.pointerId);
@@ -604,7 +681,7 @@ const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
         }
         return `${Math.round(selection.width)} × ${Math.round(selection.height)} px @ (${Math.round(selection.x)}, ${Math.round(selection.y)})`;
     }, [selection]);
-    const submitDisabled = !selection || signatureId == null || !!documentError;
+    const submitDisabled = !selection || signatureId == null || !!documentError || !supportsPlacement;
 
     if (!isOpen) {
         return null;
@@ -663,7 +740,25 @@ const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
                                     height: renderedSize ? `${renderedSize.height}px` : '100%',
                                 }}
                             >
-                                <canvas ref={canvasRef} className="block w-full" />
+                                {isPdfDocument && (
+                                    <canvas ref={canvasRef} className="block w-full" />
+                                )}
+                                {isImageDocument && (
+                                    <img
+                                        ref={imageRef}
+                                        src={documentUri}
+                                        alt="Document for signature placement"
+                                        onLoad={handleImageLoad}
+                                        onError={handleImageError}
+                                        draggable={false}
+                                        className="block h-full w-full select-none object-contain"
+                                    />
+                                )}
+                                {!isPdfDocument && !isImageDocument && (
+                                    <div className="flex h-full w-full items-center justify-center rounded-md bg-gray-900/60 text-xs text-dark-text-secondary">
+                                        Document preview is not available for this file type.
+                                    </div>
+                                )}
                                 {selection && renderedSize && (
                                     <div
                                         className="absolute border-2 border-brand-primary bg-brand-primary/15 text-xs text-white"
@@ -786,7 +881,7 @@ const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
                                     Review the captured signature before placing it on the document.
                                 </p>
                                 <div className="mt-3 rounded-md border border-dashed border-gray-600 bg-gray-800/50 p-3">
-                                    <div className="relative overflow-hidden rounded-md bg-gray-900/60">
+                                    <div className="relative overflow-hidden rounded-md bg-white">
                                         <canvas
                                             ref={sidePreviewCanvasRef}
                                             className="h-32 w-full"
