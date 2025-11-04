@@ -424,6 +424,9 @@ const DocumentDetailPage: React.FC = () => {
                     onClose={handleInsertModalClose}
                     documentUri={document.fileUrl}
                     signatureId={signatureIdForPlacement}
+                    signatureStrokes={document.signature?.signatureData?.strokes}
+                    signatureColor={document.signature?.signatureData?.color || DEFAULT_SIGNATURE_COLOR}
+                    signatureWidth={document.signature?.signatureData?.width || DEFAULT_SIGNATURE_WIDTH}
                     onSubmit={handleInsertSignatureSubmit}
                     isSubmitting={insertSignatureMutation.isPending}
                     submitError={insertSignatureErrorMessage}

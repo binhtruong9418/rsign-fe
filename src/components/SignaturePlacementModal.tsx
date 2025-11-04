@@ -1,9 +1,9 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, Loader2, X } from 'lucide-react';
 import { GlobalWorkerOptions, getDocument, PDFDocumentProxy, PDFPageProxy } from 'pdfjs-dist';
 // @ts-ignore - Vite handles ?url imports for static assets
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.js?url';
-import { SignaturePosition } from '../types';
+import { SignaturePosition, Stroke } from '../types';
 
 type Selection = {
     x: number;
@@ -21,6 +21,9 @@ interface SignaturePlacementModalProps {
     onClose: () => void;
     documentUri: string;
     signatureId: number | null;
+    signatureStrokes?: Stroke[];
+    signatureColor?: string;
+    signatureWidth?: number;
     onSubmit: (position: SignaturePosition) => void;
     isSubmitting: boolean;
     submitError?: string | null;
@@ -36,11 +39,106 @@ const clamp = (value: number, min: number, max: number) => Math.min(Math.max(val
 
 GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
+type SignatureGeometry = {
+    strokes: Stroke[];
+    bounds: {
+        minX: number;
+        minY: number;
+        width: number;
+        height: number;
+    };
+};
+
+const clearCanvas = (canvas: HTMLCanvasElement) => {
+    const context = canvas.getContext('2d');
+    if (!context) {
+        return;
+    }
+    context.setTransform(1, 0, 0, 1, 0, 0);
+    context.clearRect(0, 0, canvas.width, canvas.height);
+};
+
+const drawSignatureToCanvas = (
+    canvas: HTMLCanvasElement,
+    width: number,
+    height: number,
+    geometry: SignatureGeometry,
+    options: {
+        color?: string;
+        baseLineWidth?: number;
+    }
+) => {
+    if (width <= 0 || height <= 0) {
+        clearCanvas(canvas);
+        return;
+    }
+
+    const context = canvas.getContext('2d');
+    if (!context) {
+        return;
+    }
+
+    const dpr = window.devicePixelRatio || 1;
+    const pixelWidth = Math.max(Math.round(width * dpr), 1);
+    const pixelHeight = Math.max(Math.round(height * dpr), 1);
+
+    if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
+        canvas.width = pixelWidth;
+        canvas.height = pixelHeight;
+        canvas.style.width = `${width}px`;
+        canvas.style.height = `${height}px`;
+    }
+
+    context.setTransform(1, 0, 0, 1, 0, 0);
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.scale(dpr, dpr);
+
+    const { bounds, strokes } = geometry;
+    const paddingBase = Math.min(width, height) > 120 ? 16 : 8;
+    const padding = Math.min(paddingBase, Math.min(width, height) / 3);
+
+    const availableWidth = Math.max(width - padding * 2, 1);
+    const availableHeight = Math.max(height - padding * 2, 1);
+    const rawScale = Math.min(availableWidth / bounds.width, availableHeight / bounds.height);
+    const scale = Math.max(rawScale, 0.05);
+
+    const offsetX = (width - bounds.width * scale) / 2 - bounds.minX * scale;
+    const offsetY = (height - bounds.height * scale) / 2 - bounds.minY * scale;
+
+    const strokeColor = options.color || '#111827';
+    const baseLineWidth = options.baseLineWidth ?? 2;
+
+    context.lineCap = 'round';
+    context.lineJoin = 'round';
+    context.strokeStyle = strokeColor;
+    context.lineWidth = Math.max(baseLineWidth * scale, 0.5);
+
+    strokes.forEach((stroke) => {
+        const points = stroke.points;
+        if (!points || points.length === 0) {
+            return;
+        }
+
+        context.beginPath();
+        context.moveTo(points[0].x * scale + offsetX, points[0].y * scale + offsetY);
+
+        for (let index = 1; index < points.length; index++) {
+            const point = points[index];
+            context.lineTo(point.x * scale + offsetX, point.y * scale + offsetY);
+        }
+
+        context.stroke();
+    });
+};
+
 const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
     isOpen,
     onClose,
     documentUri,
     signatureId,
+    signatureStrokes,
+    signatureColor,
+    signatureWidth,
     onSubmit,
     isSubmitting,
     submitError,
@@ -56,6 +154,8 @@ const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
     const containerRef = useRef<HTMLDivElement>(null);
     const overlayRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const previewCanvasRef = useRef<HTMLCanvasElement>(null);
+    const sidePreviewCanvasRef = useRef<HTMLCanvasElement>(null);
     const modeRef = useRef<InteractionMode>('idle');
     const dragOffsetRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
     const resizeHandleRef = useRef<Handle | null>(null);
@@ -65,6 +165,44 @@ const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
     const renderScaleRef = useRef(1);
 
     const selection = selectionByPage[activePage] ?? null;
+    const signatureGeometry = useMemo<SignatureGeometry | null>(() => {
+        if (!signatureStrokes || signatureStrokes.length === 0) {
+            return null;
+        }
+
+        const normalizedStrokes = signatureStrokes
+            .map((stroke) => {
+                const filteredPoints = (stroke.points ?? []).filter(
+                    (point): point is Stroke['points'][number] => Boolean(point)
+                );
+                return {
+                    ...stroke,
+                    points: filteredPoints,
+                };
+            })
+            .filter((stroke) => stroke.points.length > 0);
+
+        if (normalizedStrokes.length === 0) {
+            return null;
+        }
+
+        const allPoints = normalizedStrokes.flatMap((stroke) => stroke.points);
+        const minX = Math.min(...allPoints.map((point) => point.x));
+        const maxX = Math.max(...allPoints.map((point) => point.x));
+        const minY = Math.min(...allPoints.map((point) => point.y));
+        const maxY = Math.max(...allPoints.map((point) => point.y));
+
+        return {
+            strokes: normalizedStrokes,
+            bounds: {
+                minX,
+                minY,
+                width: Math.max(maxX - minX, 1),
+                height: Math.max(maxY - minY, 1),
+            },
+        };
+    }, [signatureStrokes]);
+    const hasDrawableSignature = Boolean(signatureGeometry);
 
     const updateSelectionForActive = (next: Selection | null | ((current: Selection | null) => Selection | null)) => {
         setSelectionByPage((currentMap) => {
@@ -86,6 +224,73 @@ const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
     useEffect(() => {
         selectionRef.current = selection ?? null;
     }, [selection]);
+
+    const renderSidePreview = useCallback(() => {
+        const canvas = sidePreviewCanvasRef.current;
+        if (!canvas) {
+            return;
+        }
+
+        if (!isOpen || !signatureGeometry) {
+            clearCanvas(canvas);
+            return;
+        }
+
+        const rect = canvas.getBoundingClientRect();
+        const width = Math.max(rect.width, 1);
+        const height = Math.max(rect.height, 1);
+
+        drawSignatureToCanvas(
+            canvas,
+            width,
+            height,
+            signatureGeometry,
+            {
+                color: signatureColor,
+                baseLineWidth: signatureWidth,
+            }
+        );
+    }, [isOpen, signatureGeometry, signatureColor, signatureWidth]);
+
+    useEffect(() => {
+        const canvas = previewCanvasRef.current;
+        if (!canvas) {
+            return;
+        }
+
+        if (!isOpen || !selection || !signatureGeometry) {
+            clearCanvas(canvas);
+            return;
+        }
+
+        drawSignatureToCanvas(
+            canvas,
+            Math.max(selection.width, 1),
+            Math.max(selection.height, 1),
+            signatureGeometry,
+            {
+                color: signatureColor,
+                baseLineWidth: signatureWidth,
+            }
+        );
+    }, [isOpen, selection, signatureGeometry, signatureColor, signatureWidth]);
+
+    useEffect(() => {
+        renderSidePreview();
+    }, [renderSidePreview]);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') {
+            return;
+        }
+        const handleResize = () => {
+            renderSidePreview();
+        };
+        window.addEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, [renderSidePreview]);
 
     useEffect(() => {
         if (!isOpen) {
@@ -360,7 +565,7 @@ const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
         if (!selection) {
             return;
         }
-        if (signatureId === null || signatureId === undefined) {
+        if (signatureId == null) {
             return;
         }
 
@@ -399,7 +604,7 @@ const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
         }
         return `${Math.round(selection.width)} × ${Math.round(selection.height)} px @ (${Math.round(selection.x)}, ${Math.round(selection.y)})`;
     }, [selection]);
-    const submitDisabled = !selection || signatureId === null || signatureId === undefined || !!documentError;
+    const submitDisabled = !selection || signatureId == null || !!documentError;
 
     if (!isOpen) {
         return null;
@@ -414,7 +619,9 @@ const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
                 <div className="flex items-center justify-between">
                     <div>
                         <h2 className="text-xl font-semibold text-dark-text">Insert Signature</h2>
-                        <p className="text-sm text-dark-text-secondary">Draw the placement area and configure signature details.</p>
+                        <p className="text-sm text-dark-text-secondary">
+                            Draw the placement area and configure signature details. A live preview renders inside your selection.
+                        </p>
                     </div>
                     <button
                         onClick={onClose}
@@ -470,6 +677,15 @@ const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
                                         onPointerMove={handleInteractionPointerMove}
                                         onPointerUp={handleInteractionPointerUp}
                                     >
+                                        <canvas
+                                            ref={previewCanvasRef}
+                                            className="pointer-events-none absolute inset-0"
+                                        />
+                                        {!hasDrawableSignature && (
+                                            <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded bg-black/40 px-2 text-center text-[11px] font-medium">
+                                                Signature preview unavailable
+                                            </div>
+                                        )}
                                         <div className="absolute top-1 left-1 rounded bg-brand-primary/80 px-2 py-0.5 text-[10px] font-semibold">
                                             {Math.round(selection.width)} × {Math.round(selection.height)}
                                         </div>
@@ -565,10 +781,26 @@ const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
                     >
                         <div className="space-y-4">
                             <div>
-                                <p className="text-sm font-medium text-dark-text">Signature</p>
+                                <p className="text-sm font-medium text-dark-text">Signature preview</p>
                                 <p className="mt-1 text-xs text-dark-text-secondary">
-                                    Using signature ID <span className="font-mono text-dark-text">{signatureId ?? '—'}</span>
+                                    Review the captured signature before placing it on the document.
                                 </p>
+                                <div className="mt-3 rounded-md border border-dashed border-gray-600 bg-gray-800/50 p-3">
+                                    <div className="relative overflow-hidden rounded-md bg-gray-900/60">
+                                        <canvas
+                                            ref={sidePreviewCanvasRef}
+                                            className="h-32 w-full"
+                                        />
+                                        {!hasDrawableSignature && (
+                                            <div className="absolute inset-0 flex items-center justify-center px-3 text-center text-xs text-dark-text-secondary">
+                                                Signature preview unavailable.
+                                            </div>
+                                        )}
+                                    </div>
+                                    <p className="mt-2 text-[11px] text-dark-text-secondary">
+                                        The preview scales automatically to match your placement selection.
+                                    </p>
+                                </div>
                             </div>
 
                             <div className="rounded-md border border-dashed border-gray-600 bg-gray-800/50 p-3 text-sm text-dark-text-secondary">
@@ -584,7 +816,7 @@ const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
                                 </p>
                             </div>
 
-                            {(submitError || (signatureId === null || signatureId === undefined)) && (
+                            {(submitError || signatureId == null) && (
                                 <div className="rounded-md border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-400">
                                     {submitError || 'No signature is associated with this document.'}
                                 </div>
