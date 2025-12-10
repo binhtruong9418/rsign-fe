@@ -28,12 +28,15 @@ const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-dark-bg">
-      <div className="max-w-md w-full bg-dark-card shadow-lg rounded-lg p-8">
-        <h2 className="text-3xl font-bold text-center text-brand-primary mb-8">Create your Account</h2>
+    <div className="min-h-screen flex items-center justify-center bg-secondary-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full bg-white shadow-xl rounded-xl p-8 border border-secondary-200">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-secondary-900">Create Account</h2>
+          <p className="mt-2 text-sm text-secondary-600">Sign up to start signing documents securely</p>
+        </div>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-dark-text-secondary">Email address</label>
+            <label htmlFor="email" className="label-text">Email address</label>
             <input
               id="email"
               name="email"
@@ -42,11 +45,12 @@ const RegisterPage: React.FC = () => {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-brand-primary focus:border-brand-primary sm:text-sm"
+              className="input-field"
+              placeholder="you@example.com"
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-dark-text-secondary">Password</label>
+            <label htmlFor="password" className="label-text">Password</label>
             <input
               id="password"
               name="password"
@@ -55,22 +59,23 @@ const RegisterPage: React.FC = () => {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-brand-primary focus:border-brand-primary sm:text-sm"
+              className="input-field"
+              placeholder="••••••••"
             />
           </div>
           <div>
             <button
               type="submit"
               disabled={mutation.isPending}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-brand-primary hover:bg-brand-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-dark-card focus:ring-brand-primary disabled:opacity-50"
+              className="w-full btn-primary py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {mutation.isPending ? 'Registering...' : 'Register'}
+              {mutation.isPending ? 'Registering...' : 'Create Account'}
             </button>
           </div>
         </form>
-        <p className="mt-6 text-center text-sm text-dark-text-secondary">
+        <p className="mt-6 text-center text-sm text-secondary-600">
           Already a member?{' '}
-          <Link to="/login" className="font-medium text-brand-primary hover:text-brand-secondary">
+          <Link to="/login" className="font-semibold text-primary-600 hover:text-primary-700 transition-colors">
             Login here
           </Link>
         </p>

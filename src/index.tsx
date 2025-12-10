@@ -3,6 +3,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { useAuthStore } from './store/authStore';
+import './index.css';
 
 // Initialize auth state from localStorage on app load
 useAuthStore.getState().init();

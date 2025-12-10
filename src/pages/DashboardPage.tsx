@@ -53,11 +53,14 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-dark-text">My Documents</h1>
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-secondary-900">Documents</h1>
+          <p className="text-secondary-600 mt-1">Manage and track your signature requests</p>
+        </div>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="bg-brand-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-brand-secondary flex items-center space-x-2 transition-colors"
+          className="btn-primary flex items-center space-x-2"
         >
           <PlusCircle size={20} />
           <span>New Document</span>

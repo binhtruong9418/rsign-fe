@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.2",
-    "docx-preview": "^0.3.2",
     "axios": "^1.12.2",
+    "docx-preview": "^0.3.2",
     "lucide-react": "^0.544.0",
     "pdfjs-dist": "^2.12.313",
     "qrcode.react": "^4.2.0",
@@ -22,9 +22,13 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.17",
     "@types/node": "^22.14.0",
     "@types/react": "^19.1.16",
     "@vitejs/plugin-react": "^5.0.0",
+    "autoprefixer": "^10.4.22",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.17",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"
   }

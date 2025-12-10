@@ -688,21 +688,21 @@ const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
     }
 
     return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/75 p-4" onClick={onClose}>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-secondary-900/50 backdrop-blur-sm p-4" onClick={onClose}>
             <div
-                className="flex w-full max-w-6xl flex-col gap-6 rounded-lg bg-dark-card p-6 shadow-2xl"
+                className="flex w-full max-w-6xl flex-col gap-6 rounded-xl bg-white p-6 shadow-2xl border border-secondary-200"
                 onClick={(event) => event.stopPropagation()}
             >
                 <div className="flex items-center justify-between">
                     <div>
-                        <h2 className="text-xl font-semibold text-dark-text">Insert Signature</h2>
-                        <p className="text-sm text-dark-text-secondary">
+                        <h2 className="text-xl font-bold text-secondary-900">Insert Signature</h2>
+                        <p className="text-sm text-secondary-500">
                             Draw the placement area and configure signature details. A live preview renders inside your selection.
                         </p>
                     </div>
                     <button
                         onClick={onClose}
-                        className="rounded-full p-2 text-dark-text-secondary transition-colors hover:bg-gray-700 hover:text-white"
+                        className="rounded-full p-2 text-secondary-500 transition-colors hover:bg-secondary-100 hover:text-secondary-900"
                     >
                         <X size={20} />
                     </button>
@@ -710,14 +710,14 @@ const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
 
                 <div className="flex flex-col gap-6 lg:flex-row">
                     <div className="flex-1">
-                        <div className="mb-3 flex items-center justify-between text-sm text-dark-text-secondary">
+                        <div className="mb-3 flex items-center justify-between text-sm text-secondary-500">
                             <span>Page {activePage} of {pageCount}</span>
                             <div className="flex items-center gap-2">
                                 <button
                                     type="button"
                                     onClick={() => goToPage('prev')}
                                     disabled={activePage === 1 || pageCount <= 1}
-                                    className="flex items-center justify-center rounded-md border border-gray-600 p-1 text-dark-text-secondary transition-colors hover:border-brand-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="flex items-center justify-center rounded-lg border border-secondary-300 p-1 text-secondary-500 transition-colors hover:border-primary-600 hover:text-primary-600 disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     <ChevronLeft size={18} />
                                 </button>
@@ -725,13 +725,13 @@ const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
                                     type="button"
                                     onClick={() => goToPage('next')}
                                     disabled={activePage === pageCount || pageCount <= 1}
-                                    className="flex items-center justify-center rounded-md border border-gray-600 p-1 text-dark-text-secondary transition-colors hover:border-brand-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="flex items-center justify-center rounded-lg border border-secondary-300 p-1 text-secondary-500 transition-colors hover:border-primary-600 hover:text-primary-600 disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     <ChevronRight size={18} />
                                 </button>
                             </div>
                         </div>
-                        <div className="relative h-[520px] overflow-auto rounded-md border border-gray-700 bg-gray-900/60">
+                        <div className="relative h-[520px] overflow-auto rounded-lg border border-secondary-200 bg-secondary-50">
                             <div
                                 ref={containerRef}
                                 className="relative mx-auto my-4"
@@ -755,13 +755,13 @@ const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
                                     />
                                 )}
                                 {!isPdfDocument && !isImageDocument && (
-                                    <div className="flex h-full w-full items-center justify-center rounded-md bg-gray-900/60 text-xs text-dark-text-secondary">
+                                    <div className="flex h-full w-full items-center justify-center rounded-lg bg-secondary-50 text-xs text-secondary-500">
                                         Document preview is not available for this file type.
                                     </div>
                                 )}
                                 {selection && renderedSize && (
                                     <div
-                                        className="absolute border-2 border-brand-primary bg-brand-primary/15 text-xs text-white"
+                                        className="absolute border-2 border-primary-600 bg-primary-600/15 text-xs text-white"
                                         style={{
                                             left: selection.x,
                                             top: selection.y,
@@ -781,7 +781,7 @@ const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
                                                 Signature preview unavailable
                                             </div>
                                         )}
-                                        <div className="absolute top-1 left-1 rounded bg-brand-primary/80 px-2 py-0.5 text-[10px] font-semibold">
+                                        <div className="absolute top-1 left-1 rounded bg-primary-600/90 px-2 py-0.5 text-[10px] font-semibold shadow-sm">
                                             {Math.round(selection.width)} × {Math.round(selection.height)}
                                         </div>
                                         {handles.map((handle) => {
@@ -830,7 +830,7 @@ const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
                                             return (
                                                 <div
                                                     key={handle}
-                                                    className="absolute rounded-full border-2 border-white bg-brand-primary"
+                                                    className="absolute rounded-full border-2 border-white bg-primary-600 shadow-sm"
                                                     style={positionStyles}
                                                     onPointerDown={(event) => beginResize(event, handle)}
                                                     onPointerMove={handleInteractionPointerMove}
@@ -848,71 +848,71 @@ const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
                                     onPointerUp={handleOverlayPointerUp}
                                 />
                                 {isPageRendering && (
-                                    <div className="absolute inset-0 flex items-center justify-center rounded-md bg-black/40">
-                                        <Loader2 className="h-6 w-6 animate-spin text-white" />
+                                    <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-white/50 backdrop-blur-sm">
+                                        <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
                                     </div>
                                 )}
                             </div>
                         </div>
-                        <div className="mt-3 flex flex-col gap-2 text-sm text-dark-text-secondary sm:flex-row sm:items-center sm:justify-between">
+                        <div className="mt-3 flex flex-col gap-2 text-sm text-secondary-500 sm:flex-row sm:items-center sm:justify-between">
                             <span>Selection: {selectionSummary}</span>
                             <button
                                 type="button"
                                 onClick={handleResetSelection}
-                                className="text-brand-primary underline-offset-2 transition-colors hover:text-brand-secondary hover:underline"
+                                className="text-primary-600 underline-offset-2 transition-colors hover:text-primary-700 hover:underline"
                             >
                                 Reset selection
                             </button>
                         </div>
                         {documentError && (
-                            <div className="mt-3 rounded-md border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-400">
+                            <div className="mt-3 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">
                                 {documentError}
                             </div>
                         )}
                     </div>
                     <form
                         onSubmit={handleSubmit}
-                        className="w-full max-w-xs flex-shrink-0 rounded-lg border border-gray-700 bg-gray-900/60 p-4"
+                        className="w-full max-w-xs flex-shrink-0 rounded-xl border border-secondary-200 bg-white p-4 shadow-sm"
                     >
                         <div className="space-y-4">
                             <div>
-                                <p className="text-sm font-medium text-dark-text">Signature preview</p>
-                                <p className="mt-1 text-xs text-dark-text-secondary">
+                                <p className="text-sm font-bold text-secondary-900">Signature preview</p>
+                                <p className="mt-1 text-xs text-secondary-500">
                                     Review the captured signature before placing it on the document.
                                 </p>
-                                <div className="mt-3 rounded-md border border-dashed border-gray-600 bg-gray-800/50 p-3">
-                                    <div className="relative overflow-hidden rounded-md bg-white">
+                                <div className="mt-3 rounded-lg border border-dashed border-secondary-300 bg-secondary-50 p-3">
+                                    <div className="relative overflow-hidden rounded-md bg-white border border-secondary-200">
                                         <canvas
                                             ref={sidePreviewCanvasRef}
                                             className="h-32 w-full"
                                         />
                                         {!hasDrawableSignature && (
-                                            <div className="absolute inset-0 flex items-center justify-center px-3 text-center text-xs text-dark-text-secondary">
+                                            <div className="absolute inset-0 flex items-center justify-center px-3 text-center text-xs text-secondary-400">
                                                 Signature preview unavailable.
                                             </div>
                                         )}
                                     </div>
-                                    <p className="mt-2 text-[11px] text-dark-text-secondary">
+                                    <p className="mt-2 text-[11px] text-secondary-500">
                                         The preview scales automatically to match your placement selection.
                                     </p>
                                 </div>
                             </div>
 
-                            <div className="rounded-md border border-dashed border-gray-600 bg-gray-800/50 p-3 text-sm text-dark-text-secondary">
-                                <p className="font-medium text-dark-text">Placement summary</p>
-                                <p className="mt-1 text-xs text-dark-text-secondary">
+                            <div className="rounded-lg border border-dashed border-secondary-300 bg-secondary-50 p-3 text-sm text-secondary-500">
+                                <p className="font-bold text-secondary-900">Placement summary</p>
+                                <p className="mt-1 text-xs text-secondary-500">
                                     Coordinates convert automatically to PDF space when you submit. Drag or resize the selection for precise placement.
                                 </p>
-                                <p className="mt-2 rounded bg-gray-900/60 px-2 py-1 font-mono text-xs text-dark-text">
+                                <p className="mt-2 rounded bg-white border border-secondary-200 px-2 py-1 font-mono text-xs text-secondary-700">
                                     {selectionSummary}
                                 </p>
-                                <p className="mt-2 font-mono text-xs text-dark-text">
+                                <p className="mt-2 font-mono text-xs text-secondary-700">
                                     Target page: {activePage}
                                 </p>
                             </div>
 
                             {(submitError || signatureId == null) && (
-                                <div className="rounded-md border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-400">
+                                <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">
                                     {submitError || 'No signature is associated with this document.'}
                                 </div>
                             )}
@@ -920,7 +920,7 @@ const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
                             <button
                                 type="submit"
                                 disabled={submitDisabled || isSubmitting}
-                                className="flex w-full items-center justify-center rounded-md bg-brand-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-secondary disabled:cursor-not-allowed disabled:bg-brand-primary/60"
+                                className="w-full btn-primary py-2 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {isSubmitting ? 'Inserting…' : 'Insert Signature'}
                             </button>
@@ -928,7 +928,7 @@ const SignaturePlacementModal: React.FC<SignaturePlacementModalProps> = ({
                             <button
                                 type="button"
                                 onClick={handleClose}
-                                className="mt-2 w-full rounded-md border border-gray-600 px-4 py-2 text-sm font-semibold text-dark-text transition-colors hover:border-brand-primary hover:text-white"
+                                className="mt-2 w-full btn-secondary py-2"
                             >
                                 Cancel
                             </button>

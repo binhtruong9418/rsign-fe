@@ -1,81 +1,85 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FileSignature, ShieldCheck, Zap } from 'lucide-react';
+import { FileSignature, ShieldCheck, Zap, CheckCircle } from 'lucide-react';
 import Header from '../components/Header';
 
 const HomePage: React.FC = () => {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-white">
         <Header />
         <main className="flex-grow">
-            <div className="relative pt-16 pb-32 flex content-center items-center justify-center min-h-[75vh]">
-                <div className="absolute top-0 w-full h-full bg-center bg-cover"
-                     style={{backgroundImage: "url('https://picsum.photos/1920/1080?grayscale&blur=2')"}}>
-                    <span id="blackOverlay" className="w-full h-full absolute opacity-75 bg-black"></span>
-                </div>
-                <div className="container relative mx-auto">
+            {/* Hero Section */}
+            <div className="relative pt-24 pb-32 flex content-center items-center justify-center min-h-[60vh] bg-gradient-to-b from-secondary-50 to-white overflow-hidden">
+                <div className="container relative mx-auto px-4">
                     <div className="items-center flex flex-wrap">
-                        <div className="w-full lg:w-6/12 px-4 ml-auto mr-auto text-center">
-                            <div>
-                                <h1 className="text-white font-semibold text-5xl">
-                                    Sign Documents, Seamlessly.
-                                </h1>
-                                <p className="mt-4 text-lg text-gray-300">
-                                    RSign provides a fast, secure, and legally binding way to sign your documents electronically. Get started in seconds.
-                                </p>
-                                <Link to="/dashboard" className="mt-8 inline-block bg-brand-primary text-white font-bold py-3 px-8 rounded-full hover:bg-brand-secondary transition-colors">
-                                    Go to Dashboard
+                        <div className="w-full lg:w-8/12 px-4 mx-auto text-center">
+                            <div className="mb-8">
+                                <span className="text-primary-600 font-semibold tracking-wider uppercase text-sm bg-primary-50 px-3 py-1 rounded-full">Secure e-Signatures</span>
+                            </div>
+                            <h1 className="text-secondary-900 font-bold text-5xl sm:text-6xl leading-tight mb-6 font-heading">
+                                Sign Documents, <br/>
+                                <span className="text-primary-600">Seamlessly & Securely.</span>
+                            </h1>
+                            <p className="mt-4 text-xl text-secondary-600 mb-10 max-w-2xl mx-auto">
+                                RSign provides a fast, legally binding way to sign your documents electronically. 
+                                Trusted by professionals worldwide.
+                            </p>
+                            <div className="flex flex-col sm:flex-row justify-center gap-4">
+                                <Link to="/dashboard" className="btn-primary text-lg px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transform transition hover:-translate-y-1">
+                                    Start Signing for Free
                                 </Link>
+                                <Link to="/login" className="btn-secondary text-lg px-8 py-4 rounded-xl">
+                                    View Demo
+                                </Link>
+                            </div>
+                            <div className="mt-12 flex justify-center gap-8 text-secondary-500 text-sm font-medium">
+                                <span className="flex items-center gap-2"><CheckCircle size={16} className="text-accent-500"/> No credit card required</span>
+                                <span className="flex items-center gap-2"><CheckCircle size={16} className="text-accent-500"/> Legally binding</span>
+                                <span className="flex items-center gap-2"><CheckCircle size={16} className="text-accent-500"/> Encrypted storage</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <section className="pb-20 bg-dark-card -mt-24">
+            {/* Features Section */}
+            <section className="py-20 bg-secondary-50">
                 <div className="container mx-auto px-4">
-                    <div className="flex flex-wrap">
-                        <div className="lg:pt-12 pt-6 w-full md:w-4/12 px-4 text-center">
-                            <div className="relative flex flex-col min-w-0 break-words bg-dark-bg w-full mb-8 shadow-lg rounded-lg">
-                                <div className="px-4 py-5 flex-auto">
-                                    <div className="text-white p-3 text-center inline-flex items-center justify-center w-12 h-12 mb-5 shadow-lg rounded-full bg-brand-primary">
-                                        <Zap />
-                                    </div>
-                                    <h6 className="text-xl font-semibold">Fast & Efficient</h6>
-                                    <p className="mt-2 mb-4 text-dark-text-secondary">
-                                        Sign and send documents in minutes. No more printing, scanning, or faxing.
-                                    </p>
-                                </div>
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl font-bold text-secondary-900 mb-4">Why Choose RSign?</h2>
+                        <p className="text-secondary-600 max-w-2xl mx-auto">Everything you need to manage your document workflows efficiently and securely.</p>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div className="card hover:shadow-md transition-shadow duration-300 border-t-4 border-t-primary-500">
+                            <div className="text-primary-600 p-3 inline-flex items-center justify-center w-14 h-14 mb-6 rounded-lg bg-primary-50">
+                                <Zap size={28} />
                             </div>
+                            <h3 className="text-xl font-bold mb-3">Fast & Efficient</h3>
+                            <p className="text-secondary-600 leading-relaxed">
+                                Sign and send documents in minutes. No more printing, scanning, or faxing. Automate your workflow today.
+                            </p>
                         </div>
 
-                        <div className="w-full md:w-4/12 px-4 text-center">
-                            <div className="relative flex flex-col min-w-0 break-words bg-dark-bg w-full mb-8 shadow-lg rounded-lg">
-                                <div className="px-4 py-5 flex-auto">
-                                    <div className="text-white p-3 text-center inline-flex items-center justify-center w-12 h-12 mb-5 shadow-lg rounded-full bg-brand-secondary">
-                                        <FileSignature />
-                                    </div>
-                                    <h6 className="text-xl font-semibold">Legally Binding</h6>
-                                    <p className="mt-2 mb-4 text-dark-text-secondary">
-                                        Our electronic signatures are compliant with e-signature laws around the world.
-                                    </p>
-                                </div>
+                        <div className="card hover:shadow-md transition-shadow duration-300 border-t-4 border-t-primary-500">
+                            <div className="text-primary-600 p-3 inline-flex items-center justify-center w-14 h-14 mb-6 rounded-lg bg-primary-50">
+                                <FileSignature size={28} />
                             </div>
+                            <h3 className="text-xl font-bold mb-3">Legally Binding</h3>
+                            <p className="text-secondary-600 leading-relaxed">
+                                Our electronic signatures are fully compliant with e-signature laws (ESIGN, UETA, eIDAS) globally.
+                            </p>
                         </div>
 
-                        <div className="pt-6 w-full md:w-4/12 px-4 text-center">
-                            <div className="relative flex flex-col min-w-0 break-words bg-dark-bg w-full mb-8 shadow-lg rounded-lg">
-                                <div className="px-4 py-5 flex-auto">
-                                    <div className="text-white p-3 text-center inline-flex items-center justify-center w-12 h-12 mb-5 shadow-lg rounded-full bg-teal-400">
-                                        <ShieldCheck />
-                                    </div>
-                                    <h6 className="text-xl font-semibold">Secure & Private</h6>
-                                    <p className="mt-2 mb-4 text-dark-text-secondary">
-                                        Your documents are encrypted and stored securely. Your privacy is our priority.
-                                    </p>
-                                </div>
+                        <div className="card hover:shadow-md transition-shadow duration-300 border-t-4 border-t-primary-500">
+                            <div className="text-primary-600 p-3 inline-flex items-center justify-center w-14 h-14 mb-6 rounded-lg bg-primary-50">
+                                <ShieldCheck size={28} />
                             </div>
+                            <h3 className="text-xl font-bold mb-3">Secure & Private</h3>
+                            <p className="text-secondary-600 leading-relaxed">
+                                Bank-grade encryption for your documents. Your data privacy and security are our top priorities.
+                            </p>
                         </div>
                     </div>
                 </div>

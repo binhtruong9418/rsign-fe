@@ -35,12 +35,16 @@ const LoginPage: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-dark-bg">
-            <div className="max-w-md w-full bg-dark-card shadow-lg rounded-lg p-8">
-                <h2 className="text-3xl font-bold text-center text-brand-primary mb-8">Login to RSign</h2>
+        <div className="min-h-screen flex items-center justify-center bg-secondary-50 py-12 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-md w-full bg-white shadow-lg rounded-xl p-8 border border-secondary-200">
+                <div className="text-center mb-8">
+                    <h2 className="text-3xl font-bold text-secondary-900">Welcome Back</h2>
+                    <p className="mt-2 text-sm text-secondary-600">Please sign in to your account</p>
+                </div>
+                
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
-                        <label htmlFor="email" className="block text-sm font-medium text-dark-text-secondary">
+                        <label htmlFor="email" className="label-text">
                             Email address
                         </label>
                         <input
@@ -51,11 +55,12 @@ const LoginPage: React.FC = () => {
                             required
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-brand-primary focus:border-brand-primary sm:text-sm"
+                            className="input-field"
+                            placeholder="you@example.com"
                         />
                     </div>
                     <div>
-                        <label htmlFor="password" className="block text-sm font-medium text-dark-text-secondary">
+                        <label htmlFor="password" className="label-text">
                             Password
                         </label>
                         <input
@@ -66,14 +71,15 @@ const LoginPage: React.FC = () => {
                             required
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-brand-primary focus:border-brand-primary sm:text-sm"
+                            className="input-field"
+                            placeholder="••••••••"
                         />
                     </div>
                     <div>
                         <button
                             type="submit"
                             disabled={loginMutation.isPending}
-                            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-brand-primary hover:bg-brand-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-dark-card focus:ring-brand-primary disabled:opacity-50"
+                            className="w-full btn-primary flex justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {loginMutation.isPending ? 'Signing in...' : 'Sign in'}
                         </button>
@@ -82,10 +88,10 @@ const LoginPage: React.FC = () => {
 
                 <div className="mt-6 relative">
                     <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-gray-600"/>
+                        <div className="w-full border-t border-secondary-200"/>
                     </div>
                     <div className="relative flex justify-center text-sm">
-                        <span className="px-2 bg-dark-card text-dark-text-secondary">Or continue with</span>
+                        <span className="px-2 bg-white text-secondary-500">Or continue with</span>
                     </div>
                 </div>
 
@@ -94,36 +100,33 @@ const LoginPage: React.FC = () => {
                     <button
                         type="button"
                         onClick={() => setIsHustModalOpen(true)}
-                        className="w-full flex justify-center items-center py-2 px-4 border border-gray-600 rounded-md shadow-sm text-sm font-medium text-dark-text-secondary bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-dark-card focus:ring-brand-primary"
+                        className="w-full btn-secondary flex justify-center items-center"
                     >
-
-                        <img src="/image/logo-hust.png" alt="HUST Logo" className="w-4 mr-3"/>
+                        <img src="/image/logo-hust.png" alt="HUST Logo" className="w-5 h-5 mr-3 object-contain"/>
                         Login with HUST
                     </button>
                 </div>
 
-                <p className="mt-6 text-center text-sm text-dark-text-secondary">
+                <p className="mt-6 text-center text-sm text-secondary-600">
                     Not a member?{' '}
-                    <Link to='/register' className="font-medium text-brand-primary hover:text-brand-secondary">
+                    <Link to='/register' className="font-medium text-primary-600 hover:text-primary-500">
                         Register here
                     </Link>
                 </p>
             </div>
 
             {isHustModalOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
+                <div className="fixed inset-0 bg-secondary-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
                      onClick={() => setIsHustModalOpen(false)}>
-                    <div className="bg-dark-card p-8 rounded-lg shadow-xl w-full max-w-md m-4"
+                    <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md m-4 border border-secondary-200"
                          onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-center mb-6">
-                            <img src="/image/logo-hust.png" alt="HUST Logo" className="w-12"/>
+                            <img src="/image/logo-hust.png" alt="HUST Logo" className="w-16 h-16 object-contain"/>
                         </div>
-                        <h2 className="text-2xl font-bold text-center text-brand-primary mb-6">Login with HUST
-                            Account</h2>
+                        <h2 className="text-2xl font-bold text-center text-secondary-900 mb-6">Login with HUST Account</h2>
                         <form onSubmit={handleHustSubmit} className="space-y-6">
                             <div>
-                                <label htmlFor="hust-email"
-                                       className="block text-sm font-medium text-dark-text-secondary">
+                                <label htmlFor="hust-email" className="label-text">
                                     Email address
                                 </label>
                                 <input
@@ -133,12 +136,12 @@ const LoginPage: React.FC = () => {
                                     required
                                     value={hustEmail}
                                     onChange={(e) => setHustEmail(e.target.value)}
-                                    className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-brand-primary focus:border-brand-primary sm:text-sm"
+                                    className="input-field"
+                                    placeholder="student@hust.edu.vn"
                                 />
                             </div>
                             <div>
-                                <label htmlFor="hust-password"
-                                       className="block text-sm font-medium text-dark-text-secondary">
+                                <label htmlFor="hust-password" className="label-text">
                                     Password
                                 </label>
                                 <input
@@ -148,14 +151,15 @@ const LoginPage: React.FC = () => {
                                     required
                                     value={hustPassword}
                                     onChange={(e) => setHustPassword(e.target.value)}
-                                    className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-brand-primary focus:border-brand-primary sm:text-sm"
+                                    className="input-field"
+                                    placeholder="••••••••"
                                 />
                             </div>
                             <div>
                                 <button
                                     type="submit"
                                     disabled={hustMutation.isPending}
-                                    className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-brand-primary hover:bg-brand-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-dark-card focus:ring-brand-primary disabled:opacity-50"
+                                    className="w-full btn-primary flex justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {hustMutation.isPending ? 'Signing in...' : 'Sign in with HUST'}
                                 </button>

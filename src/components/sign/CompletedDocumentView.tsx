@@ -9,11 +9,13 @@ interface CompletedDocumentViewProps {
 
 const CompletedDocumentView: React.FC<CompletedDocumentViewProps> = ({ document }) => {
     return (
-        <div className="flex flex-col items-center justify-center h-full text-center">
-            <CheckCircle size={64} className="text-green-500 mb-4" />
-            <h1 className="text-2xl sm:text-3xl font-bold text-dark-text mb-2">Document Completed</h1>
-            <p className="text-dark-text-secondary mb-6">This document has already been signed and no further action is required.</p>
-            <Link to="/" className="px-8 py-3 bg-brand-primary text-white font-bold rounded-lg hover:bg-brand-secondary transition-colors">
+        <div className="flex flex-col items-center justify-center h-full text-center p-8">
+            <div className="bg-green-50 p-6 rounded-full mb-6">
+                <CheckCircle size={64} className="text-green-500" />
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-secondary-900 mb-3">Document Completed</h1>
+            <p className="text-secondary-600 mb-8 max-w-md mx-auto">This document has already been signed and no further action is required.</p>
+            <Link to="/" className="btn-primary px-8 py-3">
                 Go to Homepage
             </Link>
         </div>

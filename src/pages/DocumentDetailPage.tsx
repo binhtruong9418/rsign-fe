@@ -192,11 +192,11 @@ const DocumentDetailPage: React.FC = () => {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Content: Signature Viewer */}
-            <div className="lg:col-span-2 bg-dark-card p-6 rounded-lg shadow-lg flex flex-col">
-                <h2 className="text-xl font-semibold mb-4 text-dark-text">Signature</h2>
+            <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-secondary-200 shadow-sm flex flex-col">
+                <h2 className="text-xl font-bold mb-4 text-secondary-900">Signature</h2>
                 {document?.signature ? (
                     <>
-                        <div className="bg-white rounded-lg aspect-video w-full flex-grow">
+                        <div className="bg-secondary-50 rounded-lg aspect-video w-full flex-grow border border-secondary-200">
                             <SignatureViewer
                                 ref={signatureViewerRef}
                                 strokes={document?.signature.signatureData.strokes}
@@ -205,21 +205,20 @@ const DocumentDetailPage: React.FC = () => {
                                 strokeWidth={document?.signature.signatureData.width || DEFAULT_SIGNATURE_WIDTH}
                             />
                         </div>
-                        <div className="mt-4 pt-4 border-t border-gray-700">
-                            <p className="font-semibold text-dark-text">Signed by: {document?.signature.signer?.email}</p>
-                            <p className="text-sm text-dark-text-secondary">Signed
-                                on: {formatDate(document?.signedAt)}</p>
+                        <div className="mt-4 pt-4 border-t border-secondary-200">
+                            <p className="font-semibold text-secondary-900">Signed by: {document?.signature.signer?.email}</p>
+                            <p className="text-sm text-secondary-500">Signed on: {formatDate(document?.signedAt)}</p>
                             <div className="flex items-center space-x-4 mt-4">
                                 <button
                                     onClick={handleDownload}
-                                    className="flex items-center justify-center space-x-2 px-4 py-2 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-700 transition-colors"
+                                    className="btn-secondary flex items-center justify-center space-x-2"
                                 >
                                     <Download size={18} />
                                     <span>Download</span>
                                 </button>
                                 <button
                                     onClick={handlePlayback}
-                                    className="flex items-center justify-center space-x-2 px-4 py-2 bg-brand-primary text-white font-semibold rounded-lg hover:bg-brand-secondary transition-colors"
+                                    className="btn-primary flex items-center justify-center space-x-2"
                                 >
                                     <Play size={18} />
                                     <span>Playback</span>
@@ -229,62 +228,61 @@ const DocumentDetailPage: React.FC = () => {
                     </>
                 ) : (
                     <div
-                        className="flex-grow flex flex-col items-center justify-center bg-gray-700/50 rounded-lg p-8 text-center">
-                        <Signature size={48} className="text-dark-text-secondary mb-4" />
-                        <h3 className="text-xl font-medium text-dark-text">No Signatures Yet</h3>
-                        <p className="text-dark-text-secondary mt-1">Share the signing link to get this document
-                            signed.</p>
+                        className="flex-grow flex flex-col items-center justify-center bg-secondary-50 rounded-lg p-8 text-center border border-dashed border-secondary-300">
+                        <Signature size={48} className="text-secondary-400 mb-4" />
+                        <h3 className="text-xl font-medium text-secondary-900">No Signatures Yet</h3>
+                        <p className="text-secondary-500 mt-1">Share the signing link to get this document signed.</p>
                     </div>
                 )}
             </div>
 
             {/* Sidebar: Document Content & Actions */}
-            <div className="bg-dark-card p-6 rounded-lg shadow-lg flex flex-col">
+            <div className="bg-white p-6 rounded-xl border border-secondary-200 shadow-sm flex flex-col">
 
                 <div>
                     <div className="mb-4">
-                        <h1 className="text-2xl font-bold text-brand-primary break-words" title={document.title}>{document.title}</h1>
+                        <h1 className="text-2xl font-bold text-secondary-900 break-words" title={document.title}>{document.title}</h1>
                         <div className="mt-2">
-                            <span className={`px-3 py-1 text-sm font-semibold rounded-full ${document.status === 'COMPLETED' ? 'bg-green-500 text-white' : 'bg-yellow-500 text-black'
+                            <span className={`px-3 py-1 text-sm font-semibold rounded-full ${document.status === 'COMPLETED' ? 'bg-accent-500/10 text-accent-600 border border-accent-200' : 'bg-yellow-50 text-yellow-700 border border-yellow-200'
                                 }`}>
                                 {document.status}
                             </span>
                         </div>
                     </div>
 
-                    <div className="space-y-2 text-sm border-t border-gray-700 pt-4">
+                    <div className="space-y-3 text-sm border-t border-secondary-200 pt-4">
                         <div className="flex justify-between items-start gap-4">
-                            <p className="text-dark-text-secondary">Authority:</p>
-                            <p className="font-medium text-dark-text text-right break-words">{document.competentAuthority}</p>
+                            <p className="text-secondary-500">Authority:</p>
+                            <p className="font-medium text-secondary-900 text-right break-words">{document.competentAuthority}</p>
                         </div>
                         <div className="flex justify-between items-start gap-4">
-                            <p className="text-dark-text-secondary">Created:</p>
-                            <p className="font-medium text-dark-text text-right">{formatDate(document.createdAt)}</p>
+                            <p className="text-secondary-500">Created:</p>
+                            <p className="font-medium text-secondary-900 text-right">{formatDate(document.createdAt)}</p>
                         </div>
                         {document.deadline && (
                             <div className="flex justify-between items-start gap-4">
-                                <p className="text-dark-text-secondary">Deadline:</p>
-                                <p className="font-medium text-dark-text text-right">{new Date(document.deadline).toLocaleString()}</p>
+                                <p className="text-secondary-500">Deadline:</p>
+                                <p className="font-medium text-secondary-900 text-right">{new Date(document.deadline).toLocaleString()}</p>
                             </div>
                         )}
                         {document.signedAt && (
                             <div className="flex justify-between items-start gap-4">
-                                <p className="text-dark-text-secondary">Signed:</p>
-                                <p className="font-medium text-dark-text text-right">{formatDate(document.signedAt)}</p>
+                                <p className="text-secondary-500">Signed:</p>
+                                <p className="font-medium text-secondary-900 text-right">{formatDate(document.signedAt)}</p>
                             </div>
                         )}
                     </div>
                 </div>
-                <div className="flex-grow my-4 min-h-[20px]">
+                <div className="flex-grow my-6 min-h-[20px]">
                     {document.fileUrl ? (
-                        <div className="flex flex-col items-center justify-center h-full text-dark-text-secondary rounded-md border border-dashed border-gray-600 p-4">
-                            <FileText size={40} className="text-dark-text-secondary mb-4" />
-                            <p className="font-semibold text-dark-text text-center mb-1" title={document.title}>{document.title}</p>
-                            <p className="text-sm text-gray-400 mb-4">Click below to view the document.</p>
-                            <div className="mt-auto flex w-full flex-col gap-2">
+                        <div className="flex flex-col items-center justify-center h-full text-secondary-500 rounded-lg border border-dashed border-secondary-300 p-6 bg-secondary-50">
+                            <FileText size={40} className="text-secondary-400 mb-4" />
+                            <p className="font-semibold text-secondary-900 text-center mb-1" title={document.title}>{document.title}</p>
+                            <p className="text-sm text-secondary-500 mb-6">Click below to view the document.</p>
+                            <div className="mt-auto flex w-full flex-col gap-3">
                                 <button
                                     onClick={() => openViewer(document.fileUrl!, document.title)}
-                                    className="w-full px-6 py-2 bg-brand-primary text-white font-bold rounded-lg hover:bg-brand-secondary transition-colors"
+                                    className="w-full btn-primary"
                                 >
                                     View Document
                                 </button>
@@ -293,7 +291,7 @@ const DocumentDetailPage: React.FC = () => {
                                         onClick={() => setIsInsertModalOpen(true)}
                                         disabled={!canInsertSignature}
                                         title={!canInsertSignature ? 'Signature data is not ready for placement yet.' : undefined}
-                                        className="w-full flex items-center justify-center gap-2 px-6 py-2 rounded-lg border border-brand-primary text-brand-primary font-bold transition-colors hover:bg-brand-primary/10 disabled:cursor-not-allowed disabled:border-gray-600 disabled:text-gray-500 disabled:hover:bg-transparent"
+                                        className="w-full flex items-center justify-center gap-2 px-6 py-2 rounded-lg border border-primary-600 text-primary-600 font-bold transition-colors hover:bg-primary-50 disabled:cursor-not-allowed disabled:border-secondary-300 disabled:text-secondary-400 disabled:hover:bg-transparent"
                                     >
                                         <PenSquare size={18} />
                                         <span>Insert Signature</span>
@@ -301,53 +299,53 @@ const DocumentDetailPage: React.FC = () => {
                                 )}
                             </div>
                             {document.signature && (!supportsPlacement || signatureIdForPlacement === null) && (
-                                <p className="mt-2 text-center text-xs text-yellow-400">
+                                <p className="mt-2 text-center text-xs text-yellow-600">
                                     {supportsPlacement
                                         ? 'Signature placement unlocks once the final signature ID is available.'
                                         : 'Signature placement is only available for PDF or image documents.'}
                                 </p>
                             )}
                             {latestSignedFileUrl && (
-                                <div className="mt-4 w-full rounded-lg border border-green-500/50 bg-green-600/10 p-4 text-sm text-green-200">
-                                    <p className="font-semibold text-green-200">Signed document ready.</p>
-                                    <p className="mt-1 text-xs text-green-100/80">Preview or download the updated document below.</p>
+                                <div className="mt-4 w-full rounded-lg border border-accent-200 bg-accent-50 p-4 text-sm text-accent-700">
+                                    <p className="font-semibold text-accent-800">Signed document ready.</p>
+                                    <p className="mt-1 text-xs text-accent-600">Preview or download the updated document below.</p>
                                     <div className="mt-3 flex flex-col gap-2 sm:flex-row">
                                         <button
                                             onClick={() => openViewer(latestSignedFileUrl, document ? `${document.title} (Signed)` : undefined)}
-                                            className="flex items-center justify-center gap-2 rounded-md bg-brand-primary px-4 py-2 text-white transition-colors hover:bg-brand-secondary"
+                                            className="flex items-center justify-center gap-2 rounded-md bg-accent-600 px-4 py-2 text-white transition-colors hover:bg-accent-700"
                                         >
                                             <Eye size={16} />
-                                            <span>Preview Signed Document</span>
+                                            <span>Preview</span>
                                         </button>
                                         <a
                                             href={latestSignedFileUrl}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             download
-                                            className="flex items-center justify-center gap-2 rounded-md border border-brand-primary px-4 py-2 text-brand-primary transition-colors hover:bg-brand-primary/10"
+                                            className="flex items-center justify-center gap-2 rounded-md border border-accent-600 px-4 py-2 text-accent-600 transition-colors hover:bg-accent-50"
                                         >
                                             <Download size={16} />
-                                            <span>Download Signed PDF</span>
+                                            <span>Download</span>
                                         </a>
                                     </div>
                                 </div>
                             )}
                         </div>
                     ) : document.content ? (
-                        <div className="prose prose-invert max-w-none p-4 h-full overflow-y-auto rounded-md border border-gray-600">
+                        <div className="prose prose-sm max-w-none p-4 h-full overflow-y-auto rounded-md border border-secondary-200 bg-secondary-50">
                             <p>{document.content}</p>
                         </div>
                     ) : (
-                        <div className="flex items-center justify-center h-full text-dark-text-secondary rounded-md border border-dashed border-gray-600">
+                        <div className="flex items-center justify-center h-full text-secondary-500 rounded-md border border-dashed border-secondary-300 bg-secondary-50">
                             <p>No document content or file attached.</p>
                         </div>
                     )}
                 </div>
-                <div className="mt-auto pt-6 border-t border-gray-700">
+                <div className="mt-auto pt-6 border-t border-secondary-200">
                     <button
                         onClick={handleSignHereClick}
                         disabled={document.status === 'COMPLETED' || signatureSessionIsPending}
-                        className="w-full bg-brand-primary text-white font-bold py-3 px-4 rounded-lg hover:bg-brand-secondary flex items-center justify-center space-x-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full btn-primary flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {signatureSessionIsPending ? (
                             <>
@@ -371,45 +369,44 @@ const DocumentDetailPage: React.FC = () => {
 
             {/* Share/Sign Modal */}
             {isShareModalOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
+                <div className="fixed inset-0 bg-secondary-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
                     onClick={() => setIsShareModalOpen(false)}>
-                    <div className="bg-dark-card rounded-lg shadow-xl w-full max-w-md m-4 flex flex-col"
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-md m-4 flex flex-col border border-secondary-200"
                         onClick={(e) => e.stopPropagation()}>
-                        <div className="flex justify-between items-center p-4 border-b border-gray-700">
-                            <h3 className="text-xl font-bold">Share Signing Link</h3>
+                        <div className="flex justify-between items-center p-4 border-b border-secondary-200">
+                            <h3 className="text-xl font-bold text-secondary-900">Share Signing Link</h3>
                             <button onClick={() => setIsShareModalOpen(false)}
-                                className="text-dark-text-secondary hover:text-white">
+                                className="text-secondary-500 hover:text-secondary-700">
                                 <X size={24} />
                             </button>
                         </div>
                         <div className="p-6">
                             {signingSession?.session_id ? (
                                 <>
-                                    <div className="bg-white p-4 rounded-lg flex justify-center">
+                                    <div className="bg-white p-4 rounded-lg flex justify-center border border-secondary-100 shadow-inner mb-4">
                                         <QRCodeCanvas value={signUrl} size={200} />
                                     </div>
-                                    <p className="mt-4 text-center text-sm text-yellow-400 font-medium">
+                                    <p className="text-center text-sm text-yellow-600 font-medium mb-4 bg-yellow-50 py-2 rounded-lg border border-yellow-200">
                                         Session expires in {timer} seconds
                                     </p>
-                                    <div className="mt-4 relative">
+                                    <div className="relative">
                                         <input
                                             type="text"
                                             value={signUrl}
                                             readOnly
-                                            className="w-full bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 text-xs p-2 pr-10"
+                                            className="w-full bg-secondary-50 border border-secondary-300 rounded-lg text-secondary-600 text-xs p-3 pr-10 focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         />
                                         <button onClick={copyToClipboard} title="Copy link"
-                                            className="absolute inset-y-0 right-0 flex items-center pr-3 text-dark-text-secondary hover:text-white transition-colors">
+                                            className="absolute inset-y-0 right-0 flex items-center pr-3 text-secondary-400 hover:text-primary-600 transition-colors">
                                             <Copy size={16} />
                                         </button>
                                     </div>
                                 </>
                             ) : (
-                                <div className="text-center text-dark-text-secondary">
-                                    <AlertCircle className="mx-auto h-12 w-12" />
-                                    <h4 className="mt-2 text-lg">Signing Link Not Available</h4>
-                                    <p className="mt-1 text-sm">A signing session could not be created for this
-                                        document.</p>
+                                <div className="text-center text-secondary-500">
+                                    <AlertCircle className="mx-auto h-12 w-12 text-secondary-400" />
+                                    <h4 className="mt-2 text-lg font-medium text-secondary-900">Signing Link Not Available</h4>
+                                    <p className="mt-1 text-sm">A signing session could not be created for this document.</p>
                                 </div>
                             )}
                         </div>

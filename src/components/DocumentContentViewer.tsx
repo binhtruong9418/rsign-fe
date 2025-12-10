@@ -22,14 +22,14 @@ const ensureDocxPreviewStyles = () => {
   style.setAttribute('data-docx-preview-styles', 'true');
   style.textContent = `
     .docx-preview-container {
-      background: #111827;
+      background: #f8fafc;
     }
 
     .docx-preview {
       background: #ffffff;
       color: #111827;
       font-family: 'Times New Roman', Georgia, serif;
-      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.3);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     }
 
     .docx-preview section {
@@ -123,7 +123,7 @@ const DocumentContentViewer: React.FC<DocumentContentViewerProps> = ({
 
   if (!documentUri) {
     return (
-      <div className={`flex items-center justify-center rounded-lg border border-gray-700 bg-gray-900/70 p-6 text-sm text-dark-text-secondary ${className}`}>
+      <div className={`flex items-center justify-center rounded-lg border border-secondary-200 bg-secondary-50 p-6 text-sm text-secondary-500 ${className}`}>
         No document available to preview.
       </div>
     );
@@ -138,14 +138,14 @@ const DocumentContentViewer: React.FC<DocumentContentViewerProps> = ({
       return <DocxPreview url={documentUri} className={className} />;
     default:
       return (
-        <div className={`flex flex-col items-center justify-center gap-3 rounded-lg border border-gray-700 bg-gray-900/70 p-6 text-center text-sm text-dark-text-secondary ${className}`}>
-          <AlertTriangle className="h-6 w-6 text-yellow-400" />
+        <div className={`flex flex-col items-center justify-center gap-3 rounded-lg border border-secondary-200 bg-secondary-50 p-6 text-center text-sm text-secondary-500 ${className}`}>
+          <AlertTriangle className="h-6 w-6 text-yellow-600" />
           <p>Preview is unsupported for this file type.</p>
           <a
             href={documentUri}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-md border border-brand-primary px-3 py-1 text-sm font-semibold text-white transition-colors hover:bg-brand-primary"
+            className="rounded-md border border-primary-600 px-3 py-1 text-sm font-semibold text-primary-600 transition-colors hover:bg-primary-50"
           >
             Download document
           </a>
@@ -164,11 +164,11 @@ interface ImagePreviewProps extends PreviewProps {
 }
 
 const ImagePreview: React.FC<ImagePreviewProps> = ({ url, title, className = '' }) => (
-  <div className={`flex max-h-full w-full items-center justify-center overflow-auto rounded-lg bg-gray-900/40 p-3 ${className}`}>
+  <div className={`flex max-h-full w-full items-center justify-center overflow-auto rounded-lg bg-secondary-50 p-3 border border-secondary-200 ${className}`}>
     <img
       src={url}
       alt={title}
-      className="max-h-full w-auto max-w-full rounded-md shadow-lg"
+      className="max-h-full w-auto max-w-full rounded-md shadow-md"
     />
   </div>
 );
@@ -225,7 +225,7 @@ const PdfPreview: React.FC<PdfPreviewProps> = ({ url, className = '' }) => {
           canvas.style.width = '100%';
           canvas.style.height = 'auto';
           canvas.style.background = '#ffffff';
-          canvas.className = 'mb-4 rounded-md shadow-lg';
+          canvas.className = 'mb-4 rounded-md shadow-md border border-secondary-200';
 
           container.appendChild(canvas);
 
@@ -254,15 +254,15 @@ const PdfPreview: React.FC<PdfPreviewProps> = ({ url, className = '' }) => {
   }, [url]);
 
   return (
-    <div className={`relative max-h-full overflow-auto rounded-lg border border-gray-700 bg-gray-900/40 p-3 ${className}`}>
+    <div className={`relative max-h-full overflow-auto rounded-lg border border-secondary-200 bg-secondary-50 p-3 ${className}`}>
       <div ref={containerRef} className="mx-auto flex max-w-4xl flex-col items-center justify-start" />
       {isLoading && (
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-lg bg-black/40">
-          <Loader2 className="h-6 w-6 animate-spin text-white" />
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-lg bg-white/50 backdrop-blur-sm">
+          <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
         </div>
       )}
       {error && (
-        <div className="mt-4 rounded-md border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-400">
+        <div className="mt-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-600">
           {error}
         </div>
       )}
@@ -329,18 +329,18 @@ const DocxPreview: React.FC<DocxPreviewProps> = ({ url, className = '' }) => {
   }, [url]);
 
   return (
-    <div className={`relative max-h-full overflow-auto rounded-lg border border-gray-700 bg-gray-900/40 p-3 ${className}`}>
+    <div className={`relative max-h-full overflow-auto rounded-lg border border-secondary-200 bg-secondary-50 p-3 ${className}`}>
       <div
         ref={containerRef}
-        className="docx-preview-container mx-auto w-full max-w-4xl rounded-lg bg-white p-6 text-black shadow-lg"
+        className="docx-preview-container mx-auto w-full max-w-4xl rounded-lg bg-white p-6 text-black shadow-md border border-secondary-200"
       />
       {isLoading && (
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-lg bg-black/40">
-          <Loader2 className="h-6 w-6 animate-spin text-white" />
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-lg bg-white/50 backdrop-blur-sm">
+          <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
         </div>
       )}
       {error && (
-        <div className="mt-4 rounded-md border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-400">
+        <div className="mt-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-600">
           {error}
         </div>
       )}

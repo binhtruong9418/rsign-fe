@@ -28,15 +28,17 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({
 }) => {
     if (file) {
         return (
-            <div className="flex-grow border border-gray-600 rounded-lg p-4 flex flex-col justify-center text-center">
-                <FileIcon className="h-16 w-16 text-brand-primary mx-auto mb-4" />
-                <p className="font-semibold truncate" title={file.name}>{file.name}</p>
-                <p className="text-sm text-dark-text-secondary">{formatBytes(file.size)}</p>
-                <div className="mt-4 flex items-center justify-center space-x-4">
+            <div className="flex-grow border border-secondary-300 rounded-lg p-6 flex flex-col justify-center text-center bg-secondary-50">
+                <div className="bg-white p-4 rounded-full shadow-sm w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                    <FileIcon className="h-10 w-10 text-primary-600" />
+                </div>
+                <p className="font-semibold truncate text-secondary-900" title={file.name}>{file.name}</p>
+                <p className="text-sm text-secondary-500 mb-6">{formatBytes(file.size)}</p>
+                <div className="flex items-center justify-center space-x-4">
                     <button
                         type="button"
                         onClick={onPreviewFile}
-                        className="flex items-center space-x-2 px-4 py-2 text-sm bg-brand-primary text-white rounded-lg hover:bg-brand-secondary"
+                        className="btn-secondary flex items-center space-x-2 text-sm"
                     >
                         <Eye size={16} />
                         <span>Preview</span>
@@ -44,7 +46,7 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({
                     <button
                         type="button"
                         onClick={onRemoveFile}
-                        className="flex items-center space-x-2 px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700"
+                        className="flex items-center space-x-2 px-4 py-2 text-sm bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 font-medium transition-colors"
                     >
                         <X size={16} />
                         <span>Remove</span>
@@ -68,16 +70,18 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({
                 onDrop={onDrop}
                 onDragOver={onDrag}
                 onDragLeave={onDrag}
-                className={`h-full flex flex-col items-center justify-center border-2 border-dashed rounded-lg cursor-pointer transition-colors ${dragActive
-                        ? "border-brand-primary bg-gray-700"
-                        : "border-gray-600 hover:border-brand-secondary bg-gray-800/50"
+                className={`h-full flex flex-col items-center justify-center border-2 border-dashed rounded-lg cursor-pointer transition-all duration-200 ${dragActive
+                        ? "border-primary-500 bg-primary-50"
+                        : "border-secondary-300 hover:border-primary-400 bg-secondary-50 hover:bg-secondary-100"
                     }`}
             >
-                <UploadCloud size={40} className="text-dark-text-secondary mb-2" />
-                <p className="text-dark-text-secondary text-center">
-                    <span className="font-semibold text-brand-primary">Click to upload</span> or drag and drop
+                <div className="p-3 bg-white rounded-full shadow-sm mb-3">
+                    <UploadCloud size={24} className="text-primary-600" />
+                </div>
+                <p className="text-secondary-600 text-center mb-1">
+                    <span className="font-semibold text-primary-600">Click to upload</span> or drag and drop
                 </p>
-                <p className="text-xs text-gray-500 mt-1">PDF, DOCX, PNG, JPG, etc.</p>
+                <p className="text-xs text-secondary-400">PDF, DOCX, PNG, JPG (Max 10MB)</p>
             </div>
         </div>
     );

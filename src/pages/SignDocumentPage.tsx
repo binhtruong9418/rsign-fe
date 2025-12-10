@@ -58,16 +58,16 @@ const SignDocumentPage: React.FC = () => {
     };
 
     const containerClasses = view === 'sign'
-        ? 'h-screen w-screen sm:h-full sm:max-h-[95vh] sm:max-w-4xl sm:rounded-lg'
-        : 'max-w-4xl h-full max-h-[95vh] rounded-lg';
+        ? 'h-screen w-screen sm:h-full sm:max-h-[95vh] sm:max-w-4xl sm:rounded-xl'
+        : 'max-w-4xl h-full max-h-[95vh] rounded-xl';
 
     const paddingClasses = view === 'sign'
         ? 'p-4'
         : 'p-4 sm:p-6';
 
     return (
-        <div className={`min-h-screen bg-dark-bg flex items-center justify-center ${view === 'sign' ? 'p-0' : 'p-2 sm:p-4'}`}>
-            <div className={`w-full bg-dark-card shadow-xl flex flex-col ${containerClasses} ${paddingClasses}`}>
+        <div className={`min-h-screen bg-secondary-50 flex items-center justify-center ${view === 'sign' ? 'p-0' : 'p-2 sm:p-4'}`}>
+            <div className={`w-full bg-white shadow-xl border border-secondary-200 flex flex-col ${containerClasses} ${paddingClasses}`}>
                 {isLoading && <LoadingSpinner />}
                 {error && <p className="text-red-500 text-center">Error loading document: {error?.response?.data?.message}</p>}
                 {documentData && (
