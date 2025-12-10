@@ -7,6 +7,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import CompletedDocumentView from '../components/sign/CompletedDocumentView';
 import DocumentReviewView from '../components/sign/DocumentReviewView';
 import SignatureView from '../components/sign/SignatureView';
+import Header from '../components/Header';
 import { DEFAULT_SIGNATURE_COLOR, DEFAULT_SIGNATURE_WIDTH } from '../constants/app';
 import { showToast } from '../utils/toast';
 
@@ -28,7 +29,14 @@ const SignDocumentPage: React.FC = () => {
     console.log(error)
 
     if (!sessionId) {
-        return <p className="text-center text-red-500">Signing session ID is missing.</p>;
+        return (
+            <div className="min-h-screen bg-secondary-50 flex flex-col">
+                <Header />
+                <div className="flex-grow flex items-center justify-center">
+                    <p className="text-center text-red-500">Signing session ID is missing.</p>
+                </div>
+            </div>
+        );
     }
 
     const handleSubmitSignature = () => {
@@ -57,39 +65,44 @@ const SignDocumentPage: React.FC = () => {
         signaturePadRef.current?.clear();
     };
 
-    const containerClasses = view === 'sign'
-        ? 'h-screen w-screen sm:h-full sm:max-h-[95vh] sm:max-w-4xl sm:rounded-xl'
-        : 'max-w-4xl h-full max-h-[95vh] rounded-xl';
-
-    const paddingClasses = view === 'sign'
-        ? 'p-4'
-        : 'p-4 sm:p-6';
-
     return (
-        <div className={`min-h-screen bg-secondary-50 flex items-center justify-center ${view === 'sign' ? 'p-0' : 'p-2 sm:p-4'}`}>
-            <div className={`w-full bg-white shadow-xl border border-secondary-200 flex flex-col ${containerClasses} ${paddingClasses}`}>
-                {isLoading && <LoadingSpinner />}
-                {error && <p className="text-red-500 text-center">Error loading document: {error?.response?.data?.message}</p>}
-                {documentData && (
-                    <>
-                        {documentData.status === 'COMPLETED' ? (
-                            <CompletedDocumentView document={documentData} />
-                        ) : view === 'document' ? (
-                            <DocumentReviewView
-                                document={documentData}
-                                onProceedToSign={() => setView('sign')}
-                            />
-                        ) : (
-                            <SignatureView
-                                onBack={() => setView('document')}
-                                onClear={handleClearSignature}
-                                onSubmit={handleSubmitSignature}
-                                isSubmitting={signMutation.isPending}
-                                signaturePadRef={signaturePadRef}
-                            />
-                        )}
-                    </>
-                )}
+        <div className="min-h-screen bg-secondary-50 flex flex-col">
+            <Header />
+            <div className="flex-grow flex flex-col items-center justify-start p-4 sm:p-6 lg:p-8">
+                <div className={`w-full bg-white shadow-xl border border-secondary-200 flex flex-col rounded-xl overflow-hidden transition-all duration-300 ${view === 'sign' ? 'h-[calc(100vh-6rem)] sm:h-[80vh] max-w-4xl' : 'h-[calc(100vh-6rem)] sm:h-[85vh] max-w-5xl'}`}>
+                    {isLoading && (
+                        <div className="flex-grow flex items-center justify-center">
+                            <LoadingSpinner />
+                        </div>
+                    )}
+                    {error && (
+                        <div className="flex-grow flex items-center justify-center p-6">
+                            <p className="text-red-500 text-center">Error loading document: {error?.response?.data?.message}</p>
+                        </div>
+                    )}
+                    {documentData && (
+                        <>
+                            {documentData.status === 'COMPLETED' ? (
+                                <div className="flex-grow flex items-center justify-center p-6">
+                                    <CompletedDocumentView document={documentData} />
+                                </div>
+                            ) : view === 'document' ? (
+                                <DocumentReviewView
+                                    document={documentData}
+                                    onProceedToSign={() => setView('sign')}
+                                />
+                            ) : (
+                                <SignatureView
+                                    onBack={() => setView('document')}
+                                    onClear={handleClearSignature}
+                                    onSubmit={handleSubmitSignature}
+                                    isSubmitting={signMutation.isPending}
+                                    signaturePadRef={signaturePadRef}
+                                />
+                            )}
+                        </>
+                    )}
+                </div>
             </div>
         </div>
     );
