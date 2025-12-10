@@ -4,21 +4,23 @@ import { useMutation } from '@tanstack/react-query';
 import api from '../services/api';
 import { showToast } from '../utils/toast';
 import { User } from '../types';
+import { useTranslation } from 'react-i18next';
 
 const RegisterPage: React.FC = () => {
   const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const mutation = useMutation<User, Error, { email: string; password: string }>({
     mutationFn: (newUser) => api.post('/api/users/register', newUser).then(res => res.data),
     onSuccess: () => {
-      showToast.success('Registration successful! Please login.');
+      showToast.success(t('auth.register.success'));
       navigate('/login', { state: location.state });
     },
     onError: (error: any) => {
-      showToast.error('Registration failed: ' + (error?.response?.data?.message || 'Unknown error'));
+      showToast.error(t('auth.register.failed', { message: error?.response?.data?.message || 'Unknown error' }));
     }
   });
 
@@ -31,12 +33,12 @@ const RegisterPage: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center bg-secondary-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full bg-white shadow-xl rounded-xl p-8 border border-secondary-200">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-secondary-900">Create Account</h2>
-          <p className="mt-2 text-sm text-secondary-600">Sign up to start signing documents securely</p>
+          <h2 className="text-3xl font-bold text-secondary-900">{t('auth.register.title')}</h2>
+          <p className="mt-2 text-sm text-secondary-600">{t('auth.register.subtitle')}</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="email" className="label-text">Email address</label>
+            <label htmlFor="email" className="label-text">{t('auth.register.email_label')}</label>
             <input
               id="email"
               name="email"
@@ -50,7 +52,7 @@ const RegisterPage: React.FC = () => {
             />
           </div>
           <div>
-            <label htmlFor="password" className="label-text">Password</label>
+            <label htmlFor="password" className="label-text">{t('auth.register.password_label')}</label>
             <input
               id="password"
               name="password"
@@ -69,14 +71,14 @@ const RegisterPage: React.FC = () => {
               disabled={mutation.isPending}
               className="w-full btn-primary py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {mutation.isPending ? 'Registering...' : 'Create Account'}
+              {mutation.isPending ? t('auth.register.submitting') : t('auth.register.submit_button')}
             </button>
           </div>
         </form>
         <p className="mt-6 text-center text-sm text-secondary-600">
-          Already a member?{' '}
+          {t('auth.register.already_member')}{' '}
           <Link to="/login" className="font-semibold text-primary-600 hover:text-primary-700 transition-colors">
-            Login here
+            {t('auth.register.login_link')}
           </Link>
         </p>
       </div>
@@ -85,3 +87,4 @@ const RegisterPage: React.FC = () => {
 };
 
 export default RegisterPage;
+

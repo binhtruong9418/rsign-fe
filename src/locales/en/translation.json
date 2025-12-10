@@ -1,0 +1,197 @@
+{
+  "sign_components": {
+    "completed_view": {
+      "title": "Document Completed",
+      "message": "This document has already been signed and no further action is required.",
+      "home_button": "Go to Homepage"
+    },
+    "signature_view": {
+      "back": "Back",
+      "clear": "Clear",
+      "sign": "Sign Document",
+      "submitting": "Submitting...",
+      "sign_above": "Sign above"
+    }
+  },
+
+  "dashboard_components": {
+    "create_modal": {
+      "title": "Create New Document",
+      "title_label": "Title *",
+      "title_placeholder": "e.g. Non-Disclosure Agreement",
+      "authority_label": "Competent Authority *",
+      "authority_placeholder": "e.g. Legal Department",
+      "content_label": "Content (or upload a file)",
+      "content_placeholder": "Type your document content here...",
+      "file_label": "Document File",
+      "cancel": "Cancel",
+      "creating": "Creating...",
+      "create": "Create Document",
+      "failed": "Failed to create document: {{message}}",
+      "preview_title": "Preview"
+    },
+    "status_filter": {
+      "label": "Status:",
+      "all": "All Documents",
+      "pending": "Pending",
+      "completed": "Completed"
+    },
+    "document_grid": {
+      "authority": "Authority",
+      "updated": "Updated {{date}}",
+      "signed": "Signed {{date}}"
+    },
+    "file_upload": {
+      "preview": "Preview",
+      "remove": "Remove",
+      "click_upload": "Click to upload",
+      "drag_drop": "or drag and drop",
+      "formats": "PDF, DOCX, PNG, JPG (Max 10MB)"
+    },
+    "search_input": {
+      "placeholder_default": "Search documents...",
+      "clear": "Clear search"
+    }
+  },
+  "document_detail": {
+    "missing_id": "Document ID is missing.",
+    "create_session_failed": "Failed to create signing session: {{message}}",
+    "signature_inserted": "Signature inserted successfully.",
+    "insert_signature_failed": "Failed to insert signature: {{message}}",
+    "link_copied": "Signing link copied to clipboard!",
+    "copy_failed": "Failed to copy link.",
+    "signature_unavailable": "Signature is not available for this document.",
+    "error_loading": "Error loading document: {{message}}",
+    "not_found": "Document not found.",
+    "signature_heading": "Signature",
+    "signed_by": "Signed by: {{email}}",
+    "signed_on": "Signed on: {{date}}",
+    "download": "Download",
+    "playback": "Playback",
+    "no_signatures": "No Signatures Yet",
+    "share_instruction": "Share the signing link to get this document signed.",
+    "authority": "Authority:",
+    "created": "Created:",
+    "deadline": "Deadline:",
+    "signed": "Signed:",
+    "view_instruction": "Click below to view the document.",
+    "view_document": "View Document",
+    "insert_signature": "Insert Signature",
+    "placement_unlock_info": "Signature placement unlocks once the final signature ID is available.",
+    "placement_format_info": "Signature placement is only available for PDF or image documents.",
+    "signed_ready": "Signed document ready.",
+    "preview_instruction": "Preview or download the updated document below.",
+    "preview": "Preview",
+    "no_content": "No document content or file attached.",
+    "creating_session": "Creating session...",
+    "completed": "Completed",
+    "sign_here": "Sign Here",
+    "share_link_title": "Share Signing Link",
+    "session_expires": "Session expires in {{seconds}} seconds",
+    "link_unavailable": "Signing Link Not Available",
+    "link_unavailable_desc": "A signing session could not be created for this document."
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome Back",
+      "subtitle": "Please sign in to your account",
+      "email_label": "Email address",
+      "password_label": "Password",
+      "submit_button": "Sign in",
+      "submitting": "Signing in...",
+      "or_continue": "Or continue with",
+      "hust_login": "Login with HUST",
+      "not_member": "Not a member?",
+      "register_link": "Register here",
+      "hust_modal_title": "Login with HUST Account",
+      "hust_submit_button": "Sign in with HUST",
+      "login_failed": "Login failed: {{message}}",
+      "hust_login_failed": "HUST Login failed: {{message}}"
+    },
+    "register": {
+      "title": "Create Account",
+      "subtitle": "Sign up to start signing documents securely",
+      "email_label": "Email address",
+      "password_label": "Password",
+      "submit_button": "Create Account",
+      "submitting": "Registering...",
+      "already_member": "Already a member?",
+      "login_link": "Login here",
+      "success": "Registration successful! Please login.",
+      "failed": "Registration failed: {{message}}"
+    }
+  },
+  "home": {
+    "hero": {
+      "badge": "Secure e-Signatures",
+      "title_prefix": "Sign Documents,",
+      "title_suffix": "Seamlessly & Securely.",
+      "description": "RSign provides a fast, legally binding way to sign your documents electronically. Trusted by professionals worldwide.",
+      "start_signing": "Start Signing for Free",
+      "view_demo": "View Demo",
+      "no_credit_card": "No credit card required",
+      "legally_binding": "Legally binding",
+      "encrypted_storage": "Encrypted storage"
+    },
+    "features": {
+      "title": "Why Choose RSign?",
+      "subtitle": "Everything you need to manage your document workflows efficiently and securely.",
+      "fast": {
+        "title": "Fast & Efficient",
+        "description": "Sign and send documents in minutes. No more printing, scanning, or faxing. Automate your workflow today."
+      },
+      "legal": {
+        "title": "Legally Binding",
+        "description": "Our electronic signatures are fully compliant with e-signature laws (ESIGN, UETA, eIDAS) globally."
+      },
+      "secure": {
+        "title": "Secure & Private",
+        "description": "Bank-grade encryption for your documents. Your data privacy and security are our top priorities."
+      }
+    }
+  },
+  "sign_document": {
+    "missing_session_id": "Signing session ID is missing.",
+    "success": "Document signed successfully!",
+    "error_signing": "Failed to sign document: {{message}}",
+    "provide_signature": "Please provide a signature.",
+    "error_loading": "Error loading document: {{message}}",
+    "completed": "Document Completed",
+    "review_title": "Review Document",
+    "sign_title": "Sign Document",
+    "review_prefix": "Review: ",
+    "review_instruction": "Please review the document carefully before signing.",
+    "proceed_to_sign": "Proceed to Sign"
+  },
+  "header": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout"
+  },
+  "dashboard": {
+    "title": "Documents",
+    "subtitle": "Manage and track your signature requests",
+    "new_document": "New Document",
+    "search_placeholder": "Search documents by title...",
+    "error": "Error: {{message}}",
+    "empty_state": {
+        "title": "No documents found",
+        "description": "Create a new document to get started"
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "page_info": "Page {{current}} of {{total}}"
+    }
+  }
+}

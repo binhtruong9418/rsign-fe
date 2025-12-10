@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import {Link} from 'react-router-dom';
 import {useLogin, useHustLogin} from '@/hooks';
 import showToast from "@/utils/toast.ts";
+import { useTranslation } from 'react-i18next';
 
 const LoginPage: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -9,6 +10,7 @@ const LoginPage: React.FC = () => {
     const [isHustModalOpen, setIsHustModalOpen] = useState(false);
     const [hustEmail, setHustEmail] = useState('');
     const [hustPassword, setHustPassword] = useState('');
+    const { t } = useTranslation();
 
     const loginMutation = useLogin();
     const hustMutation = useHustLogin();
@@ -17,7 +19,7 @@ const LoginPage: React.FC = () => {
         e.preventDefault();
         loginMutation.mutate({email, password}, {
             onError: (error: any) => {
-                showToast.error('Login failed: ' + (error?.response?.data?.message || 'Unknown error'));
+                showToast.error(t('auth.login.login_failed', { message: error?.response?.data?.message || 'Unknown error' }));
             }
         });
     };
@@ -29,7 +31,7 @@ const LoginPage: React.FC = () => {
                 setIsHustModalOpen(false);
             },
             onError: (error: any) => {
-                showToast.error('HUST Login failed: ' + (error?.response?.data?.message || 'Unknown error'));
+                showToast.error(t('auth.login.hust_login_failed', { message: error?.response?.data?.message || 'Unknown error' }));
             }
         });
     };
@@ -38,14 +40,14 @@ const LoginPage: React.FC = () => {
         <div className="min-h-screen flex items-center justify-center bg-secondary-50 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-md w-full bg-white shadow-lg rounded-xl p-8 border border-secondary-200">
                 <div className="text-center mb-8">
-                    <h2 className="text-3xl font-bold text-secondary-900">Welcome Back</h2>
-                    <p className="mt-2 text-sm text-secondary-600">Please sign in to your account</p>
+                    <h2 className="text-3xl font-bold text-secondary-900">{t('auth.login.title')}</h2>
+                    <p className="mt-2 text-sm text-secondary-600">{t('auth.login.subtitle')}</p>
                 </div>
                 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
                         <label htmlFor="email" className="label-text">
-                            Email address
+                            {t('auth.login.email_label')}
                         </label>
                         <input
                             id="email"
@@ -61,7 +63,7 @@ const LoginPage: React.FC = () => {
                     </div>
                     <div>
                         <label htmlFor="password" className="label-text">
-                            Password
+                            {t('auth.login.password_label')}
                         </label>
                         <input
                             id="password"
@@ -81,7 +83,7 @@ const LoginPage: React.FC = () => {
                             disabled={loginMutation.isPending}
                             className="w-full btn-primary flex justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {loginMutation.isPending ? 'Signing in...' : 'Sign in'}
+                            {loginMutation.isPending ? t('auth.login.submitting') : t('auth.login.submit_button')}
                         </button>
                     </div>
                 </form>
@@ -91,7 +93,7 @@ const LoginPage: React.FC = () => {
                         <div className="w-full border-t border-secondary-200"/>
                     </div>
                     <div className="relative flex justify-center text-sm">
-                        <span className="px-2 bg-white text-secondary-500">Or continue with</span>
+                        <span className="px-2 bg-white text-secondary-500">{t('auth.login.or_continue')}</span>
                     </div>
                 </div>
 
@@ -103,14 +105,14 @@ const LoginPage: React.FC = () => {
                         className="w-full btn-secondary flex justify-center items-center"
                     >
                         <img src="/image/logo-hust.png" alt="HUST Logo" className="w-5 h-5 mr-3 object-contain"/>
-                        Login with HUST
+                        {t('auth.login.hust_login')}
                     </button>
                 </div>
 
                 <p className="mt-6 text-center text-sm text-secondary-600">
-                    Not a member?{' '}
+                    {t('auth.login.not_member')}{' '}
                     <Link to='/register' className="font-medium text-primary-600 hover:text-primary-500">
-                        Register here
+                        {t('auth.login.register_link')}
                     </Link>
                 </p>
             </div>
@@ -123,11 +125,11 @@ const LoginPage: React.FC = () => {
                         <div className="flex items-center justify-center mb-6">
                             <img src="/image/logo-hust.png" alt="HUST Logo" className="w-16 h-16 object-contain"/>
                         </div>
-                        <h2 className="text-2xl font-bold text-center text-secondary-900 mb-6">Login with HUST Account</h2>
+                        <h2 className="text-2xl font-bold text-center text-secondary-900 mb-6">{t('auth.login.hust_modal_title')}</h2>
                         <form onSubmit={handleHustSubmit} className="space-y-6">
                             <div>
                                 <label htmlFor="hust-email" className="label-text">
-                                    Email address
+                                    {t('auth.login.email_label')}
                                 </label>
                                 <input
                                     id="hust-email"
@@ -142,7 +144,7 @@ const LoginPage: React.FC = () => {
                             </div>
                             <div>
                                 <label htmlFor="hust-password" className="label-text">
-                                    Password
+                                    {t('auth.login.password_label')}
                                 </label>
                                 <input
                                     id="hust-password"
@@ -161,7 +163,7 @@ const LoginPage: React.FC = () => {
                                     disabled={hustMutation.isPending}
                                     className="w-full btn-primary flex justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    {hustMutation.isPending ? 'Signing in...' : 'Sign in with HUST'}
+                                    {hustMutation.isPending ? t('auth.login.submitting') : t('auth.login.hust_submit_button')}
                                 </button>
                             </div>
                         </form>
@@ -173,3 +175,4 @@ const LoginPage: React.FC = () => {
 };
 
 export default LoginPage;
+

@@ -237,7 +237,15 @@ Before delivering UI code, verify these items:
 - [ ] All images have alt text
 - [ ] Form inputs have labels
 - [ ] Color is not the only indicator
+- [ ] Color is not the only indicator
 - [ ] `prefers-reduced-motion` respected
+
+### Internationalization (i18n)
+
+- [ ] No hardcoded text strings in UI components
+- [ ] All user-facing text uses `t()` from `useTranslation`
+- [ ] Keys follow `component.section.key` or `page.section.key` pattern
+- [ ] New keys added to both `en` and `vi` translation files
 
 ---
 
@@ -275,3 +283,4 @@ Use these utility classes defined in `src/index.css` instead of raw Tailwind cla
 - **Icons**: Use `lucide-react` for all icons.
 - **Backgrounds**: Main page background should be `bg-secondary-50`.
 - **Borders**: Use `border-secondary-200` for subtle dividers.
+- **Internationalization**: All text MUST be internationalized using `react-i18next`. NEVER hardcode strings. Use `useTranslation` hook and add keys to `src/locales/{en,vi}/translation.json`.

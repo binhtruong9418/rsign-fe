@@ -1,6 +1,7 @@
 import React from 'react';
 import { Document } from '../../types';
 import DocumentContentViewer from '../DocumentContentViewer';
+import { useTranslation } from 'react-i18next';
 
 interface DocumentReviewViewProps {
     document: Document;
@@ -8,14 +9,15 @@ interface DocumentReviewViewProps {
 }
 
 const DocumentReviewView: React.FC<DocumentReviewViewProps> = ({ document, onProceedToSign }) => {
+    const { t } = useTranslation();
     return (
         <div className="flex flex-col h-full min-h-0 bg-white sm:bg-transparent">
             <div className="flex-shrink-0 px-4 py-3 border-b border-secondary-200 sm:border-0">
                 <h1 className="text-lg sm:text-2xl font-bold text-secondary-900 truncate" title={document.title}>
-                    Review: {document.title}
+                    {t('sign_document.review_prefix')}{document.title}
                 </h1>
                 <p className="text-xs sm:text-sm text-secondary-500 mt-1">
-                    Please review the document carefully before signing.
+                    {t('sign_document.review_instruction')}
                 </p>
             </div>
             
@@ -40,7 +42,7 @@ const DocumentReviewView: React.FC<DocumentReviewViewProps> = ({ document, onPro
                     onClick={onProceedToSign}
                     className="w-full btn-primary text-base sm:text-lg py-3 sm:py-3 shadow-lg sm:shadow-sm"
                 >
-                    Proceed to Sign
+                    {t('sign_document.proceed_to_sign')}
                 </button>
             </div>
         </div>
@@ -48,3 +50,4 @@ const DocumentReviewView: React.FC<DocumentReviewViewProps> = ({ document, onPro
 };
 
 export default DocumentReviewView;
+

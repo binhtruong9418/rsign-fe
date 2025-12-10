@@ -1,6 +1,7 @@
 import React from 'react';
 import { DocumentStatus } from '../../types';
-import { Filter, Clock, CheckCircle, XCircle, FileText, ChevronDown } from 'lucide-react';
+import { Filter, ChevronDown } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface StatusFilterProps {
   value: DocumentStatus | 'ALL';
@@ -8,28 +9,28 @@ interface StatusFilterProps {
 }
 
 const StatusFilter: React.FC<StatusFilterProps> = ({ value, onChange }) => {
+  const { t } = useTranslation();
+
   const statusOptions = [
     { 
       value: 'ALL' as const, 
-      label: 'All Documents',
+      label: t('dashboard_components.status_filter.all'),
     },
     {
       value: 'PENDING' as const,
-      label: 'Pending',
+      label: t('dashboard_components.status_filter.pending'),
     },
     {
       value: 'COMPLETED' as const,
-      label: 'Completed',
+      label: t('dashboard_components.status_filter.completed'),
     },
   ];
-
-  const selectedOption = statusOptions.find(option => option.value === value);
 
   return (
     <div className="flex items-center space-x-3">
       <div className="flex items-center space-x-2 text-gray-700 font-medium">
         <Filter size={18} className="text-gray-500" />
-        <span>Status:</span>
+        <span>{t('dashboard_components.status_filter.label')}</span>
       </div>
 
       <div className="relative">
@@ -55,3 +56,4 @@ const StatusFilter: React.FC<StatusFilterProps> = ({ value, onChange }) => {
 };
 
 export default StatusFilter;
+

@@ -10,6 +10,7 @@ import SignatureView from '../components/sign/SignatureView';
 import Header from '../components/Header';
 import { DEFAULT_SIGNATURE_COLOR, DEFAULT_SIGNATURE_WIDTH } from '../constants/app';
 import { showToast } from '../utils/toast';
+import { useTranslation } from 'react-i18next';
 
 type View = 'document' | 'sign';
 
@@ -18,6 +19,7 @@ const SignDocumentPage: React.FC = () => {
     const navigate = useNavigate();
     const [view, setView] = useState<View>('document');
     const signaturePadRef = useRef<SignaturePadRef>(null);
+    const { t } = useTranslation();
 
     // Use body scroll lock hook
     useBodyScrollLock(view === 'sign');
@@ -33,7 +35,7 @@ const SignDocumentPage: React.FC = () => {
             <div className="min-h-screen bg-secondary-50 flex flex-col">
                 <Header />
                 <div className="flex-grow flex items-center justify-center">
-                    <p className="text-center text-red-500">Signing session ID is missing.</p>
+                    <p className="text-center text-red-500">{t('sign_document.missing_session_id')}</p>
                 </div>
             </div>
         );
@@ -49,15 +51,15 @@ const SignDocumentPage: React.FC = () => {
                 color: DEFAULT_SIGNATURE_COLOR
             }, {
                 onSuccess: () => {
-                    showToast.success('Document signed successfully!');
+                    showToast.success(t('sign_document.success'));
                     navigate('/');
                 },
                 onError: (error) => {
-                    showToast.error('Failed to sign document: ' + (error.response?.data?.message || error.message));
+                    showToast.error(t('sign_document.error_signing', { message: error.response?.data?.message || error.message }));
                 }
             });
         } else {
-            showToast.warning('Please provide a signature.');
+            showToast.warning(t('sign_document.provide_signature'));
         }
     };
 
@@ -77,7 +79,7 @@ const SignDocumentPage: React.FC = () => {
                     )}
                     {error && (
                         <div className="flex-grow flex items-center justify-center p-6">
-                            <p className="text-red-500 text-center">Error loading document: {error?.response?.data?.message}</p>
+                            <p className="text-red-500 text-center">{t('sign_document.error_loading', { message: error?.response?.data?.message })}</p>
                         </div>
                     )}
                     {documentData && (

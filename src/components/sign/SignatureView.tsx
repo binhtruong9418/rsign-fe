@@ -1,7 +1,8 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { ArrowLeft } from 'lucide-react';
 import SignaturePad, { SignaturePadRef } from '../SignaturePad';
 import { DEFAULT_SIGNATURE_COLOR, DEFAULT_SIGNATURE_WIDTH } from '../../constants/app';
+import { useTranslation } from 'react-i18next';
 
 interface SignatureViewProps {
     onBack: () => void;
@@ -18,6 +19,8 @@ const SignatureView: React.FC<SignatureViewProps> = ({
     isSubmitting,
     signaturePadRef,
 }) => {
+    const { t } = useTranslation();
+
     return (
         <div className="flex flex-col h-full relative bg-secondary-50 sm:bg-white">
             {/* Header / Back Button Area */}
@@ -28,7 +31,7 @@ const SignatureView: React.FC<SignatureViewProps> = ({
                     aria-label="Back to document"
                 >
                     <ArrowLeft size={20} />
-                    <span className="text-sm font-medium">Back</span>
+                    <span className="text-sm font-medium">{t('sign_components.signature_view.back')}</span>
                 </button>
             </div>
 
@@ -44,7 +47,7 @@ const SignatureView: React.FC<SignatureViewProps> = ({
                     {/* Helper text for mobile */}
                     <div className="absolute bottom-4 left-0 right-0 text-center pointer-events-none sm:hidden">
                         <span className="text-xs text-secondary-400 bg-white/80 px-2 py-1 rounded-full backdrop-blur-sm">
-                            Sign above
+                            {t('sign_components.signature_view.sign_above')}
                         </span>
                     </div>
                 </div>
@@ -56,14 +59,14 @@ const SignatureView: React.FC<SignatureViewProps> = ({
                     onClick={onClear}
                     className="flex-1 btn-secondary py-3 text-base"
                 >
-                    Clear
+                    {t('sign_components.signature_view.clear')}
                 </button>
                 <button
                     onClick={onSubmit}
                     disabled={isSubmitting}
                     className="flex-1 btn-primary py-3 text-base disabled:opacity-50 disabled:cursor-not-allowed shadow-lg sm:shadow-sm"
                 >
-                    {isSubmitting ? 'Submitting...' : 'Sign Document'}
+                    {isSubmitting ? t('sign_components.signature_view.submitting') : t('sign_components.signature_view.sign')}
                 </button>
             </div>
         </div>

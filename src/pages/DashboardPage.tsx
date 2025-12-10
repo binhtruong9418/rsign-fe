@@ -10,6 +10,7 @@ import CreateDocumentModal from '../components/dashboard/CreateDocumentModal';
 import StatusFilter from '../components/dashboard/StatusFilter';
 import SearchInput from '../components/dashboard/SearchInput';
 import { DocumentStatus } from '../types';
+import { useTranslation } from 'react-i18next';
 
 const DashboardPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -17,6 +18,7 @@ const DashboardPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<DocumentStatus | 'ALL'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const pageSize = 10;
+  const { t } = useTranslation();
 
   // Use the custom useDebounce hook
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
@@ -55,15 +57,15 @@ const DashboardPage: React.FC = () => {
     <div>
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-secondary-900">Documents</h1>
-          <p className="text-secondary-600 mt-1">Manage and track your signature requests</p>
+          <h1 className="text-3xl font-bold text-secondary-900">{t('dashboard.title')}</h1>
+          <p className="text-secondary-600 mt-1">{t('dashboard.subtitle')}</p>
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
           className="btn-primary flex items-center space-x-2"
         >
           <PlusCircle size={20} />
-          <span>New Document</span>
+          <span>{t('dashboard.new_document')}</span>
         </button>
       </div>
 
@@ -75,7 +77,7 @@ const DashboardPage: React.FC = () => {
             value={searchQuery}
             onChange={handleSearchChange}
             onClear={handleClearSearch}
-            placeholder="Search documents by title..."
+            placeholder={t('dashboard.search_placeholder')}
           />
         </div>
 
@@ -86,7 +88,7 @@ const DashboardPage: React.FC = () => {
       </div>
 
       {isLoading && <LoadingSpinner />}
-      {error && <p className="text-red-500">Error: {error.message}</p>}
+      {error && <p className="text-red-500">{t('dashboard.error', { message: error.message })}</p>}
 
       {!isLoading && documents.length === 0 && (
         <EmptyDocumentsView onCreateDocument={() => setIsModalOpen(true)} />
@@ -99,8 +101,6 @@ const DashboardPage: React.FC = () => {
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={handlePageChange}
-            totalItems={totalItems}
-            itemsPerPage={pageSize}
           />
         </>
       )}
@@ -114,3 +114,4 @@ const DashboardPage: React.FC = () => {
 };
 
 export default DashboardPage;
+

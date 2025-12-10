@@ -3,12 +3,15 @@ import { Link } from 'react-router-dom';
 import { Document } from '../../types';
 import { formatDate } from '../../utils/helpers';
 import { FileText, Clock, CheckCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface DocumentGridProps {
     documents: Document[];
 }
 
 const DocumentGrid: React.FC<DocumentGridProps> = ({ documents }) => {
+    const { t } = useTranslation();
+
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'COMPLETED':
@@ -43,17 +46,17 @@ const DocumentGrid: React.FC<DocumentGridProps> = ({ documents }) => {
                     
                     <div className="mt-4 space-y-2 text-sm text-secondary-500">
                         <div className="flex items-center gap-2">
-                            <span className="text-xs uppercase tracking-wider font-semibold text-secondary-400">Authority</span>
+                            <span className="text-xs uppercase tracking-wider font-semibold text-secondary-400">{t('dashboard_components.document_grid.authority')}</span>
                             <span className="font-medium text-secondary-700 truncate">{doc.competentAuthority}</span>
                         </div>
                         <div className="flex items-center gap-2">
                             <Clock size={14} />
-                            <span>Updated {formatDate(doc.updatedAt)}</span>
+                            <span>{t('dashboard_components.document_grid.updated', { date: formatDate(doc.updatedAt) })}</span>
                         </div>
                         {doc.signedAt && (
                             <div className="flex items-center gap-2 text-accent-600">
                                 <CheckCircle size={14} />
-                                <span>Signed {formatDate(doc.signedAt)}</span>
+                                <span>{t('dashboard_components.document_grid.signed', { date: formatDate(doc.signedAt) })}</span>
                             </div>
                         )}
                     </div>

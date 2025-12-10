@@ -2,6 +2,7 @@ import React from 'react';
 import { UploadCloud, File as FileIcon, X, Eye } from 'lucide-react';
 import { formatBytes } from '../../utils/helpers';
 import { ACCEPTED_FILE_TYPES } from '../../constants/app';
+import { useTranslation } from 'react-i18next';
 
 interface FileUploadAreaProps {
     file: File | null;
@@ -26,6 +27,8 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({
     onPreviewFile,
     onOpenFileDialog,
 }) => {
+    const { t } = useTranslation();
+
     if (file) {
         return (
             <div className="flex-grow border border-secondary-300 rounded-lg p-6 flex flex-col justify-center text-center bg-secondary-50">
@@ -41,7 +44,7 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({
                         className="btn-secondary flex items-center space-x-2 text-sm"
                     >
                         <Eye size={16} />
-                        <span>Preview</span>
+                        <span>{t('dashboard_components.file_upload.preview')}</span>
                     </button>
                     <button
                         type="button"
@@ -49,7 +52,7 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({
                         className="flex items-center space-x-2 px-4 py-2 text-sm bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 font-medium transition-colors"
                     >
                         <X size={16} />
-                        <span>Remove</span>
+                        <span>{t('dashboard_components.file_upload.remove')}</span>
                     </button>
                 </div>
             </div>
@@ -79,9 +82,9 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({
                     <UploadCloud size={24} className="text-primary-600" />
                 </div>
                 <p className="text-secondary-600 text-center mb-1">
-                    <span className="font-semibold text-primary-600">Click to upload</span> or drag and drop
+                    <span className="font-semibold text-primary-600">{t('dashboard_components.file_upload.click_upload')}</span> {t('dashboard_components.file_upload.drag_drop')}
                 </p>
-                <p className="text-xs text-secondary-400">PDF, DOCX, PNG, JPG (Max 10MB)</p>
+                <p className="text-xs text-secondary-400">{t('dashboard_components.file_upload.formats')}</p>
             </div>
         </div>
     );

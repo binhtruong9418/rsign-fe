@@ -14,6 +14,7 @@ import { formatDate } from '@/utils';
 import { detectDocumentMediaType, DocumentMediaType } from '../components/DocumentContentViewer';
 import { showToast } from '../utils/toast';
 import { AxiosError } from 'axios';
+import { useTranslation } from 'react-i18next';
 
 const fetchDocument = async (id: string): Promise<Document> => {
     const { data } = await api.get(`/api/documents/${id}`);
@@ -30,9 +31,10 @@ const DocumentDetailPage: React.FC = () => {
     const [viewerSource, setViewerSource] = useState<{ url: string; title: string } | null>(null);
     const signatureViewerRef = useRef<SignatureViewerRef>(null);
     const queryClient = useQueryClient();
+    const { t } = useTranslation();
 
     if (!id) {
-        return <p>Document ID is missing.</p>;
+        return <p>{t('document_detail.missing_id')}</p>;
     }
 
     const { data: document, isLoading: isLoadingDoc, error: docError, } = useQuery<Document, Error>({
@@ -50,7 +52,7 @@ const DocumentDetailPage: React.FC = () => {
             setIsShareModalOpen(true);
         },
         onError: (error: AxiosError<{ message: string }>) => {
-            showToast.error('Failed to create signing session: ' + (error.response?.data?.message || error.message));
+            showToast.error(t('document_detail.create_session_failed', { message: error.response?.data?.message || error.message }));
         }
     });
 
@@ -69,7 +71,7 @@ const DocumentDetailPage: React.FC = () => {
     const insertSignatureMutation = useMutation<InsertSignatureResponse, AxiosError<{ message: string }>, InsertSignaturePayload>({
         mutationFn: (payload) => api.post(`/api/documents/${id}/insert-signature`, payload).then(res => res.data),
         onSuccess: (data) => {
-            showToast.success('Signature inserted successfully.');
+            showToast.success(t('document_detail.signature_inserted'));
             setLatestSignedFileUrl(data.fileUrl);
             const signedTitle = document ? `${document.title} (Signed)` : 'Signed Document';
             setViewerSource({ url: data.fileUrl, title: signedTitle });
@@ -78,7 +80,7 @@ const DocumentDetailPage: React.FC = () => {
             setIsInsertModalOpen(false);
         },
         onError: (error) => {
-            showToast.error('Failed to insert signature: ' + (error.response?.data?.message || error.message));
+            showToast.error(t('document_detail.insert_signature_failed', { message: error.response?.data?.message || error.message }));
         },
     });
 
@@ -149,9 +151,9 @@ const DocumentDetailPage: React.FC = () => {
     const copyToClipboard = () => {
         if (signUrl) {
             navigator.clipboard.writeText(signUrl).then(() => {
-                showToast.success('Signing link copied to clipboard!');
+                showToast.success(t('document_detail.link_copied'));
             }, (err) => {
-                showToast.error('Failed to copy link.');
+                showToast.error(t('document_detail.copy_failed'));
                 console.error('Could not copy text: ', err);
             });
         }
@@ -170,7 +172,7 @@ const DocumentDetailPage: React.FC = () => {
     const handleInsertSignatureSubmit = (position: SignaturePosition) => {
         const signatureIdValue = getParsedSignatureId();
         if (signatureIdValue === null) {
-            showToast.error('Signature is not available for this document.');
+            showToast.error(t('document_detail.signature_unavailable'));
             return;
         }
         insertSignatureMutation.mutate({ signatureId: signatureIdValue, position });
@@ -181,8 +183,8 @@ const DocumentDetailPage: React.FC = () => {
         : null;
 
     if (isLoadingDoc) return <LoadingSpinner />;
-    if (docError) return <p className="text-red-500">Error loading document: {docError.message}</p>;
-    if (!document) return <p>Document not found.</p>;
+    if (docError) return <p className="text-red-500">{t('document_detail.error_loading', { message: docError.message })}</p>;
+    if (!document) return <p>{t('document_detail.not_found')}</p>;
 
     const signatureIdForPlacement = getParsedSignatureId();
     const documentMediaType: DocumentMediaType = document.fileUrl ? detectDocumentMediaType(document.fileUrl) : 'unknown';
@@ -193,7 +195,7 @@ const DocumentDetailPage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Content: Signature Viewer */}
             <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-secondary-200 shadow-sm flex flex-col">
-                <h2 className="text-xl font-bold mb-4 text-secondary-900">Signature</h2>
+                <h2 className="text-xl font-bold mb-4 text-secondary-900">{t('document_detail.signature_heading')}</h2>
                 {document?.signature ? (
                     <>
                         <div className="bg-secondary-50 rounded-lg aspect-video w-full flex-grow border border-secondary-200">
@@ -206,22 +208,22 @@ const DocumentDetailPage: React.FC = () => {
                             />
                         </div>
                         <div className="mt-4 pt-4 border-t border-secondary-200">
-                            <p className="font-semibold text-secondary-900">Signed by: {document?.signature.signer?.email}</p>
-                            <p className="text-sm text-secondary-500">Signed on: {formatDate(document?.signedAt)}</p>
+                            <p className="font-semibold text-secondary-900">{t('document_detail.signed_by', { email: document?.signature.signer?.email })}</p>
+                            <p className="text-sm text-secondary-500">{t('document_detail.signed_on', { date: formatDate(document?.signedAt) })}</p>
                             <div className="flex items-center space-x-4 mt-4">
                                 <button
                                     onClick={handleDownload}
                                     className="btn-secondary flex items-center justify-center space-x-2"
                                 >
                                     <Download size={18} />
-                                    <span>Download</span>
+                                    <span>{t('document_detail.download')}</span>
                                 </button>
                                 <button
                                     onClick={handlePlayback}
                                     className="btn-primary flex items-center justify-center space-x-2"
                                 >
                                     <Play size={18} />
-                                    <span>Playback</span>
+                                    <span>{t('document_detail.playback')}</span>
                                 </button>
                             </div>
                         </div>
@@ -230,8 +232,8 @@ const DocumentDetailPage: React.FC = () => {
                     <div
                         className="flex-grow flex flex-col items-center justify-center bg-secondary-50 rounded-lg p-8 text-center border border-dashed border-secondary-300">
                         <Signature size={48} className="text-secondary-400 mb-4" />
-                        <h3 className="text-xl font-medium text-secondary-900">No Signatures Yet</h3>
-                        <p className="text-secondary-500 mt-1">Share the signing link to get this document signed.</p>
+                        <h3 className="text-xl font-medium text-secondary-900">{t('document_detail.no_signatures')}</h3>
+                        <p className="text-secondary-500 mt-1">{t('document_detail.share_instruction')}</p>
                     </div>
                 )}
             </div>
@@ -252,22 +254,22 @@ const DocumentDetailPage: React.FC = () => {
 
                     <div className="space-y-3 text-sm border-t border-secondary-200 pt-4">
                         <div className="flex justify-between items-start gap-4">
-                            <p className="text-secondary-500">Authority:</p>
+                            <p className="text-secondary-500">{t('document_detail.authority')}</p>
                             <p className="font-medium text-secondary-900 text-right break-words">{document.competentAuthority}</p>
                         </div>
                         <div className="flex justify-between items-start gap-4">
-                            <p className="text-secondary-500">Created:</p>
+                            <p className="text-secondary-500">{t('document_detail.created')}</p>
                             <p className="font-medium text-secondary-900 text-right">{formatDate(document.createdAt)}</p>
                         </div>
                         {document.deadline && (
                             <div className="flex justify-between items-start gap-4">
-                                <p className="text-secondary-500">Deadline:</p>
+                                <p className="text-secondary-500">{t('document_detail.deadline')}</p>
                                 <p className="font-medium text-secondary-900 text-right">{new Date(document.deadline).toLocaleString()}</p>
                             </div>
                         )}
                         {document.signedAt && (
                             <div className="flex justify-between items-start gap-4">
-                                <p className="text-secondary-500">Signed:</p>
+                                <p className="text-secondary-500">{t('document_detail.signed')}</p>
                                 <p className="font-medium text-secondary-900 text-right">{formatDate(document.signedAt)}</p>
                             </div>
                         )}
@@ -278,13 +280,13 @@ const DocumentDetailPage: React.FC = () => {
                         <div className="flex flex-col items-center justify-center h-full text-secondary-500 rounded-lg border border-dashed border-secondary-300 p-6 bg-secondary-50">
                             <FileText size={40} className="text-secondary-400 mb-4" />
                             <p className="font-semibold text-secondary-900 text-center mb-1" title={document.title}>{document.title}</p>
-                            <p className="text-sm text-secondary-500 mb-6">Click below to view the document.</p>
+                            <p className="text-sm text-secondary-500 mb-6">{t('document_detail.view_instruction')}</p>
                             <div className="mt-auto flex w-full flex-col gap-3">
                                 <button
                                     onClick={() => openViewer(document.fileUrl!, document.title)}
                                     className="w-full btn-primary"
                                 >
-                                    View Document
+                                    {t('document_detail.view_document')}
                                 </button>
                                 {document.signature && (
                                     <button
@@ -294,28 +296,28 @@ const DocumentDetailPage: React.FC = () => {
                                         className="w-full flex items-center justify-center gap-2 px-6 py-2 rounded-lg border border-primary-600 text-primary-600 font-bold transition-colors hover:bg-primary-50 disabled:cursor-not-allowed disabled:border-secondary-300 disabled:text-secondary-400 disabled:hover:bg-transparent"
                                     >
                                         <PenSquare size={18} />
-                                        <span>Insert Signature</span>
+                                        <span>{t('document_detail.insert_signature')}</span>
                                     </button>
                                 )}
                             </div>
                             {document.signature && (!supportsPlacement || signatureIdForPlacement === null) && (
                                 <p className="mt-2 text-center text-xs text-yellow-600">
                                     {supportsPlacement
-                                        ? 'Signature placement unlocks once the final signature ID is available.'
-                                        : 'Signature placement is only available for PDF or image documents.'}
+                                        ? t('document_detail.placement_unlock_info')
+                                        : t('document_detail.placement_format_info')}
                                 </p>
                             )}
                             {latestSignedFileUrl && (
                                 <div className="mt-4 w-full rounded-lg border border-accent-200 bg-accent-50 p-4 text-sm text-accent-700">
-                                    <p className="font-semibold text-accent-800">Signed document ready.</p>
-                                    <p className="mt-1 text-xs text-accent-600">Preview or download the updated document below.</p>
+                                    <p className="font-semibold text-accent-800">{t('document_detail.signed_ready')}</p>
+                                    <p className="mt-1 text-xs text-accent-600">{t('document_detail.preview_instruction')}</p>
                                     <div className="mt-3 flex flex-col gap-2 sm:flex-row">
                                         <button
                                             onClick={() => openViewer(latestSignedFileUrl, document ? `${document.title} (Signed)` : undefined)}
                                             className="flex items-center justify-center gap-2 rounded-md bg-accent-600 px-4 py-2 text-white transition-colors hover:bg-accent-700"
                                         >
                                             <Eye size={16} />
-                                            <span>Preview</span>
+                                            <span>{t('document_detail.preview')}</span>
                                         </button>
                                         <a
                                             href={latestSignedFileUrl}
@@ -325,7 +327,7 @@ const DocumentDetailPage: React.FC = () => {
                                             className="flex items-center justify-center gap-2 rounded-md border border-accent-600 px-4 py-2 text-accent-600 transition-colors hover:bg-accent-50"
                                         >
                                             <Download size={16} />
-                                            <span>Download</span>
+                                            <span>{t('document_detail.download')}</span>
                                         </a>
                                     </div>
                                 </div>
@@ -337,7 +339,7 @@ const DocumentDetailPage: React.FC = () => {
                         </div>
                     ) : (
                         <div className="flex items-center justify-center h-full text-secondary-500 rounded-md border border-dashed border-secondary-300 bg-secondary-50">
-                            <p>No document content or file attached.</p>
+                            <p>{t('document_detail.no_content')}</p>
                         </div>
                     )}
                 </div>
@@ -350,17 +352,17 @@ const DocumentDetailPage: React.FC = () => {
                         {signatureSessionIsPending ? (
                             <>
                                 <LoadingSpinner />
-                                <span>Creating session...</span>
+                                <span>{t('document_detail.creating_session')}</span>
                             </>
                         ) : document.status === 'COMPLETED' ? (
                             <>
                                 <CheckCircle size={20} />
-                                <span>Completed</span>
+                                <span>{t('document_detail.completed')}</span>
                             </>
                         ) : (
                             <>
                                 <FileText size={20} />
-                                <span>Sign Here</span>
+                                <span>{t('document_detail.sign_here')}</span>
                             </>
                         )}
                     </button>
@@ -374,7 +376,7 @@ const DocumentDetailPage: React.FC = () => {
                     <div className="bg-white rounded-xl shadow-2xl w-full max-w-md m-4 flex flex-col border border-secondary-200"
                         onClick={(e) => e.stopPropagation()}>
                         <div className="flex justify-between items-center p-4 border-b border-secondary-200">
-                            <h3 className="text-xl font-bold text-secondary-900">Share Signing Link</h3>
+                            <h3 className="text-xl font-bold text-secondary-900">{t('document_detail.share_link_title')}</h3>
                             <button onClick={() => setIsShareModalOpen(false)}
                                 className="text-secondary-500 hover:text-secondary-700">
                                 <X size={24} />
@@ -387,7 +389,7 @@ const DocumentDetailPage: React.FC = () => {
                                         <QRCodeCanvas value={signUrl} size={200} />
                                     </div>
                                     <p className="text-center text-sm text-yellow-600 font-medium mb-4 bg-yellow-50 py-2 rounded-lg border border-yellow-200">
-                                        Session expires in {timer} seconds
+                                        {t('document_detail.session_expires', { seconds: timer })}
                                     </p>
                                     <div className="relative">
                                         <input
@@ -405,8 +407,8 @@ const DocumentDetailPage: React.FC = () => {
                             ) : (
                                 <div className="text-center text-secondary-500">
                                     <AlertCircle className="mx-auto h-12 w-12 text-secondary-400" />
-                                    <h4 className="mt-2 text-lg font-medium text-secondary-900">Signing Link Not Available</h4>
-                                    <p className="mt-1 text-sm">A signing session could not be created for this document.</p>
+                                    <h4 className="mt-2 text-lg font-medium text-secondary-900">{t('document_detail.link_unavailable')}</h4>
+                                    <p className="mt-1 text-sm">{t('document_detail.link_unavailable_desc')}</p>
                                 </div>
                             )}
                         </div>
@@ -440,3 +442,4 @@ const DocumentDetailPage: React.FC = () => {
 };
 
 export default DocumentDetailPage;
+

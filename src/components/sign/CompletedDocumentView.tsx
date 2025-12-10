@@ -1,25 +1,25 @@
 import React from 'react';
-import { Document } from '../../types';
 import { CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
-interface CompletedDocumentViewProps {
-    document: Document;
-}
+const CompletedDocumentView: React.FC = () => {
+  const { t } = useTranslation();
 
-const CompletedDocumentView: React.FC<CompletedDocumentViewProps> = ({ document }) => {
-    return (
-        <div className="flex flex-col items-center justify-center h-full text-center p-8">
-            <div className="bg-green-50 p-6 rounded-full mb-6">
-                <CheckCircle size={64} className="text-green-500" />
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-secondary-900 mb-3">Document Completed</h1>
-            <p className="text-secondary-600 mb-8 max-w-md mx-auto">This document has already been signed and no further action is required.</p>
-            <Link to="/" className="btn-primary px-8 py-3">
-                Go to Homepage
-            </Link>
-        </div>
-    );
+  return (
+    <div className="text-center py-12">
+      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-6">
+        <CheckCircle className="w-8 h-8 text-green-600" />
+      </div>
+      <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('sign_components.completed_view.title')}</h2>
+      <p className="text-gray-600 mb-8 max-w-md mx-auto">
+        {t('sign_components.completed_view.message')}
+      </p>
+      <Link to="/" className="btn-primary inline-flex items-center">
+        {t('sign_components.completed_view.home_button')}
+      </Link>
+    </div>
+  );
 };
 
 export default CompletedDocumentView;

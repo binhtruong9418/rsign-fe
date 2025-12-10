@@ -3,8 +3,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { FileSignature, ShieldCheck, Zap, CheckCircle } from 'lucide-react';
 import Header from '../components/Header';
+import { useTranslation } from 'react-i18next';
 
 const HomePage: React.FC = () => {
+  const { t } = useTranslation();
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
         <Header />
@@ -15,28 +18,27 @@ const HomePage: React.FC = () => {
                     <div className="items-center flex flex-wrap">
                         <div className="w-full lg:w-8/12 px-4 mx-auto text-center">
                             <div className="mb-8">
-                                <span className="text-primary-600 font-semibold tracking-wider uppercase text-sm bg-primary-50 px-3 py-1 rounded-full">Secure e-Signatures</span>
+                                <span className="text-primary-600 font-semibold tracking-wider uppercase text-sm bg-primary-50 px-3 py-1 rounded-full">{t('home.hero.badge')}</span>
                             </div>
                             <h1 className="text-secondary-900 font-bold text-5xl sm:text-6xl leading-tight mb-6 font-heading">
-                                Sign Documents, <br/>
-                                <span className="text-primary-600">Seamlessly & Securely.</span>
+                                {t('home.hero.title_prefix')} <br/>
+                                <span className="text-primary-600">{t('home.hero.title_suffix')}</span>
                             </h1>
                             <p className="mt-4 text-xl text-secondary-600 mb-10 max-w-2xl mx-auto">
-                                RSign provides a fast, legally binding way to sign your documents electronically. 
-                                Trusted by professionals worldwide.
+                                {t('home.hero.description')}
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
                                 <Link to="/dashboard" className="btn-primary text-lg px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transform transition hover:-translate-y-1">
-                                    Start Signing for Free
+                                    {t('home.hero.start_signing')}
                                 </Link>
                                 <Link to="/login" className="btn-secondary text-lg px-8 py-4 rounded-xl">
-                                    View Demo
+                                    {t('home.hero.view_demo')}
                                 </Link>
                             </div>
                             <div className="mt-12 flex justify-center gap-8 text-secondary-500 text-sm font-medium">
-                                <span className="flex items-center gap-2"><CheckCircle size={16} className="text-accent-500"/> No credit card required</span>
-                                <span className="flex items-center gap-2"><CheckCircle size={16} className="text-accent-500"/> Legally binding</span>
-                                <span className="flex items-center gap-2"><CheckCircle size={16} className="text-accent-500"/> Encrypted storage</span>
+                                <span className="flex items-center gap-2"><CheckCircle size={16} className="text-accent-500"/> {t('home.hero.no_credit_card')}</span>
+                                <span className="flex items-center gap-2"><CheckCircle size={16} className="text-accent-500"/> {t('home.hero.legally_binding')}</span>
+                                <span className="flex items-center gap-2"><CheckCircle size={16} className="text-accent-500"/> {t('home.hero.encrypted_storage')}</span>
                             </div>
                         </div>
                     </div>
@@ -47,8 +49,8 @@ const HomePage: React.FC = () => {
             <section className="py-20 bg-secondary-50">
                 <div className="container mx-auto px-4">
                     <div className="text-center mb-16">
-                        <h2 className="text-3xl font-bold text-secondary-900 mb-4">Why Choose RSign?</h2>
-                        <p className="text-secondary-600 max-w-2xl mx-auto">Everything you need to manage your document workflows efficiently and securely.</p>
+                        <h2 className="text-3xl font-bold text-secondary-900 mb-4">{t('home.features.title')}</h2>
+                        <p className="text-secondary-600 max-w-2xl mx-auto">{t('home.features.subtitle')}</p>
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -56,9 +58,9 @@ const HomePage: React.FC = () => {
                             <div className="text-primary-600 p-3 inline-flex items-center justify-center w-14 h-14 mb-6 rounded-lg bg-primary-50">
                                 <Zap size={28} />
                             </div>
-                            <h3 className="text-xl font-bold mb-3">Fast & Efficient</h3>
+                            <h3 className="text-xl font-bold mb-3">{t('home.features.fast.title')}</h3>
                             <p className="text-secondary-600 leading-relaxed">
-                                Sign and send documents in minutes. No more printing, scanning, or faxing. Automate your workflow today.
+                                {t('home.features.fast.description')}
                             </p>
                         </div>
 
@@ -66,9 +68,9 @@ const HomePage: React.FC = () => {
                             <div className="text-primary-600 p-3 inline-flex items-center justify-center w-14 h-14 mb-6 rounded-lg bg-primary-50">
                                 <FileSignature size={28} />
                             </div>
-                            <h3 className="text-xl font-bold mb-3">Legally Binding</h3>
+                            <h3 className="text-xl font-bold mb-3">{t('home.features.legal.title')}</h3>
                             <p className="text-secondary-600 leading-relaxed">
-                                Our electronic signatures are fully compliant with e-signature laws (ESIGN, UETA, eIDAS) globally.
+                                {t('home.features.legal.description')}
                             </p>
                         </div>
 
@@ -76,9 +78,9 @@ const HomePage: React.FC = () => {
                             <div className="text-primary-600 p-3 inline-flex items-center justify-center w-14 h-14 mb-6 rounded-lg bg-primary-50">
                                 <ShieldCheck size={28} />
                             </div>
-                            <h3 className="text-xl font-bold mb-3">Secure & Private</h3>
+                            <h3 className="text-xl font-bold mb-3">{t('home.features.secure.title')}</h3>
                             <p className="text-secondary-600 leading-relaxed">
-                                Bank-grade encryption for your documents. Your data privacy and security are our top priorities.
+                                {t('home.features.secure.description')}
                             </p>
                         </div>
                     </div>
