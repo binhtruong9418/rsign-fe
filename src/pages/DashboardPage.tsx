@@ -98,9 +98,9 @@ const DashboardPage: React.FC = () => {
         <>
           <DocumentGrid documents={documents} />
           <Pagination
-            currentPage={currentPage}
+            currentPage={currentPage + 1}
             totalPages={totalPages}
-            onPageChange={handlePageChange}
+            onPageChange={(page) => handlePageChange(page - 1)}
           />
         </>
       )}

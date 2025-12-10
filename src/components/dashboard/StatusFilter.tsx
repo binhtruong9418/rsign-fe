@@ -37,7 +37,7 @@ const StatusFilter: React.FC<StatusFilterProps> = ({ value, onChange }) => {
         <select
           value={value}
           onChange={(e) => onChange(e.target.value as DocumentStatus | 'ALL')}
-          className="appearance-none bg-dark-card border border-gray-300 rounded-lg px-4 py-2 pr-10 text-sm font-medium text-white hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors cursor-pointer shadow-sm"
+          className="appearance-none bg-white border border-secondary-300 rounded-lg px-4 py-2 pr-10 text-sm font-medium text-secondary-900 hover:border-secondary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors cursor-pointer shadow-sm"
         >
           {statusOptions.map((option) => (
             <option key={option.value} value={option.value}>

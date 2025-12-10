@@ -165,7 +165,7 @@
   },
   "header": {
     "home": "Home",
-    "dashboard": "Dashboard",
+    "dashboard": "List Documents",
     "login": "Login",
     "register": "Register",
     "logout": "Logout"
