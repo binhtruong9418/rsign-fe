@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 
 const api = axios.create({
-  baseURL: 'https://rsign-be.ducbinh203.tech',
+  baseURL: 'https://api.rsign.io.vn',
   headers: {
     'Content-Type': 'application/json',
   },
