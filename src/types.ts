@@ -118,3 +118,106 @@ export interface FileUploadProps {
     acceptedTypes?: string;
     maxSize?: number;
 }
+
+// ============================================
+// V2 Signing Types (Session-based workflow)
+// ============================================
+
+// Signing Session
+export interface SigningSession {
+    id: string;
+    status: 'active' | 'completed' | 'expired';
+    expiresAt: number;
+    createdAt: number;
+}
+
+// Checkout Session Response
+export interface CheckoutSessionResponse {
+    sessionId: string;
+    expiresIn: number;
+    expiresAt: number;
+}
+
+// Signature Zone
+export interface SignatureZone {
+    id: string;
+    pageNumber: number;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    label?: string;
+}
+
+// Session Details Response
+export interface SessionDetailsResponse {
+    session: SigningSession;
+    document: {
+        id: string;
+        title: string;
+        originalFileUrl: string;
+        signatureZone: SignatureZone;
+    };
+    canSign: boolean;
+    reason?: string;
+}
+
+// Signature Data (V2)
+export interface SignatureDataV2 {
+    strokes: Stroke[];
+    color: string;
+    width: number;
+}
+
+// Submit Signature Request
+export interface SubmitSignatureRequest {
+    signatureData: SignatureDataV2;
+    idempotencyKey: string;
+}
+
+// Submit Signature Response
+export interface SubmitSignatureResponse {
+    success: boolean;
+    documentComplete: boolean;
+    documentSigner?: {
+        id: string;
+        status: string;
+        signedAt: string;
+    };
+}
+
+// Pending Document (V2)
+export interface PendingDocument {
+    documentSignerId: string;
+    document: {
+        id: string;
+        title: string;
+        createdBy: string;
+        deadline?: string;
+    };
+    status: 'PENDING' | 'SIGNED' | 'DECLINED';
+}
+
+// Paginated Response (V2)
+export interface PageDto<T> {
+    items: T[];
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+}
+
+// Document Details (V2)
+export interface DocumentDetailsV2 {
+    id: string;
+    document: {
+        id: string;
+        title: string;
+        originalFileUrl: string;
+        deadline?: string;
+    };
+    signatureZone: SignatureZone;
+    status: 'PENDING' | 'SIGNED' | 'DECLINED';
+}

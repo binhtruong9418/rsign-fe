@@ -1,0 +1,209 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { FileText, Calendar, User } from 'lucide-react';
+import LoadingSpinner from '../components/LoadingSpinner';
+import Pagination from '../components/Pagination';
+import { signingApi } from '../services/signingApi';
+import type { PendingDocument, PageDto } from '../types';
+
+const DashboardPage: React.FC = () => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  
+  const [documents, setDocuments] = useState<PageDto<PendingDocument> | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const pageSize = 10;
+
+  useEffect(() => {
+    loadPendingDocuments();
+  }, [currentPage]);
+
+  const loadPendingDocuments = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await signingApi.getPendingDocuments(currentPage, pageSize);
+      setDocuments(data);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load documents');
+      console.error('Failed to load pending documents:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleViewDocument = (documentSignerId: string) => {
+    navigate(`/documents/${documentSignerId}`);
+  };
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return null;
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
+  const getDeadlineStatus = (deadline?: string) => {
+    if (!deadline) return null;
+    
+    const now = new Date();
+    const deadlineDate = new Date(deadline);
+    const daysRemaining = Math.ceil((deadlineDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (daysRemaining < 0) {
+      return { text: 'Expired', className: 'bg-red-100 text-red-800' };
+    } else if (daysRemaining <= 3) {
+      return { text: `${daysRemaining} days left`, className: 'bg-orange-100 text-orange-800' };
+    } else if (daysRemaining <= 7) {
+      return { text: `${daysRemaining} days left`, className: 'bg-yellow-100 text-yellow-800' };
+    }
+    return { text: `${daysRemaining} days left`, className: 'bg-green-100 text-green-800' };
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-red-600 mb-4">{error}</p>
+        <button onClick={loadPendingDocuments} className="btn-primary">
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  const items = documents?.items || [];
+  const isEmpty = items.length === 0;
+
+  return (
+    <div className="max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-secondary-900">
+          {t('dashboard.pending_documents', 'Pending Documents')}
+        </h1>
+        <p className="text-secondary-600 mt-1">
+          {t('dashboard.pending_subtitle', 'Documents waiting for your signature')}
+        </p>
+      </div>
+
+      {/* Empty State */}
+      {isEmpty && (
+        <div className="text-center py-16 bg-white rounded-lg shadow-sm">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mb-4">
+            <FileText className="w-8 h-8 text-primary-600" />
+          </div>
+          <h3 className="text-xl font-semibold text-secondary-900 mb-2">
+            {t('dashboard.no_pending_documents', 'No Pending Documents')}
+          </h3>
+          <p className="text-secondary-600">
+            {t('dashboard.all_caught_up', "You're all caught up!")}
+          </p>
+        </div>
+      )}
+
+      {/* Document List */}
+      {!isEmpty && (
+        <>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {items.map((item) => {
+              const deadlineStatus = getDeadlineStatus(item.document.deadline);
+              
+              return (
+                <div
+                  key={item.documentSignerId}
+                  className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-6 cursor-pointer border border-secondary-200"
+                  onClick={() => handleViewDocument(item.documentSignerId)}
+                >
+                  {/* Document Icon */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex-shrink-0 w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
+                        <FileText className="w-6 h-6 text-primary-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-secondary-900 truncate">
+                          {item.document.title}
+                        </h3>
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mt-1">
+                          {item.status}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Document Info */}
+                  <div className="space-y-2 text-sm text-secondary-600">
+                    <div className="flex items-center gap-2">
+                      <User className="w-4 h-4" />
+                      <span className="truncate">{item.document.createdBy}</span>
+                    </div>
+                    
+                    {item.document.deadline && (
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4" />
+                        <span>{formatDate(item.document.deadline)}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Deadline Warning */}
+                  {deadlineStatus && (
+                    <div className="mt-4">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${deadlineStatus.className}`}>
+                        ⚠️ {deadlineStatus.text}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Action Button */}
+                  <div className="mt-4 pt-4 border-t border-secondary-200">
+                    <button className="w-full btn-primary text-sm py-2">
+                      {t('dashboard.view_and_sign', 'View & Sign')} →
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Pagination */}
+          {documents && documents.totalPages > 1 && (
+            <div className="mt-8">
+              <Pagination
+                currentPage={currentPage + 1}
+                totalPages={documents.totalPages}
+                onPageChange={(page) => setCurrentPage(page - 1)}
+              />
+            </div>
+          )}
+
+          {/* Summary */}
+          <div className="mt-6 text-center text-sm text-secondary-600">
+            {t('dashboard.showing_documents', {
+              start: currentPage * pageSize + 1,
+              end: Math.min((currentPage + 1) * pageSize, documents?.total || 0),
+              total: documents?.total || 0,
+              defaultValue: `Showing {{start}}-{{end}} of {{total}} documents`,
+            })}
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
+export default DashboardPage;
