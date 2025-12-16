@@ -125,17 +125,17 @@ const DashboardPage: React.FC = () => {
               return (
                 <div
                   key={item.documentSignerId}
-                  className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-6 cursor-pointer border border-secondary-200"
+                  className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 p-6 cursor-pointer border border-secondary-200 hover:border-primary-300 group"
                   onClick={() => handleViewDocument(item.documentSignerId)}
                 >
-                  {/* Document Icon */}
+                  {/* Header with Icon and Status */}
                   <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex-shrink-0 w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-primary-100 to-primary-50 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
                         <FileText className="w-6 h-6 text-primary-600" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-secondary-900 truncate">
+                        <h3 className="font-semibold text-secondary-900 truncate text-base group-hover:text-primary-600 transition-colors">
                           {item.document.title}
                         </h3>
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mt-1">
@@ -145,33 +145,47 @@ const DashboardPage: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Document Info */}
-                  <div className="space-y-2 text-sm text-secondary-600">
-                    <div className="flex items-center gap-2">
-                      <User className="w-4 h-4" />
+                  {/* Document Info Grid */}
+                  <div className="space-y-2.5 text-sm">
+                    {/* Created By */}
+                    <div className="flex items-center gap-2 text-secondary-600">
+                      <User className="w-4 h-4 flex-shrink-0" />
                       <span className="truncate">{item.document.createdBy}</span>
                     </div>
                     
+                    {/* Deadline */}
                     {item.document.deadline && (
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4" />
-                        <span>{formatDate(item.document.deadline)}</span>
+                      <div className="flex items-center gap-2 text-secondary-600">
+                        <Calendar className="w-4 h-4 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <span className="truncate">{formatDate(item.document.deadline)}</span>
+                          {deadlineStatus && (
+                            <span className={`ml-2 text-xs font-medium ${
+                              deadlineStatus.className.includes('red') ? 'text-red-600' :
+                              deadlineStatus.className.includes('orange') ? 'text-orange-600' :
+                              deadlineStatus.className.includes('yellow') ? 'text-yellow-600' :
+                              'text-green-600'
+                            }`}>
+                              ({deadlineStatus.text})
+                            </span>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
 
-                  {/* Deadline Warning */}
-                  {deadlineStatus && (
+                  {/* Deadline Warning Badge */}
+                  {deadlineStatus && (deadlineStatus.className.includes('red') || deadlineStatus.className.includes('orange')) && (
                     <div className="mt-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${deadlineStatus.className}`}>
+                      <div className={`inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium ${deadlineStatus.className}`}>
                         ⚠️ {deadlineStatus.text}
-                      </span>
+                      </div>
                     </div>
                   )}
 
                   {/* Action Button */}
-                  <div className="mt-4 pt-4 border-t border-secondary-200">
-                    <button className="w-full btn-primary text-sm py-2">
+                  <div className="mt-5 pt-4 border-t border-secondary-200">
+                    <button className="w-full btn-primary text-sm py-2.5 group-hover:shadow-md transition-shadow">
                       {t('dashboard.view_and_sign', 'View & Sign')} →
                     </button>
                   </div>
