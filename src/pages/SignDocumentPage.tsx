@@ -84,7 +84,7 @@ const SignDocumentPage: React.FC = () => {
                         <>
                             {documentData.status === 'COMPLETED' ? (
                                 <div className="flex-grow flex items-center justify-center p-6">
-                                    <CompletedDocumentView document={documentData} />
+                                    <CompletedDocumentView />
                                 </div>
                             ) : view === 'document' ? (
                                 <DocumentReviewView
