@@ -50,10 +50,20 @@ const ensureDocxPreviewStyles = () => {
 
 export type DocumentMediaType = 'image' | 'pdf' | 'docx' | 'unknown';
 
+interface SignatureZone {
+  pageNumber: number;
+  x: number;        // Percentage (0-100) from left edge
+  y: number;        // Percentage (0-100) from top edge
+  width: number;    // Percentage (0-100) of page width
+  height: number;   // Percentage (0-100) of page height
+  label?: string;
+}
+
 interface DocumentContentViewerProps {
   documentUri: string;
   documentTitle: string;
   className?: string;
+  signatureZone?: SignatureZone;  // Optional signature zone to highlight
 }
 
 const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
@@ -96,6 +106,7 @@ const DocumentContentViewer: React.FC<DocumentContentViewerProps> = ({
   documentUri,
   documentTitle,
   className = '',
+  signatureZone,
 }) => {
   const mediaType = useMemo(() => detectDocumentMediaType(documentUri), [documentUri]);
   const [scale, setScale] = useState(1);
@@ -146,7 +157,7 @@ const DocumentContentViewer: React.FC<DocumentContentViewerProps> = ({
       case 'image':
         return <ImagePreview url={documentUri} title={documentTitle} scale={scale} rotation={rotation} />;
       case 'pdf':
-        return <PdfPreview url={documentUri} scale={scale} rotation={rotation} />;
+        return <PdfPreview url={documentUri} scale={scale} rotation={rotation} signatureZone={signatureZone} />;
       case 'docx':
         return <DocxPreview url={documentUri} scale={scale} rotation={rotation} />;
       default:
@@ -202,9 +213,10 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({ url, title, scale, rotation
 
 interface PdfPreviewProps extends PreviewProps {
   url: string;
+  signatureZone?: SignatureZone;
 }
 
-const PdfPreview: React.FC<PdfPreviewProps> = ({ url, scale, rotation }) => {
+const PdfPreview: React.FC<PdfPreviewProps> = ({ url, scale, rotation, signatureZone }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -256,9 +268,52 @@ const PdfPreview: React.FC<PdfPreviewProps> = ({ url, scale, rotation }) => {
           
           canvas.className = 'mb-4 rounded-md shadow-md border border-secondary-200 bg-white';
 
-          container.appendChild(canvas);
-
+          // Render the page first
           await page.render({ canvasContext: context, viewport }).promise;
+
+          // Create wrapper for canvas + signature zone overlay
+          const pageWrapper = document.createElement('div');
+          pageWrapper.className = 'relative mb-4 inline-block';
+          pageWrapper.appendChild(canvas);
+
+          container.appendChild(pageWrapper);
+
+          // Add signature zone highlight if this is the signature page
+          if (signatureZone && pageNumber === signatureZone.pageNumber) {
+            // Backend now sends percentage values (0-100) directly
+            // No conversion needed - just use them as-is
+            
+            // Create overlay using percentage positioning
+            const overlay = document.createElement('div');
+            overlay.className = 'absolute border-4 border-red-500 bg-red-500/10 pointer-events-none rounded';
+            overlay.style.left = `${signatureZone.x}%`;
+            overlay.style.top = `${signatureZone.y}%`;
+            overlay.style.width = `${signatureZone.width}%`;
+            overlay.style.height = `${signatureZone.height}%`;
+
+            // Add label if provided
+            if (signatureZone.label) {
+              const label = document.createElement('div');
+              label.className = 'absolute -top-6 left-0 bg-red-500 text-white text-xs px-2 py-1 rounded font-semibold shadow-md whitespace-nowrap';
+              label.textContent = signatureZone.label;
+              overlay.appendChild(label);
+            } else {
+              const label = document.createElement('div');
+              label.className = 'absolute -top-6 left-0 bg-red-500 text-white text-xs px-2 py-1 rounded font-semibold shadow-md whitespace-nowrap';
+              label.textContent = '✍️ Sign Here';
+              overlay.appendChild(label);
+            }
+
+            pageWrapper.appendChild(overlay);
+
+            // Auto-scroll to signature zone
+            setTimeout(() => {
+              if (isMounted) {
+                pageWrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+            }, 100);
+          }
+
           page.cleanup();
         }
 
@@ -278,7 +333,7 @@ const PdfPreview: React.FC<PdfPreviewProps> = ({ url, scale, rotation }) => {
       container.innerHTML = '';
       loadingTask.destroy();
     };
-  }, [url, scale, rotation]); // Re-render when scale or rotation changes
+  }, [url, scale, rotation, signatureZone]); // Re-render when signatureZone changes
 
   return (
     <div className="relative w-full flex justify-center">

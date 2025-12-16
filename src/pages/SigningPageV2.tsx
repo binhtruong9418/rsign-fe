@@ -264,6 +264,7 @@ const SigningPageV2: React.FC = () => {
                   documentUri={document.originalFileUrl}
                   documentTitle={document.title}
                   className="h-full w-full shadow-sm bg-white"
+                  signatureZone={document.signatureZone}
                 />
               </div>
 
