@@ -47,7 +47,7 @@ const SigningPageV2: React.FC = () => {
       e.returnValue = '';
 
       // Best-effort cancel using Beacon API
-      const apiUrl = 'https://api-beta.rsign.io.vn';
+      const apiUrl = import.meta.env.VITE_API_URL;
       navigator.sendBeacon(`${apiUrl}/documents/sessions/${sessionId}/cancel`);
     };
 
