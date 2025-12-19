@@ -117,4 +117,11 @@ export const signingApi = {
     const response = await api.post(`/api/documents/multi-sessions/${sessionId}/sign`, data);
     return response.data;
   },
+
+  /**
+   * Cancel multi-signature session and release all locks
+   */
+  cancelMultiSession: async (sessionId: string): Promise<void> => {
+    await api.delete(`/api/documents/multi-sessions/${sessionId}/cancel`);
+  },
 };

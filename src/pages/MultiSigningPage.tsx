@@ -46,7 +46,9 @@ const MultiSigningPage: React.FC = () => {
 
             // Best-effort cancel using Beacon API
             const apiUrl = import.meta.env.VITE_API_URL;
-            navigator.sendBeacon(`${apiUrl}/documents/sessions/${sessionId}/cancel`);
+            navigator.sendBeacon(`${apiUrl}/documents/multi-sessions/${sessionId}/cancel`,
+                new Blob([JSON.stringify({})], { type: 'application/json' })
+            );
         };
 
         window.addEventListener('beforeunload', handleBeforeUnload);
@@ -187,9 +189,9 @@ const MultiSigningPage: React.FC = () => {
         if (!sessionId) return;
 
         try {
-            await signingApi.cancelSession(sessionId);
+            await signingApi.cancelMultiSession(sessionId);
         } catch (err) {
-            console.error('Failed to cancel session:', err);
+            console.error('Failed to cancel multi-signature session:', err);
         } finally {
             navigate('/dashboard');
         }
