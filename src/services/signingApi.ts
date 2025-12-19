@@ -7,6 +7,11 @@ import type {
   PendingDocument,
   PageDto,
   DocumentDetailsV2,
+  MultiSignatureSessionResponse,
+  MultiDocumentDetailsResponse,
+  MultiSessionDetailsResponse,
+  MultiSignatureSubmitRequest,
+  MultiSignatureSubmitResponse,
 } from '../types';
 
 /**
@@ -75,6 +80,41 @@ export const signingApi = {
     reason?: string
   ): Promise<{ success: boolean }> => {
     const response = await api.post(`/api/documents/${documentSignerId}/decline`, { reason });
+    return response.data;
+  },
+
+  /**
+   * Get multi-document details before creating session
+   */
+  getMultiDocumentDetails: async (documentId: string): Promise<MultiDocumentDetailsResponse> => {
+    const response = await api.get(`/api/documents/multi/${documentId}/details`);
+    return response.data;
+  },
+
+  /**
+   * Create multi-signature session for a document
+   */
+  createMultiCheckoutSession: async (documentId: string): Promise<MultiSignatureSessionResponse> => {
+    const response = await api.post(`/api/documents/multi/${documentId}/checkout`);
+    return response.data;
+  },
+
+  /**
+   * Get multi-signature session details
+   */
+  getMultiSession: async (sessionId: string): Promise<MultiSessionDetailsResponse> => {
+    const response = await api.get(`/api/documents/multi-sessions/${sessionId}`);
+    return response.data;
+  },
+
+  /**
+   * Submit multiple signatures in one session
+   */
+  submitMultiSignatures: async (
+    sessionId: string,
+    data: MultiSignatureSubmitRequest
+  ): Promise<MultiSignatureSubmitResponse> => {
+    const response = await api.post(`/api/documents/multi-sessions/${sessionId}/sign`, data);
     return response.data;
   },
 };

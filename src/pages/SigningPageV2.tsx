@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
 import DocumentContentViewer from '../components/DocumentContentViewer';
-import SignaturePad, { SignaturePadRef } from '../components/SignaturePad';
+import SingleSignatureView from '../components/sign/SingleSignatureView';
 import Header from '../components/Header';
 import SessionTimer from '../components/SessionTimer';
 import { signingApi } from '../services/signingApi';
@@ -20,7 +19,6 @@ const SigningPageV2: React.FC = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const signaturePadRef = useRef<SignaturePadRef>(null);
 
   const [sessionDetails, setSessionDetails] = useState<SessionDetailsResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -103,14 +101,8 @@ const SigningPageV2: React.FC = () => {
     navigate('/dashboard');
   }, [navigate, t]);
 
-  const handleSubmitSignature = async () => {
+  const handleSubmitSignature = async (strokesData: Stroke[]) => {
     if (!sessionId) return;
-
-    const strokesData = signaturePadRef.current?.getSignature();
-    if (!strokesData || strokesData.length === 0) {
-      showToast.warning(t('sign_document.provide_signature', 'Please draw your signature first'));
-      return;
-    }
 
     setSubmitting(true);
 
@@ -118,10 +110,9 @@ const SigningPageV2: React.FC = () => {
       // Generate idempotency key
       const idempotencyKey = crypto.randomUUID();
 
-      // strokesData is already in correct Stroke[] format from SignaturePad
       const response = await signingApi.submitSignature(sessionId, {
         signatureData: {
-          strokes: strokesData,  // Already has id and points
+          strokes: strokesData,
           color: DEFAULT_SIGNATURE_COLOR,
           width: DEFAULT_SIGNATURE_WIDTH,
         },
@@ -146,7 +137,7 @@ const SigningPageV2: React.FC = () => {
         onSigningInProgress: () => {
           // Retry after 1 second
           showToast.info(t('errors.signing_in_progress', 'Signing in progress, retrying...'));
-          setTimeout(() => handleSubmitSignature(), 1000);
+          setTimeout(() => handleSubmitSignature(strokesData), 1000);
         },
         onTooManyAttempts: () => {
           showToast.error(t('errors.too_many_attempts', 'Too many attempts. Please create a new session.'));
@@ -159,10 +150,6 @@ const SigningPageV2: React.FC = () => {
     } finally {
       setSubmitting(false);
     }
-  };
-
-  const handleClearSignature = () => {
-    signaturePadRef.current?.clear();
   };
 
   const handleBack = () => {
@@ -278,63 +265,14 @@ const SigningPageV2: React.FC = () => {
               </div>
             </div>
           ) : (
-            // Signature View
-            <div className="flex flex-col h-full relative bg-secondary-50 sm:bg-white">
-              {/* Header / Back Button Area */}
-              <div className="absolute top-4 left-4 z-10">
-                <button
-                  onClick={handleBack}
-                  className="flex items-center space-x-2 bg-white/90 backdrop-blur-sm text-secondary-600 hover:text-primary-600 pl-2 pr-3 py-2 rounded-full shadow-sm border border-secondary-200 transition-colors"
-                  aria-label="Back to document"
-                >
-                  <ArrowLeft size={20} />
-                  <span className="text-sm font-medium">
-                    {t('sign_components.signature_view.back', 'Back')}
-                  </span>
-                </button>
-              </div>
-
-              {/* Session Timer in Sign View */}
-              <div className="absolute top-4 right-4 z-10">
-                <div className="bg-white/90 backdrop-blur-sm px-3 py-2 rounded-full shadow-sm border border-secondary-200">
-                  <SessionTimer expiresAt={session.expiresAt} onExpired={handleSessionExpired} />
-                </div>
-              </div>
-
-              {/* Signature Area */}
-              <div className="flex-grow flex items-center justify-center p-4 sm:p-0 overflow-hidden">
-                {/* Mobile: Square & Centered. Desktop: Full size */}
-                <div className="w-full aspect-square max-w-[400px] sm:max-w-none sm:w-full sm:h-full sm:aspect-auto bg-white border border-secondary-200 sm:border-0 rounded-2xl sm:rounded-none shadow-sm sm:shadow-none overflow-hidden relative">
-                  <SignaturePad
-                    ref={signaturePadRef}
-                    strokeColor={DEFAULT_SIGNATURE_COLOR}
-                    strokeWidth={DEFAULT_SIGNATURE_WIDTH}
-                  />
-                  {/* Helper text for mobile */}
-                  <div className="absolute bottom-4 left-0 right-0 text-center pointer-events-none sm:hidden">
-                    <span className="text-xs text-secondary-400 bg-white/80 px-2 py-1 rounded-full backdrop-blur-sm">
-                      {t('sign_components.signature_view.sign_above', 'Sign above')}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Buttons Area */}
-              <div className="p-4 bg-white border-t border-secondary-200 sm:border-t-0 flex gap-4 shrink-0 z-20">
-                <button onClick={handleClearSignature} className="flex-1 btn-secondary py-3 text-base">
-                  {t('sign_components.signature_view.clear', 'Clear')}
-                </button>
-                <button
-                  onClick={handleSubmitSignature}
-                  disabled={submitting}
-                  className="flex-1 btn-primary py-3 text-base disabled:opacity-50 disabled:cursor-not-allowed shadow-lg sm:shadow-sm"
-                >
-                  {submitting
-                    ? t('sign_components.signature_view.submitting', 'Submitting...')
-                    : t('sign_components.signature_view.sign', 'Sign')}
-                </button>
-              </div>
-            </div>
+            // Single Signature View
+            <SingleSignatureView
+              onBack={handleBack}
+              onSubmit={handleSubmitSignature}
+              isSubmitting={submitting}
+              documentTitle={document.title}
+              signatureLabel={document.signatureZone.label}
+            />
           )}
         </div>
       </div>

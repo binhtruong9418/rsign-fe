@@ -157,7 +157,66 @@ export interface SessionDetailsResponse {
         title: string;
         originalFileUrl: string;
         signatureZone: SignatureZone;
+        deadline?: string;
     };
+    canSign: boolean;
+    reason?: string;
+}
+
+// Multi-Signature Session Response
+export interface MultiSignatureSessionResponse {
+    sessionId: string;
+    expiresIn: number;
+    expiresAt: number;
+    totalSignatures: number;
+}
+
+// Multi-Document Details Response (before creating session)
+export interface MultiDocumentDetailsResponse {
+    document: {
+        id: string;
+        title: string;
+        originalFileUrl: string;
+        deadline?: string;
+        status: string;
+        createdBy: {
+            id: string;
+            fullName: string;
+            email: string;
+        };
+        createdAt: string;
+    };
+    signatureZones: Array<{
+        documentSignerId: string;
+        signatureZone: SignatureZone;
+        status: 'PENDING' | 'SIGNED' | 'DECLINED';
+        stepOrder: number;
+    }>;
+    totalSignatures: number;
+    canUseMultiSign: boolean;
+    allSignaturesStatus: string;
+}
+
+// Multi-Signature Session Details
+export interface MultiSessionDetailsResponse {
+    session: {
+        id: string;
+        documentId: string;
+        totalSignatures: number;
+        completedSignatures: string[];
+        status: 'active' | 'completed' | 'expired';
+        expiresAt: number;
+    };
+    document: {
+        id: string;
+        title: string;
+        originalFileUrl: string;
+        deadline?: string;
+    };
+    pendingSignatures: Array<{
+        documentSignerId: string;
+        signatureZone: SignatureZone;
+    }>;
     canSign: boolean;
     reason?: string;
 }
@@ -184,17 +243,54 @@ export interface SubmitSignatureResponse {
         status: string;
         signedAt: string;
     };
+    signedFileUrl?: string;
+}
+
+// Multi-Signature Submit Request
+export interface MultiSignatureSubmitRequest {
+    signatures: Array<{
+        documentSignerId: string;
+        signatureData: SignatureDataV2;
+    }>;
+    idempotencyKey: string;
+}
+
+// Multi-Signature Submit Response
+export interface MultiSignatureSubmitResponse {
+    success: boolean;
+    documentComplete: boolean;
+    completedSignatures: string[];
+    pendingSignatures: string[];
+    totalSignatures: number;
+    signedFileUrl?: string;
+    errors?: Array<{
+        documentSignerId: string;
+        error: string;
+        message: string;
+    }>;
 }
 
 // Pending Document (V2)
 export interface PendingDocument {
-    documentSignerId: string;
+    documentId: string;
+    documentSignerId?: string;
     document: {
         id: string;
         title: string;
-        createdBy: string;
+        originalFileUrl: string;
+        createdBy?: string | {
+            id: string;
+            fullName: string;
+            email: string;
+        };
         deadline?: string;
+        batchId?: string;
     };
+    signers?: Array<{
+        documentSignerId: string;
+        signatureZone: SignatureZone;
+    }>;
+    canUseMultiSign?: boolean;
     status: 'PENDING' | 'SIGNED' | 'DECLINED';
 }
 

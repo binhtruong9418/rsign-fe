@@ -159,6 +159,8 @@ const DocumentDetailPageV2: React.FC = () => {
             <DocumentContentViewer
               documentUri={details.document.originalFileUrl}
               documentTitle={details.document.title}
+              className="h-full w-full"
+              signatureZone={details.signatureZone}
             />
           </div>
         </div>

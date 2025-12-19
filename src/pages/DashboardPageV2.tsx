@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FileText, Calendar, User } from 'lucide-react';
+import { FileText, Calendar, User, Users } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Pagination from '../components/Pagination';
 import { signingApi } from '../services/signingApi';
@@ -35,8 +35,22 @@ const DashboardPage: React.FC = () => {
     }
   };
 
-  const handleViewDocument = (documentSignerId: string) => {
-    navigate(`/documents/${documentSignerId}`);
+  const handleViewDocument = (item: PendingDocument) => {
+    // If document has multiple signatures, go to multi-document detail
+    if (item.canUseMultiSign && item.signers && item.signers.length > 1) {
+      navigate(`/multi-documents/${item.documentId}`);
+    } else if (item.documentSignerId) {
+      // Single signature - use old flow
+      navigate(`/documents/${item.documentSignerId}`);
+    } else {
+      // Fallback: if documentSignerId is missing but we have signers array
+      const firstSigner = item.signers?.[0];
+      if (firstSigner?.documentSignerId) {
+        navigate(`/documents/${firstSigner.documentSignerId}`);
+      } else {
+        console.error('Cannot navigate: missing documentSignerId', item);
+      }
+    }
   };
 
   const formatDate = (dateString?: string) => {
@@ -49,13 +63,22 @@ const DashboardPage: React.FC = () => {
     });
   };
 
+  const getCreatorName = (createdBy: any): string | null => {
+    if (!createdBy) return null;
+    if (typeof createdBy === 'string') return createdBy;
+    if (typeof createdBy === 'object') {
+      return createdBy.fullName || createdBy.email || null;
+    }
+    return null;
+  };
+
   const getDeadlineStatus = (deadline?: string) => {
     if (!deadline) return null;
-    
+
     const now = new Date();
     const deadlineDate = new Date(deadline);
     const daysRemaining = Math.ceil((deadlineDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    
+
     if (daysRemaining < 0) {
       return { text: 'Expired', className: 'bg-red-100 text-red-800' };
     } else if (daysRemaining <= 3) {
@@ -121,12 +144,14 @@ const DashboardPage: React.FC = () => {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {items.map((item) => {
               const deadlineStatus = getDeadlineStatus(item.document.deadline);
-              
+              const isMultiSign = item.canUseMultiSign && item.signers && item.signers.length > 1;
+              const signatureCount = isMultiSign ? item.signers!.length : 1;
+
               return (
                 <div
-                  key={item.documentSignerId}
+                  key={item.documentSignerId || item.documentId}
                   className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 p-6 cursor-pointer border border-secondary-200 hover:border-primary-300 group"
-                  onClick={() => handleViewDocument(item.documentSignerId)}
+                  onClick={() => handleViewDocument(item)}
                 >
                   {/* Header with Icon and Status */}
                   <div className="flex items-start justify-between mb-4">
@@ -138,9 +163,17 @@ const DashboardPage: React.FC = () => {
                         <h3 className="font-semibold text-secondary-900 truncate text-base group-hover:text-primary-600 transition-colors">
                           {item.document.title}
                         </h3>
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mt-1">
-                          {item.status}
-                        </span>
+                        <div className="flex gap-2 mt-1 flex-wrap">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            {item.status}
+                          </span>
+                          {isMultiSign && (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                              <Users size={12} />
+                              {signatureCount} {t('dashboard.signatures', 'signatures')}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -148,10 +181,14 @@ const DashboardPage: React.FC = () => {
                   {/* Document Info Grid */}
                   <div className="space-y-2.5 text-sm">
                     {/* Created By */}
-                    <div className="flex items-center gap-2 text-secondary-600">
-                      <User className="w-4 h-4 flex-shrink-0" />
-                      <span className="truncate">{item.document.createdBy}</span>
-                    </div>
+                    {getCreatorName(item.document.createdBy) && (
+                      <div className="flex items-center gap-2 text-secondary-600">
+                        <User className="w-4 h-4 flex-shrink-0" />
+                        <span className="truncate">
+                          {getCreatorName(item.document.createdBy)}
+                        </span>
+                      </div>
+                    )}
                     
                     {/* Deadline */}
                     {item.document.deadline && (
@@ -186,7 +223,10 @@ const DashboardPage: React.FC = () => {
                   {/* Action Button */}
                   <div className="mt-5 pt-4 border-t border-secondary-200">
                     <button className="w-full btn-primary text-sm py-2.5 group-hover:shadow-md transition-shadow">
-                      {t('dashboard.view_and_sign', 'View & Sign')} →
+                      {isMultiSign
+                        ? `${t('dashboard.sign_all', 'Sign All')} (${signatureCount})`
+                        : t('dashboard.view_and_sign', 'View & Sign')
+                      } →
                     </button>
                   </div>
                 </div>
