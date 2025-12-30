@@ -11,6 +11,18 @@
       "sign": "Ký tài liệu",
       "submitting": "Đang gửi...",
       "sign_above": "Ký bên trên"
+    },
+    "document_viewer": {
+      "zoom_in": "Phóng to",
+      "zoom_out": "Thu nhỏ",
+      "rotate": "Xoay",
+      "reset": "Đặt lại",
+      "download": "Tải xuống tài liệu",
+      "unsupported_type": "Không hỗ trợ xem trước loại tệp này.",
+      "no_document": "Không có tài liệu để xem trước.",
+      "loading_error": "Không thể tải tài liệu.",
+      "pdf_error": "Không thể tải tài liệu PDF.",
+      "docx_error": "Không thể tải tài liệu DOCX."
     }
   },
 
@@ -89,7 +101,55 @@
     "share_link_title": "Chia sẻ liên kết ký",
     "session_expires": "Phiên hết hạn sau {{seconds}} giây",
     "link_unavailable": "Liên kết ký không khả dụng",
-    "link_unavailable_desc": "Không thể tạo phiên ký cho tài liệu này."
+    "link_unavailable_desc": "Không thể tạo phiên ký cho tài liệu này.",
+    "document_preview": "Xem trước tài liệu",
+    "information": "Thông tin tài liệu",
+    "status": "Trạng thái",
+    "signature_location": "Vị trí chữ ký",
+    "page_number": "Trang {{page}}",
+    "actions": "Hành động",
+    "start_signing": "Bắt đầu ký",
+    "decline": "Từ chối tài liệu",
+    "decline_reason": "Lý do từ chối (tùy chọn):",
+    "declined_success": "Đã từ chối tài liệu thành công",
+    "cannot_sign": "Không thể ký tài liệu này nữa",
+    "help_text": "Nhấp \"Bắt đầu ký\" để bắt đầu quá trình ký. Bạn sẽ có 30 phút để hoàn thành chữ ký.",
+    "urgent_warning": "Tài liệu này sẽ hết hạn trong {{days}} ngày",
+    "days_remaining": "ngày còn lại"
+  },
+  "dashboard": {
+    "title": "Tài liệu",
+    "subtitle": "Quản lý và theo dõi các yêu cầu ký của bạn",
+    "new_document": "Tài liệu mới",
+    "search_placeholder": "Tìm kiếm tài liệu theo tiêu đề...",
+    "error": "Lỗi: {{message}}",
+    "empty_state": {
+        "title": "Không tìm thấy tài liệu",
+        "description": "Tạo tài liệu mới để bắt đầu"
+    },
+    "pending_documents": "Tài liệu chờ ký",
+    "pending_subtitle": "Các tài liệu đang chờ chữ ký của bạn",
+    "no_pending_documents": "Không có tài liệu chờ ký",
+    "all_caught_up": "Bạn đã hoàn thành tất cả!",
+    "view_and_sign": "Xem & Ký",
+    "showing_documents": "Hiển thị {{start}}-{{end}} trong tổng số {{total}} tài liệu"
+  },
+  "signing": {
+    "session_active": "Phiên đang hoạt động",
+    "cancel_confirm_title": "Hủy ký?",
+    "cancel_confirm_message": "Bạn có chắc chắn muốn hủy? Tiến trình của bạn sẽ bị mất."
+  },
+  "errors": {
+    "document_locked": "Tài liệu này hiện đang được ký trên thiết bị khác. Vui lòng thử lại sau.",
+    "failed_to_start_signing": "Không thể bắt đầu phiên ký",
+    "failed_to_decline": "Không thể từ chối tài liệu",
+    "cannot_sign": "Không thể ký tài liệu này",
+    "session_expired": "Phiên đã hết hạn. Vui lòng thử lại.",
+    "session_not_found": "Không tìm thấy phiên. Vui lòng thử lại.",
+    "device_mismatch": "Phiên này được tạo trên thiết bị khác. Vui lòng tạo phiên mới trên thiết bị này.",
+    "signing_in_progress": "Đang ký, đang thử lại...",
+    "too_many_attempts": "Quá nhiều lần thử. Vui lòng tạo phiên mới.",
+    "failed_to_sign": "Không thể gửi chữ ký"
   },
   "auth": {
     "login": {
@@ -170,17 +230,6 @@
     "register": "Đăng ký",
     "logout": "Đăng xuất"
   },
-  "dashboard": {
-    "title": "Tài liệu",
-    "subtitle": "Quản lý và theo dõi các yêu cầu ký của bạn",
-    "new_document": "Tài liệu mới",
-    "search_placeholder": "Tìm kiếm tài liệu theo tiêu đề...",
-    "error": "Lỗi: {{message}}",
-    "empty_state": {
-        "title": "Không tìm thấy tài liệu",
-        "description": "Tạo tài liệu mới để bắt đầu"
-    }
-  },
   "common": {
     "loading": "Đang tải...",
     "cancel": "Hủy",
@@ -188,6 +237,10 @@
     "delete": "Xóa",
     "edit": "Sửa",
     "view": "Xem",
+    "back": "Quay lại",
+    "yes": "Có, Hủy",
+    "no": "Không, Tiếp tục",
+    "retry": "Thử lại",
     "pagination": {
       "previous": "Trước",
       "next": "Tiếp",

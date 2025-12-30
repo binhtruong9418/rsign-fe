@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AlertTriangle, Loader2, ZoomIn, ZoomOut, RotateCw, Maximize, RefreshCw } from 'lucide-react';
 import { GlobalWorkerOptions, getDocument, PDFDocumentProxy } from 'pdfjs-dist';
+import { useTranslation } from 'react-i18next';
 // @ts-ignore - Vite resolves ?url assets at build time
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.js?url';
 import { renderAsync } from 'docx-preview';
@@ -50,10 +51,21 @@ const ensureDocxPreviewStyles = () => {
 
 export type DocumentMediaType = 'image' | 'pdf' | 'docx' | 'unknown';
 
+interface SignatureZone {
+  pageNumber: number;
+  x: number;        // Percentage (0-100) from left edge
+  y: number;        // Percentage (0-100) from top edge
+  width: number;    // Percentage (0-100) of page width
+  height: number;   // Percentage (0-100) of page height
+  label?: string;
+}
+
 interface DocumentContentViewerProps {
   documentUri: string;
   documentTitle: string;
   className?: string;
+  signatureZone?: SignatureZone;  // Optional single signature zone to highlight
+  signatureZones?: SignatureZone[];  // Optional multiple signature zones to highlight
 }
 
 const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
@@ -96,10 +108,24 @@ const DocumentContentViewer: React.FC<DocumentContentViewerProps> = ({
   documentUri,
   documentTitle,
   className = '',
+  signatureZone,
+  signatureZones,
 }) => {
+  const { t } = useTranslation();
   const mediaType = useMemo(() => detectDocumentMediaType(documentUri), [documentUri]);
   const [scale, setScale] = useState(1);
   const [rotation, setRotation] = useState(0);
+
+  // Combine single zone and multiple zones into one array
+  const allZones = useMemo(() => {
+    if (signatureZones && signatureZones.length > 0) {
+      return signatureZones;
+    }
+    if (signatureZone) {
+      return [signatureZone];
+    }
+    return [];
+  }, [signatureZone, signatureZones]);
 
   const handleZoomIn = () => setScale(prev => Math.min(prev + 0.1, 3));
   const handleZoomOut = () => setScale(prev => Math.max(prev - 0.1, 0.5));
@@ -112,7 +138,7 @@ const DocumentContentViewer: React.FC<DocumentContentViewerProps> = ({
   if (!documentUri) {
     return (
       <div className={`flex items-center justify-center rounded-lg border border-secondary-200 bg-secondary-50 p-6 text-sm text-secondary-500 ${className}`}>
-        No document available to preview.
+        {t('sign_components.document_viewer.no_document')}
       </div>
     );
   }
@@ -123,18 +149,18 @@ const DocumentContentViewer: React.FC<DocumentContentViewerProps> = ({
         <span className="text-xs font-medium text-secondary-500 uppercase tracking-wider">{mediaType}</span>
       </div>
       <div className="flex items-center space-x-1 bg-secondary-100 rounded-lg p-1">
-        <button onClick={handleZoomOut} className="p-1.5 text-secondary-600 hover:text-primary-600 hover:bg-white rounded-md transition-all" title="Zoom Out">
+        <button onClick={handleZoomOut} className="p-1.5 text-secondary-600 hover:text-primary-600 hover:bg-white rounded-md transition-all" title={t('sign_components.document_viewer.zoom_out')}>
           <ZoomOut size={18} />
         </button>
         <span className="text-xs font-medium text-secondary-700 w-12 text-center">{Math.round(scale * 100)}%</span>
-        <button onClick={handleZoomIn} className="p-1.5 text-secondary-600 hover:text-primary-600 hover:bg-white rounded-md transition-all" title="Zoom In">
+        <button onClick={handleZoomIn} className="p-1.5 text-secondary-600 hover:text-primary-600 hover:bg-white rounded-md transition-all" title={t('sign_components.document_viewer.zoom_in')}>
           <ZoomIn size={18} />
         </button>
         <div className="w-px h-4 bg-secondary-300 mx-1"></div>
-        <button onClick={handleRotate} className="p-1.5 text-secondary-600 hover:text-primary-600 hover:bg-white rounded-md transition-all" title="Rotate">
+        <button onClick={handleRotate} className="p-1.5 text-secondary-600 hover:text-primary-600 hover:bg-white rounded-md transition-all" title={t('sign_components.document_viewer.rotate')}>
           <RotateCw size={18} />
         </button>
-        <button onClick={handleReset} className="p-1.5 text-secondary-600 hover:text-primary-600 hover:bg-white rounded-md transition-all" title="Reset View">
+        <button onClick={handleReset} className="p-1.5 text-secondary-600 hover:text-primary-600 hover:bg-white rounded-md transition-all" title={t('sign_components.document_viewer.reset')}>
           <RefreshCw size={18} />
         </button>
       </div>
@@ -146,21 +172,21 @@ const DocumentContentViewer: React.FC<DocumentContentViewerProps> = ({
       case 'image':
         return <ImagePreview url={documentUri} title={documentTitle} scale={scale} rotation={rotation} />;
       case 'pdf':
-        return <PdfPreview url={documentUri} scale={scale} rotation={rotation} />;
+        return <PdfPreview url={documentUri} scale={scale} rotation={rotation} signatureZones={allZones} />;
       case 'docx':
         return <DocxPreview url={documentUri} scale={scale} rotation={rotation} />;
       default:
         return (
           <div className="flex flex-col items-center justify-center gap-3 p-12 text-center text-sm text-secondary-500">
             <AlertTriangle className="h-8 w-8 text-yellow-600" />
-            <p>Preview is unsupported for this file type.</p>
+            <p>{t('sign_components.document_viewer.unsupported_type')}</p>
             <a
               href={documentUri}
               target="_blank"
               rel="noopener noreferrer"
               className="btn-primary text-sm"
             >
-              Download document
+              {t('sign_components.document_viewer.download')}
             </a>
           </div>
         );
@@ -202,9 +228,11 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({ url, title, scale, rotation
 
 interface PdfPreviewProps extends PreviewProps {
   url: string;
+  signatureZones?: SignatureZone[];
 }
 
-const PdfPreview: React.FC<PdfPreviewProps> = ({ url, scale, rotation }) => {
+const PdfPreview: React.FC<PdfPreviewProps> = ({ url, scale, rotation, signatureZones = [] }) => {
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -256,9 +284,62 @@ const PdfPreview: React.FC<PdfPreviewProps> = ({ url, scale, rotation }) => {
           
           canvas.className = 'mb-4 rounded-md shadow-md border border-secondary-200 bg-white';
 
-          container.appendChild(canvas);
-
+          // Render the page first
           await page.render({ canvasContext: context, viewport }).promise;
+
+          // Create wrapper for canvas + signature zone overlay
+          const pageWrapper = document.createElement('div');
+          pageWrapper.className = 'relative mb-4 inline-block';
+          pageWrapper.appendChild(canvas);
+
+          container.appendChild(pageWrapper);
+
+          // Add signature zone highlights for all zones on this page
+          const zonesOnThisPage = signatureZones.filter(zone => zone.pageNumber === pageNumber);
+          let shouldScrollToPage = false;
+
+          zonesOnThisPage.forEach((zone, zoneIndex) => {
+            // Backend now sends percentage values (0-100) directly
+            // No conversion needed - just use them as-is
+
+            // Create overlay using percentage positioning
+            const overlay = document.createElement('div');
+            overlay.className = 'absolute border-4 border-red-500 bg-red-500/10 pointer-events-none rounded';
+            overlay.style.left = `${zone.x}%`;
+            overlay.style.top = `${zone.y}%`;
+            overlay.style.width = `${zone.width}%`;
+            overlay.style.height = `${zone.height}%`;
+
+            // Add label if provided
+            if (zone.label) {
+              const label = document.createElement('div');
+              label.className = 'absolute -top-6 left-0 bg-red-500 text-white text-xs px-2 py-1 rounded font-semibold shadow-md whitespace-nowrap';
+              label.textContent = zone.label;
+              overlay.appendChild(label);
+            } else {
+              const label = document.createElement('div');
+              label.className = 'absolute -top-6 left-0 bg-red-500 text-white text-xs px-2 py-1 rounded font-semibold shadow-md whitespace-nowrap';
+              label.textContent = '✍️ Sign Here';
+              overlay.appendChild(label);
+            }
+
+            pageWrapper.appendChild(overlay);
+
+            // Only scroll to first signature zone
+            if (zoneIndex === 0) {
+              shouldScrollToPage = true;
+            }
+          });
+
+          // Auto-scroll to first signature zone
+          if (shouldScrollToPage) {
+            setTimeout(() => {
+              if (isMounted) {
+                pageWrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+            }, 100);
+          }
+
           page.cleanup();
         }
 
@@ -268,7 +349,7 @@ const PdfPreview: React.FC<PdfPreviewProps> = ({ url, scale, rotation }) => {
       .catch((err: unknown) => {
         console.error('Failed to render PDF preview', err);
         if (isMounted) {
-          setError('Unable to load PDF document.');
+          setError(t('sign_components.document_viewer.pdf_error'));
           setIsLoading(false);
         }
       });
@@ -278,7 +359,7 @@ const PdfPreview: React.FC<PdfPreviewProps> = ({ url, scale, rotation }) => {
       container.innerHTML = '';
       loadingTask.destroy();
     };
-  }, [url, scale, rotation]); // Re-render when scale or rotation changes
+  }, [url, scale, rotation, signatureZones]); // Re-render when signatureZones changes
 
   return (
     <div className="relative w-full flex justify-center">
@@ -304,6 +385,7 @@ interface DocxPreviewProps extends PreviewProps {
 }
 
 const DocxPreview: React.FC<DocxPreviewProps> = ({ url, scale, rotation }) => {
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -334,7 +416,7 @@ const DocxPreview: React.FC<DocxPreviewProps> = ({ url, scale, rotation }) => {
         if ((err as { name?: string }).name === 'AbortError') return;
         
         console.error('Failed to render DOCX preview', err);
-        setError('Unable to load DOCX document.');
+        setError(t('sign_components.document_viewer.docx_error'));
         setIsLoading(false);
       }
     };

@@ -28,8 +28,6 @@ const SignDocumentPage: React.FC = () => {
     const { data: documentData, isLoading, error }: any = useDocumentBySessionId(sessionId || '');
     const signMutation = useSignDocumentBySession();
 
-    console.log(error)
-
     if (!sessionId) {
         return (
             <div className="min-h-screen bg-secondary-50 flex flex-col">
@@ -86,7 +84,7 @@ const SignDocumentPage: React.FC = () => {
                         <>
                             {documentData.status === 'COMPLETED' ? (
                                 <div className="flex-grow flex items-center justify-center p-6">
-                                    <CompletedDocumentView document={documentData} />
+                                    <CompletedDocumentView />
                                 </div>
                             ) : view === 'document' ? (
                                 <DocumentReviewView

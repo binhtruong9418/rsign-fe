@@ -11,6 +11,18 @@
       "sign": "Sign Document",
       "submitting": "Submitting...",
       "sign_above": "Sign above"
+    },
+    "document_viewer": {
+      "zoom_in": "Zoom In",
+      "zoom_out": "Zoom Out",
+      "rotate": "Rotate",
+      "reset": "Reset View",
+      "download": "Download document",
+      "unsupported_type": "Preview is unsupported for this file type.",
+      "no_document": "No document available to preview.",
+      "loading_error": "Unable to load document.",
+      "pdf_error": "Unable to load PDF document.",
+      "docx_error": "Unable to load DOCX document."
     }
   },
 
@@ -89,7 +101,55 @@
     "share_link_title": "Share Signing Link",
     "session_expires": "Session expires in {{seconds}} seconds",
     "link_unavailable": "Signing Link Not Available",
-    "link_unavailable_desc": "A signing session could not be created for this document."
+    "link_unavailable_desc": "A signing session could not be created for this document.",
+    "document_preview": "Document Preview",
+    "information": "Document Information",
+    "status": "Status",
+    "signature_location": "Signature Location",
+    "page_number": "Page {{page}}",
+    "actions": "Actions",
+    "start_signing": "Start Signing",
+    "decline": "Decline Document",
+    "decline_reason": "Reason for declining (optional):",
+    "declined_success": "Document declined successfully",
+    "cannot_sign": "This document cannot be signed anymore",
+    "help_text": "Click \"Start Signing\" to begin the signing process. You will have 30 minutes to complete the signature.",
+    "urgent_warning": "This document expires in {{days}} days",
+    "days_remaining": "days remaining"
+  },
+  "dashboard": {
+    "title": "Documents",
+    "subtitle": "Manage and track your signature requests",
+    "new_document": "New Document",
+    "search_placeholder": "Search documents by title...",
+    "error": "Error: {{message}}",
+    "empty_state": {
+        "title": "No documents found",
+        "description": "Create a new document to get started"
+    },
+    "pending_documents": "Pending Documents",
+    "pending_subtitle": "Documents waiting for your signature",
+    "no_pending_documents": "No Pending Documents",
+    "all_caught_up": "You're all caught up!",
+    "view_and_sign": "View & Sign",
+    "showing_documents": "Showing {{start}}-{{end}} of {{total}} documents"
+  },
+  "signing": {
+    "session_active": "Session Active",
+    "cancel_confirm_title": "Cancel Signing?",
+    "cancel_confirm_message": "Are you sure you want to cancel? Your progress will be lost."
+  },
+  "errors": {
+    "document_locked": "This document is currently being signed by another device. Please try again later.",
+    "failed_to_start_signing": "Failed to start signing session",
+    "failed_to_decline": "Failed to decline document",
+    "cannot_sign": "Cannot sign this document",
+    "session_expired": "Session expired. Please try again.",
+    "session_not_found": "Session not found. Please try again.",
+    "device_mismatch": "This session was created on a different device. Please create a new session on this device.",
+    "signing_in_progress": "Signing in progress, retrying...",
+    "too_many_attempts": "Too many attempts. Please create a new session.",
+    "failed_to_sign": "Failed to submit signature"
   },
   "auth": {
     "login": {
@@ -170,17 +230,6 @@
     "register": "Register",
     "logout": "Logout"
   },
-  "dashboard": {
-    "title": "Documents",
-    "subtitle": "Manage and track your signature requests",
-    "new_document": "New Document",
-    "search_placeholder": "Search documents by title...",
-    "error": "Error: {{message}}",
-    "empty_state": {
-        "title": "No documents found",
-        "description": "Create a new document to get started"
-    }
-  },
   "common": {
     "loading": "Loading...",
     "cancel": "Cancel",
@@ -188,6 +237,10 @@
     "delete": "Delete",
     "edit": "Edit",
     "view": "View",
+    "back": "Back",
+    "yes": "Yes, Cancel",
+    "no": "No, Continue",
+    "retry": "Retry",
     "pagination": {
       "previous": "Previous",
       "next": "Next",
