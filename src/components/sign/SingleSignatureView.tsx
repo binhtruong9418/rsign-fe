@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, Check, X, Eye } from 'lucide-react';
+import { ArrowLeft, Check, X, Eye, EyeOff } from 'lucide-react';
 import SignaturePad, { SignaturePadRef } from '../SignaturePad';
 import { DEFAULT_SIGNATURE_COLOR, DEFAULT_SIGNATURE_WIDTH } from '../../constants/app';
 import { useTranslation } from 'react-i18next';
@@ -11,6 +11,14 @@ interface SingleSignatureViewProps {
     isSubmitting: boolean;
     documentTitle: string;
     signatureLabel?: string;
+    documentUrl?: string; // Optional document URL for preview
+    signatureZone?: {
+        pageNumber?: number;
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+    };
 }
 
 type ViewMode = 'signing' | 'preview';
@@ -21,12 +29,16 @@ const SingleSignatureView: React.FC<SingleSignatureViewProps> = ({
     isSubmitting,
     documentTitle,
     signatureLabel,
+    documentUrl,
+    signatureZone,
 }) => {
     const { t } = useTranslation();
     const [signature, setSignature] = useState<Stroke[] | null>(null);
     const [viewMode, setViewMode] = useState<ViewMode>('signing');
     const signaturePadRef = useRef<SignaturePadRef>(null);
     const [hasDrawn, setHasDrawn] = useState(false);
+    const [showDocPreview, setShowDocPreview] = useState(false);
+    const [signatureDataUrl, setSignatureDataUrl] = useState<string | null>(null);
 
     // Track if user has drawn
     useEffect(() => {
@@ -37,6 +49,70 @@ const SingleSignatureView: React.FC<SingleSignatureViewProps> = ({
 
         return () => clearInterval(checkDrawing);
     }, []);
+
+    // Update signature preview when in document preview mode
+    useEffect(() => {
+        if (!showDocPreview || !hasDrawn) return;
+
+        const updateSignaturePreview = () => {
+            const sig = signaturePadRef.current?.getSignature();
+            if (sig && sig.length > 0) {
+                // Create a temporary canvas to render signature
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                if (!ctx) return;
+
+                // Get bounding box
+                let minX = Infinity, minY = Infinity;
+                let maxX = -Infinity, maxY = -Infinity;
+
+                sig.forEach(stroke => {
+                    stroke.points.forEach(point => {
+                        minX = Math.min(minX, point.x);
+                        minY = Math.min(minY, point.y);
+                        maxX = Math.max(maxX, point.x);
+                        maxY = Math.max(maxY, point.y);
+                    });
+                });
+
+                const signatureWidth = maxX - minX;
+                const signatureHeight = maxY - minY;
+                const padding = 10;
+
+                canvas.width = signatureWidth + padding * 2;
+                canvas.height = signatureHeight + padding * 2;
+
+                ctx.strokeStyle = DEFAULT_SIGNATURE_COLOR;
+                ctx.lineWidth = DEFAULT_SIGNATURE_WIDTH;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+
+                sig.forEach(stroke => {
+                    if (stroke.points.length > 0) {
+                        ctx.beginPath();
+                        ctx.moveTo(
+                            stroke.points[0].x - minX + padding,
+                            stroke.points[0].y - minY + padding
+                        );
+                        for (let i = 1; i < stroke.points.length; i++) {
+                            ctx.lineTo(
+                                stroke.points[i].x - minX + padding,
+                                stroke.points[i].y - minY + padding
+                            );
+                        }
+                        ctx.stroke();
+                    }
+                });
+
+                setSignatureDataUrl(canvas.toDataURL('image/png'));
+            }
+        };
+
+        const interval = setInterval(updateSignaturePreview, 500);
+        updateSignaturePreview();
+
+        return () => clearInterval(interval);
+    }, [showDocPreview, hasDrawn]);
 
     const handleSaveAndPreview = () => {
         const strokesData = signaturePadRef.current?.getSignature();
@@ -218,12 +294,33 @@ const SingleSignatureView: React.FC<SingleSignatureViewProps> = ({
                             <ArrowLeft size={20} />
                             <span className="font-medium text-sm">{t('common.back', 'Back')}</span>
                         </button>
-                        {signature && (
-                            <div className="text-sm font-semibold text-green-600 flex items-center gap-1">
-                                <Check size={16} />
-                                {t('signing.saved', 'Saved')}
-                            </div>
-                        )}
+                        <div className="flex items-center gap-2">
+                            {/* Document Preview Toggle */}
+                            {documentUrl && signatureZone && hasDrawn && (
+                                <button
+                                    onClick={() => setShowDocPreview(!showDocPreview)}
+                                    className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-primary-600 bg-primary-50 hover:bg-primary-100 rounded-full transition-colors"
+                                >
+                                    {showDocPreview ? (
+                                        <>
+                                            <EyeOff size={16} />
+                                            <span className="hidden sm:inline">{t('signing.hide_preview', 'Hide Preview')}</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Eye size={16} />
+                                            <span className="hidden sm:inline">{t('signing.show_on_doc', 'Preview on Doc')}</span>
+                                        </>
+                                    )}
+                                </button>
+                            )}
+                            {signature && (
+                                <div className="text-sm font-semibold text-green-600 flex items-center gap-1">
+                                    <Check size={16} />
+                                    {t('signing.saved', 'Saved')}
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* Signature Info */}
@@ -232,23 +329,65 @@ const SingleSignatureView: React.FC<SingleSignatureViewProps> = ({
                             {signatureLabel || t('signing.your_signature', 'Your Signature')}
                         </h3>
                         <p className="text-xs text-primary-700 mt-0.5">
-                            {t('signing.draw_signature_below', 'Draw your signature below')}
+                            {showDocPreview
+                                ? t('signing.preview_mode_hint', 'Preview mode - Draw to see signature on document')
+                                : t('signing.draw_signature_below', 'Draw your signature below')
+                            }
                         </p>
                     </div>
                 </div>
             </div>
 
-            {/* Signature Pad Area */}
-            <div className="flex-grow flex flex-col p-4 bg-secondary-50">
-                <div className="flex-grow flex items-center justify-center">
-                    <div className="w-full max-w-lg aspect-[4/3] bg-white border-4 border-primary-200 rounded-2xl shadow-lg overflow-hidden">
-                        <SignaturePad
-                            ref={signaturePadRef}
-                            strokeColor={DEFAULT_SIGNATURE_COLOR}
-                            strokeWidth={DEFAULT_SIGNATURE_WIDTH}
-                        />
+            {/* Signature Pad Area or Document Preview */}
+            <div className="grow flex flex-col p-4 bg-secondary-50 overflow-hidden">
+                {showDocPreview && documentUrl && signatureZone ? (
+                    /* Document Preview with Signature Overlay */
+                    <div className="grow flex items-center justify-center overflow-auto">
+                        <div className="relative max-w-4xl max-h-full">
+                            <img
+                                src={documentUrl}
+                                alt={documentTitle}
+                                className="max-w-full max-h-[60vh] object-contain rounded-lg shadow-lg border-2 border-secondary-200"
+                            />
+
+                            {/* Signature Zone Overlay */}
+                            <div
+                                className="absolute border-4 border-primary-500 bg-primary-500/10 rounded"
+                                style={{
+                                    left: `${signatureZone.x}%`,
+                                    top: `${signatureZone.y}%`,
+                                    width: `${signatureZone.width}%`,
+                                    height: `${signatureZone.height}%`,
+                                }}
+                            >
+                                {/* Signature Preview */}
+                                {signatureDataUrl && (
+                                    <img
+                                        src={signatureDataUrl}
+                                        alt="Signature preview"
+                                        className="w-full h-full object-contain p-1"
+                                    />
+                                )}
+
+                                {/* Label */}
+                                <div className="absolute -top-7 left-0 bg-primary-500 text-white text-xs px-2 py-1 rounded font-semibold shadow-md whitespace-nowrap">
+                                    ✍️ {signatureLabel || t('signing.your_signature', 'Your Signature')}
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                ) : (
+                    /* Normal Signature Pad */
+                    <div className="grow flex items-center justify-center">
+                        <div className="w-full max-w-lg aspect-[4/3] bg-white border-4 border-primary-200 rounded-2xl shadow-lg overflow-hidden">
+                            <SignaturePad
+                                ref={signaturePadRef}
+                                strokeColor={DEFAULT_SIGNATURE_COLOR}
+                                strokeWidth={DEFAULT_SIGNATURE_WIDTH}
+                            />
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Action Buttons */}

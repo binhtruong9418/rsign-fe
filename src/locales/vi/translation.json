@@ -10,7 +10,11 @@
             "clear": "Xóa",
             "sign": "Ký tài liệu",
             "submitting": "Đang gửi...",
-            "sign_above": "Ký bên trên"
+            "sign_above": "Ký bên trên",
+            "show_preview": "Xem trước trên tài liệu",
+            "hide_preview": "Ẩn xem trước",
+            "your_signature": "Chữ ký của bạn",
+            "preview_mode": "Chế độ xem trước - Xem chữ ký sẽ xuất hiện như thế nào trên tài liệu"
         },
         "document_viewer": {
             "zoom_in": "Phóng to",
