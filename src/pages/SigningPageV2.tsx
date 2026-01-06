@@ -203,7 +203,7 @@ const SigningPageV2: React.FC = () => {
   return (
     <div className="min-h-screen bg-secondary-50 flex flex-col">
       <Header />
-      
+
       {/* Session Timer - Only show in document view */}
       {view === 'document' && (
         <div className="bg-white border-b border-secondary-200 px-4 py-2">
@@ -218,11 +218,10 @@ const SigningPageV2: React.FC = () => {
 
       <div className="flex-grow flex flex-col items-center justify-start p-4 sm:p-6 lg:p-8">
         <div
-          className={`w-full bg-white shadow-xl border border-secondary-200 flex flex-col rounded-xl overflow-hidden transition-all duration-300 ${
-            view === 'sign'
+          className={`w-full bg-white shadow-xl border border-secondary-200 flex flex-col rounded-xl overflow-hidden transition-all duration-300 ${view === 'sign'
               ? 'h-[calc(100vh-6rem)] sm:h-[80vh] max-w-4xl'
               : 'h-[calc(100vh-6rem)] sm:h-[85vh] max-w-5xl'
-          }`}
+            }`}
         >
           {view === 'document' ? (
             // Document Review View
@@ -272,6 +271,8 @@ const SigningPageV2: React.FC = () => {
               isSubmitting={submitting}
               documentTitle={document.title}
               signatureLabel={document.signatureZone.label}
+              documentUrl={document.originalFileUrl}
+              signatureZone={document.signatureZone}
             />
           )}
         </div>

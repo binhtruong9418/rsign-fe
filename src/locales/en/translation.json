@@ -10,7 +10,11 @@
             "clear": "Clear",
             "sign": "Sign Document",
             "submitting": "Submitting...",
-            "sign_above": "Sign above"
+            "sign_above": "Sign above",
+            "show_preview": "Preview on Document",
+            "hide_preview": "Hide Preview",
+            "your_signature": "Your Signature",
+            "preview_mode": "Preview mode - See how your signature will appear on the document"
         },
         "document_viewer": {
             "zoom_in": "Zoom In",
@@ -143,7 +147,20 @@
     "signing": {
         "session_active": "Session Active",
         "cancel_confirm_title": "Cancel Signing?",
-        "cancel_confirm_message": "Are you sure you want to cancel? Your progress will be lost."
+        "cancel_confirm_message": "Are you sure you want to cancel? Your progress will be lost.",
+        "your_signature": "Your Signature",
+        "draw_signature_below": "Draw your signature below",
+        "save_and_review": "✓ Save & Review",
+        "view_preview": "View Preview",
+        "saved": "Saved",
+        "ready": "Ready",
+        "review_signature": "Review Signature",
+        "ready_to_submit": "Ready to submit",
+        "submit_signature": "Submit Signature",
+        "multi_sign_review": "Review document and sign {{count}} signature zones",
+        "show_on_doc": "Preview on Doc",
+        "hide_preview": "Hide Preview",
+        "preview_mode_hint": "Preview mode - Draw to see signature on document"
     },
     "errors": {
         "document_locked": "This document is currently being signed by another device. Please try again later.",
