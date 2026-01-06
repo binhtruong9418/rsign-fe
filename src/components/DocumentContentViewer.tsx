@@ -1,10 +1,25 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { AlertTriangle, Loader2, ZoomIn, ZoomOut, RotateCw, Maximize, RefreshCw } from 'lucide-react';
+import { AlertTriangle, Loader2, ZoomIn, ZoomOut, RotateCw, Maximize, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
 import { GlobalWorkerOptions, getDocument, PDFDocumentProxy } from 'pdfjs-dist';
 import { useTranslation } from 'react-i18next';
 // @ts-ignore - Vite resolves ?url assets at build time
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.js?url';
 import { renderAsync } from 'docx-preview';
+
+// Polyfill for requestIdleCallback (for Safari and older browsers)
+const requestIdleCallbackPolyfill = (cb: (deadline: IdleDeadline) => void) => {
+  if (typeof requestIdleCallback !== 'undefined') {
+    return requestIdleCallback(cb);
+  }
+  // Fallback to setTimeout
+  const start = Date.now();
+  return setTimeout(() => {
+    cb({
+      didTimeout: false,
+      timeRemaining: () => Math.max(0, 50 - (Date.now() - start))
+    });
+  }, 1) as unknown as number;
+};
 
 const docxRenderOptions: Parameters<typeof renderAsync>[3] = {
   className: 'docx-preview',
@@ -115,6 +130,8 @@ const DocumentContentViewer: React.FC<DocumentContentViewerProps> = ({
   const mediaType = useMemo(() => detectDocumentMediaType(documentUri), [documentUri]);
   const [scale, setScale] = useState(1);
   const [rotation, setRotation] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   // Combine single zone and multiple zones into one array
   const allZones = useMemo(() => {
@@ -134,6 +151,7 @@ const DocumentContentViewer: React.FC<DocumentContentViewerProps> = ({
     setScale(1);
     setRotation(0);
   };
+  const handlePageChange = (page: number) => setCurrentPage(page);
 
   if (!documentUri) {
     return (
@@ -144,11 +162,37 @@ const DocumentContentViewer: React.FC<DocumentContentViewerProps> = ({
   }
 
   const renderToolbar = () => (
-    <div className="sticky top-0 z-20 flex items-center justify-between bg-white/90 backdrop-blur-sm border-b border-secondary-200 px-4 py-2 mb-4 rounded-t-lg shadow-sm">
-      <div className="flex items-center space-x-2">
+    <div className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-2 bg-white/90 backdrop-blur-sm border-b border-secondary-200 px-3 sm:px-4 py-2 mb-4 rounded-t-lg shadow-sm">
+      <div className="flex items-center gap-2 flex-wrap">
         <span className="text-xs font-medium text-secondary-500 uppercase tracking-wider">{mediaType}</span>
+        {totalPages > 1 && (
+          <>
+            <div className="hidden sm:block w-px h-4 bg-secondary-300"></div>
+            <div className="flex items-center gap-1 bg-secondary-100 rounded-lg p-1">
+              <button
+                onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+                className="p-1.5 text-secondary-600 hover:text-primary-600 hover:bg-white rounded-md transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                title={t('sign_components.document_viewer.previous_page')}
+              >
+                <ChevronLeft size={18} />
+              </button>
+              <span className="text-xs font-medium text-secondary-700 px-2 min-w-[60px] text-center">
+                {currentPage} / {totalPages}
+              </span>
+              <button
+                onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                disabled={currentPage === totalPages}
+                className="p-1.5 text-secondary-600 hover:text-primary-600 hover:bg-white rounded-md transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                title={t('sign_components.document_viewer.next_page')}
+              >
+                <ChevronRight size={18} />
+              </button>
+            </div>
+          </>
+        )}
       </div>
-      <div className="flex items-center space-x-1 bg-secondary-100 rounded-lg p-1">
+      <div className="flex items-center gap-1 bg-secondary-100 rounded-lg p-1">
         <button onClick={handleZoomOut} className="p-1.5 text-secondary-600 hover:text-primary-600 hover:bg-white rounded-md transition-all" title={t('sign_components.document_viewer.zoom_out')}>
           <ZoomOut size={18} />
         </button>
@@ -172,7 +216,7 @@ const DocumentContentViewer: React.FC<DocumentContentViewerProps> = ({
       case 'image':
         return <ImagePreview url={documentUri} title={documentTitle} scale={scale} rotation={rotation} />;
       case 'pdf':
-        return <PdfPreview url={documentUri} scale={scale} rotation={rotation} signatureZones={allZones} />;
+        return <PdfPreview url={documentUri} scale={scale} rotation={rotation} signatureZones={allZones} currentPage={currentPage} onTotalPagesChange={setTotalPages} />;
       case 'docx':
         return <DocxPreview url={documentUri} scale={scale} rotation={rotation} />;
       default:
@@ -196,7 +240,7 @@ const DocumentContentViewer: React.FC<DocumentContentViewerProps> = ({
   return (
     <div className={`flex flex-col rounded-lg border border-secondary-200 bg-secondary-50/50 overflow-hidden ${className}`}>
       {renderToolbar()}
-      <div className="flex-grow overflow-auto p-4 flex items-start justify-center min-h-[400px]">
+      <div className="grow overflow-auto p-4 flex items-start justify-center min-h-[400px]">
         {renderContent()}
       </div>
     </div>
@@ -214,7 +258,7 @@ interface ImagePreviewProps extends PreviewProps {
 }
 
 const ImagePreview: React.FC<ImagePreviewProps> = ({ url, title, scale, rotation }) => (
-  <div 
+  <div
     className="transition-transform duration-200 ease-out origin-top"
     style={{ transform: `scale(${scale}) rotate(${rotation}deg)` }}
   >
@@ -229,125 +273,49 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({ url, title, scale, rotation
 interface PdfPreviewProps extends PreviewProps {
   url: string;
   signatureZones?: SignatureZone[];
+  currentPage: number;
+  onTotalPagesChange: (total: number) => void;
 }
 
-const PdfPreview: React.FC<PdfPreviewProps> = ({ url, scale, rotation, signatureZones = [] }) => {
+const PdfPreview: React.FC<PdfPreviewProps> = ({ url, scale, rotation, signatureZones = [], currentPage, onTotalPagesChange }) => {
   const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const pdfDocRef = useRef<PDFDocumentProxy | null>(null);
+  const lastUrlRef = useRef<string>('');
 
+  // Load PDF document
   useEffect(() => {
     let isMounted = true;
-    const container = containerRef.current;
 
-    if (!container) return;
-
-    container.innerHTML = '';
     setIsLoading(true);
     setError(null);
 
-    const loadingTask = getDocument({ url });
+    const loadingTask = getDocument({
+      url,
+      cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.12.313/cmaps/',
+      cMapPacked: true,
+      enableXfa: true,
+      standardFontDataUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.12.313/standard_fonts/',
+      disableAutoFetch: false,
+      disableStream: false,
+      disableRange: false,
+    });
 
     loadingTask.promise
-      .then(async (pdf: PDFDocumentProxy) => {
+      .then((pdf: PDFDocumentProxy) => {
         if (!isMounted) {
           pdf.destroy();
           return;
         }
 
-        for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
-          const page = await pdf.getPage(pageNumber);
-          if (!isMounted) {
-            page.cleanup();
-            pdf.destroy();
-            return;
-          }
-
-          // Adjust scale based on prop
-          const viewport = page.getViewport({ scale: scale * 1.5, rotation });
-          const canvas = document.createElement('canvas');
-          const context = canvas.getContext('2d');
-
-          if (!context) {
-            page.cleanup();
-            continue;
-          }
-
-          canvas.height = viewport.height;
-          canvas.width = viewport.width;
-          // Use CSS to control display size, but keep canvas resolution high
-          canvas.style.width = `${viewport.width}px`; 
-          canvas.style.height = `${viewport.height}px`;
-          canvas.style.maxWidth = '100%';
-          canvas.style.height = 'auto';
-          
-          canvas.className = 'mb-4 rounded-md shadow-md border border-secondary-200 bg-white';
-
-          // Render the page first
-          await page.render({ canvasContext: context, viewport }).promise;
-
-          // Create wrapper for canvas + signature zone overlay
-          const pageWrapper = document.createElement('div');
-          pageWrapper.className = 'relative mb-4 inline-block';
-          pageWrapper.appendChild(canvas);
-
-          container.appendChild(pageWrapper);
-
-          // Add signature zone highlights for all zones on this page
-          const zonesOnThisPage = signatureZones.filter(zone => zone.pageNumber === pageNumber);
-          let shouldScrollToPage = false;
-
-          zonesOnThisPage.forEach((zone, zoneIndex) => {
-            // Backend now sends percentage values (0-100) directly
-            // No conversion needed - just use them as-is
-
-            // Create overlay using percentage positioning
-            const overlay = document.createElement('div');
-            overlay.className = 'absolute border-4 border-red-500 bg-red-500/10 pointer-events-none rounded';
-            overlay.style.left = `${zone.x}%`;
-            overlay.style.top = `${zone.y}%`;
-            overlay.style.width = `${zone.width}%`;
-            overlay.style.height = `${zone.height}%`;
-
-            // Add label if provided
-            if (zone.label) {
-              const label = document.createElement('div');
-              label.className = 'absolute -top-6 left-0 bg-red-500 text-white text-xs px-2 py-1 rounded font-semibold shadow-md whitespace-nowrap';
-              label.textContent = zone.label;
-              overlay.appendChild(label);
-            } else {
-              const label = document.createElement('div');
-              label.className = 'absolute -top-6 left-0 bg-red-500 text-white text-xs px-2 py-1 rounded font-semibold shadow-md whitespace-nowrap';
-              label.textContent = '✍️ Sign Here';
-              overlay.appendChild(label);
-            }
-
-            pageWrapper.appendChild(overlay);
-
-            // Only scroll to first signature zone
-            if (zoneIndex === 0) {
-              shouldScrollToPage = true;
-            }
-          });
-
-          // Auto-scroll to first signature zone
-          if (shouldScrollToPage) {
-            setTimeout(() => {
-              if (isMounted) {
-                pageWrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              }
-            }, 100);
-          }
-
-          page.cleanup();
-        }
-
-        pdf.destroy();
-        if (isMounted) setIsLoading(false);
+        pdfDocRef.current = pdf;
+        onTotalPagesChange(pdf.numPages);
+        setIsLoading(false);
       })
       .catch((err: unknown) => {
-        console.error('Failed to render PDF preview', err);
+        console.error('Failed to load PDF', err);
         if (isMounted) {
           setError(t('sign_components.document_viewer.pdf_error'));
           setIsLoading(false);
@@ -356,19 +324,131 @@ const PdfPreview: React.FC<PdfPreviewProps> = ({ url, scale, rotation, signature
 
     return () => {
       isMounted = false;
-      container.innerHTML = '';
+      if (pdfDocRef.current) {
+        pdfDocRef.current.destroy();
+        pdfDocRef.current = null;
+      }
       loadingTask.destroy();
     };
-  }, [url, scale, rotation, signatureZones]); // Re-render when signatureZones changes
+  }, [url, t, onTotalPagesChange]);
+
+  // Render current page
+  useEffect(() => {
+    const container = containerRef.current;
+    const pdf = pdfDocRef.current;
+
+    if (!container || !pdf || isLoading) return;
+
+    let isMounted = true;
+    container.innerHTML = '';
+
+    const renderCurrentPage = async () => {
+      try {
+        const page = await pdf.getPage(currentPage);
+        if (!isMounted) {
+          page.cleanup();
+          return;
+        }
+
+        const devicePixelRatio = window.devicePixelRatio || 1;
+        const baseScale = Math.min(devicePixelRatio * 1.5, 2.5);
+        const effectiveScale = scale * baseScale;
+        const viewport = page.getViewport({ scale: effectiveScale, rotation });
+
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d', {
+          alpha: false,
+          willReadFrequently: false,
+          desynchronized: true
+        });
+
+        if (!context) {
+          page.cleanup();
+          return;
+        }
+
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        canvas.style.width = '100%';
+        canvas.style.height = 'auto';
+        canvas.style.maxWidth = '100%';
+        canvas.className = 'rounded-md shadow-md border border-secondary-200 bg-white';
+
+        // Render with timeout
+        const renderTask = page.render({
+          canvasContext: context,
+          viewport,
+          intent: 'display',
+        });
+
+        await Promise.race([
+          renderTask.promise,
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Render timeout')), 30000)
+          )
+        ]);
+
+        if (!isMounted) {
+          page.cleanup();
+          return;
+        }
+
+        // Create wrapper for canvas + signature zones
+        const pageWrapper = document.createElement('div');
+        pageWrapper.className = 'relative inline-block w-full flex justify-center';
+
+        const canvasContainer = document.createElement('div');
+        canvasContainer.className = 'relative';
+        canvasContainer.appendChild(canvas);
+
+        // Add signature zone highlights for current page
+        const zonesOnThisPage = signatureZones.filter(zone => zone.pageNumber === currentPage);
+
+        zonesOnThisPage.forEach((zone) => {
+          const overlay = document.createElement('div');
+          overlay.className = 'absolute border-4 border-red-500 bg-red-500/10 pointer-events-none rounded';
+          overlay.style.left = `${zone.x}%`;
+          overlay.style.top = `${zone.y}%`;
+          overlay.style.width = `${zone.width}%`;
+          overlay.style.height = `${zone.height}%`;
+
+          const label = document.createElement('div');
+          label.className = 'absolute -top-6 left-0 bg-red-500 text-white text-xs px-2 py-1 rounded font-semibold shadow-md whitespace-nowrap';
+          label.textContent = zone.label || '✍️ Sign Here';
+          overlay.appendChild(label);
+
+          canvasContainer.appendChild(overlay);
+        });
+
+        pageWrapper.appendChild(canvasContainer);
+        container.appendChild(pageWrapper);
+
+        page.cleanup();
+      } catch (err) {
+        console.error(`Failed to render page ${currentPage}:`, err);
+        if (isMounted) {
+          setError(t('sign_components.document_viewer.pdf_error'));
+        }
+      }
+    };
+
+    renderCurrentPage();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [currentPage, scale, rotation, signatureZones, isLoading, t]);
 
   return (
-    <div className="relative w-full flex justify-center">
-      <div ref={containerRef} className="flex flex-col items-center" />
+    <div className="relative w-full flex flex-col items-center">
+      <div ref={containerRef} className="flex flex-col items-center w-full" />
+
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-sm z-10">
           <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
         </div>
       )}
+
       {error && (
         <div className="absolute top-0 left-0 right-0 p-4 text-center">
           <div className="inline-block rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-600">
@@ -405,16 +485,16 @@ const DocxPreview: React.FC<DocxPreviewProps> = ({ url, scale, rotation }) => {
         ensureDocxPreviewStyles();
         const response = await fetch(url, { signal: abortController.signal });
         if (!response.ok) throw new Error(`Request failed with status ${response.status}`);
-        
+
         const arrayBuffer = await response.arrayBuffer();
         if (!isMounted) return;
-        
+
         await renderAsync(arrayBuffer, container, undefined, docxRenderOptions);
         if (isMounted) setIsLoading(false);
       } catch (err: unknown) {
         if (!isMounted) return;
         if ((err as { name?: string }).name === 'AbortError') return;
-        
+
         console.error('Failed to render DOCX preview', err);
         setError(t('sign_components.document_viewer.docx_error'));
         setIsLoading(false);
@@ -432,7 +512,7 @@ const DocxPreview: React.FC<DocxPreviewProps> = ({ url, scale, rotation }) => {
 
   return (
     <div className="relative w-full flex justify-center">
-      <div 
+      <div
         className="transition-transform duration-200 ease-out origin-top"
         style={{ transform: `scale(${scale}) rotate(${rotation}deg)` }}
       >
@@ -441,7 +521,7 @@ const DocxPreview: React.FC<DocxPreviewProps> = ({ url, scale, rotation }) => {
           className="docx-preview-container mx-auto w-full max-w-4xl bg-white shadow-lg border border-secondary-200 min-h-[800px]"
         />
       </div>
-      
+
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-sm z-10">
           <Loader2 className="h-8 w-8 animate-spin text-primary-600" />

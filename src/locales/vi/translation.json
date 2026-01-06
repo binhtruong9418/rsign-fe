@@ -1,250 +1,256 @@
 {
-  "sign_components": {
-    "completed_view": {
-      "title": "Tài liệu đã hoàn thành",
-      "message": "Tài liệu này đã được ký và không cần thực hiện thêm hành động nào.",
-      "home_button": "Về trang chủ"
+    "sign_components": {
+        "completed_view": {
+            "title": "Tài liệu đã hoàn thành",
+            "message": "Tài liệu này đã được ký và không cần thực hiện thêm hành động nào.",
+            "home_button": "Về trang chủ"
+        },
+        "signature_view": {
+            "back": "Quay lại",
+            "clear": "Xóa",
+            "sign": "Ký tài liệu",
+            "submitting": "Đang gửi...",
+            "sign_above": "Ký bên trên"
+        },
+        "document_viewer": {
+            "zoom_in": "Phóng to",
+            "zoom_out": "Thu nhỏ",
+            "rotate": "Xoay",
+            "reset": "Đặt lại",
+            "download": "Tải xuống tài liệu",
+            "unsupported_type": "Không hỗ trợ xem trước loại tệp này.",
+            "no_document": "Không có tài liệu để xem trước.",
+            "loading_error": "Không thể tải tài liệu.",
+            "pdf_error": "Không thể tải tài liệu PDF.",
+            "docx_error": "Không thể tải tài liệu DOCX.",
+            "page": "Trang",
+            "previous_page": "Trang trước",
+            "next_page": "Trang sau",
+            "first_page": "Trang đầu",
+            "last_page": "Trang cuối",
+            "page_of": "Trang {{current}} / {{total}}"
+        }
     },
-    "signature_view": {
-      "back": "Quay lại",
-      "clear": "Xóa",
-      "sign": "Ký tài liệu",
-      "submitting": "Đang gửi...",
-      "sign_above": "Ký bên trên"
-    },
-    "document_viewer": {
-      "zoom_in": "Phóng to",
-      "zoom_out": "Thu nhỏ",
-      "rotate": "Xoay",
-      "reset": "Đặt lại",
-      "download": "Tải xuống tài liệu",
-      "unsupported_type": "Không hỗ trợ xem trước loại tệp này.",
-      "no_document": "Không có tài liệu để xem trước.",
-      "loading_error": "Không thể tải tài liệu.",
-      "pdf_error": "Không thể tải tài liệu PDF.",
-      "docx_error": "Không thể tải tài liệu DOCX."
-    }
-  },
 
-  "dashboard_components": {
-    "create_modal": {
-      "title": "Tạo tài liệu mới",
-      "title_label": "Tiêu đề *",
-      "title_placeholder": "VD: Thỏa thuận bảo mật",
-      "authority_label": "Cơ quan ban hành *",
-      "authority_placeholder": "VD: Phòng Pháp chế",
-      "content_label": "Nội dung (hoặc tải lên tệp)",
-      "content_placeholder": "Nhập nội dung tài liệu của bạn tại đây...",
-      "file_label": "Tệp tài liệu",
-      "cancel": "Hủy",
-      "creating": "Đang tạo...",
-      "create": "Tạo tài liệu",
-      "failed": "Tạo tài liệu thất bại: {{message}}",
-      "preview_title": "Xem trước"
+    "dashboard_components": {
+        "create_modal": {
+            "title": "Tạo tài liệu mới",
+            "title_label": "Tiêu đề *",
+            "title_placeholder": "VD: Thỏa thuận bảo mật",
+            "authority_label": "Cơ quan ban hành *",
+            "authority_placeholder": "VD: Phòng Pháp chế",
+            "content_label": "Nội dung (hoặc tải lên tệp)",
+            "content_placeholder": "Nhập nội dung tài liệu của bạn tại đây...",
+            "file_label": "Tệp tài liệu",
+            "cancel": "Hủy",
+            "creating": "Đang tạo...",
+            "create": "Tạo tài liệu",
+            "failed": "Tạo tài liệu thất bại: {{message}}",
+            "preview_title": "Xem trước"
+        },
+        "status_filter": {
+            "label": "Trạng thái:",
+            "all": "Tất cả tài liệu",
+            "pending": "Đang chờ",
+            "completed": "Hoàn thành"
+        },
+        "document_grid": {
+            "authority": "Cơ quan",
+            "updated": "Cập nhật {{date}}",
+            "signed": "Đã ký {{date}}"
+        },
+        "file_upload": {
+            "preview": "Xem trước",
+            "remove": "Xóa",
+            "click_upload": "Nhấn để tải lên",
+            "drag_drop": "hoặc kéo và thả",
+            "formats": "PDF, DOCX, PNG, JPG (Tối đa 10MB)"
+        },
+        "search_input": {
+            "placeholder_default": "Tìm kiếm tài liệu...",
+            "clear": "Xóa tìm kiếm"
+        }
     },
-    "status_filter": {
-      "label": "Trạng thái:",
-      "all": "Tất cả tài liệu",
-      "pending": "Đang chờ",
-      "completed": "Hoàn thành"
+    "document_detail": {
+        "missing_id": "Thiếu ID tài liệu.",
+        "create_session_failed": "Không thể tạo phiên ký: {{message}}",
+        "signature_inserted": "Chèn chữ ký thành công.",
+        "insert_signature_failed": "Không thể chèn chữ ký: {{message}}",
+        "link_copied": "Đã sao chép liên kết ký vào bộ nhớ tạm!",
+        "copy_failed": "Không thể sao chép liên kết.",
+        "signature_unavailable": "Chữ ký không khả dụng cho tài liệu này.",
+        "error_loading": "Lỗi tải tài liệu: {{message}}",
+        "not_found": "Không tìm thấy tài liệu.",
+        "signature_heading": "Chữ ký",
+        "signed_by": "Được ký bởi: {{email}}",
+        "signed_on": "Đã ký vào: {{date}}",
+        "download": "Tải xuống",
+        "playback": "Phát lại",
+        "no_signatures": "Chưa có chữ ký",
+        "share_instruction": "Chia sẻ liên kết ký để nhận chữ ký cho tài liệu này.",
+        "authority": "Cơ quan ban hành:",
+        "created": "Được tạo:",
+        "deadline": "Hạn chót:",
+        "signed": "Đã ký:",
+        "view_instruction": "Nhấp bên dưới để xem tài liệu.",
+        "view_document": "Xem tài liệu",
+        "insert_signature": "Chèn chữ ký",
+        "placement_unlock_info": "Vị trí chữ ký sẽ mở khóa khi có ID chữ ký cuối cùng.",
+        "placement_format_info": "Vị trí chữ ký chỉ khả dụng cho tài liệu PDF hoặc hình ảnh.",
+        "signed_ready": "Tài liệu đã ký đã sẵn sàng.",
+        "preview_instruction": "Xem trước hoặc tải xuống tài liệu đã cập nhật bên dưới.",
+        "preview": "Xem trước",
+        "no_content": "Không có nội dung tài liệu hoặc tệp đính kèm.",
+        "creating_session": "Đang tạo phiên...",
+        "completed": "Hoàn thành",
+        "sign_here": "Ký tại đây",
+        "share_link_title": "Chia sẻ liên kết ký",
+        "session_expires": "Phiên hết hạn sau {{seconds}} giây",
+        "link_unavailable": "Liên kết ký không khả dụng",
+        "link_unavailable_desc": "Không thể tạo phiên ký cho tài liệu này.",
+        "document_preview": "Xem trước tài liệu",
+        "information": "Thông tin tài liệu",
+        "status": "Trạng thái",
+        "signature_location": "Vị trí chữ ký",
+        "page_number": "Trang {{page}}",
+        "actions": "Hành động",
+        "start_signing": "Bắt đầu ký",
+        "decline": "Từ chối tài liệu",
+        "decline_reason": "Lý do từ chối (tùy chọn):",
+        "declined_success": "Đã từ chối tài liệu thành công",
+        "cannot_sign": "Không thể ký tài liệu này nữa",
+        "help_text": "Nhấp \"Bắt đầu ký\" để bắt đầu quá trình ký. Bạn sẽ có 30 phút để hoàn thành chữ ký.",
+        "urgent_warning": "Tài liệu này sẽ hết hạn trong {{days}} ngày",
+        "days_remaining": "ngày còn lại"
     },
-    "document_grid": {
-      "authority": "Cơ quan",
-      "updated": "Cập nhật {{date}}",
-      "signed": "Đã ký {{date}}"
+    "dashboard": {
+        "title": "Tài liệu",
+        "subtitle": "Quản lý và theo dõi các yêu cầu ký của bạn",
+        "new_document": "Tài liệu mới",
+        "search_placeholder": "Tìm kiếm tài liệu theo tiêu đề...",
+        "error": "Lỗi: {{message}}",
+        "empty_state": {
+            "title": "Không tìm thấy tài liệu",
+            "description": "Tạo tài liệu mới để bắt đầu"
+        },
+        "pending_documents": "Tài liệu chờ ký",
+        "pending_subtitle": "Các tài liệu đang chờ chữ ký của bạn",
+        "no_pending_documents": "Không có tài liệu chờ ký",
+        "all_caught_up": "Bạn đã hoàn thành tất cả!",
+        "view_and_sign": "Xem & Ký",
+        "showing_documents": "Hiển thị {{start}}-{{end}} trong tổng số {{total}} tài liệu"
     },
-    "file_upload": {
-      "preview": "Xem trước",
-      "remove": "Xóa",
-      "click_upload": "Nhấn để tải lên",
-      "drag_drop": "hoặc kéo và thả",
-      "formats": "PDF, DOCX, PNG, JPG (Tối đa 10MB)"
+    "signing": {
+        "session_active": "Phiên đang hoạt động",
+        "cancel_confirm_title": "Hủy ký?",
+        "cancel_confirm_message": "Bạn có chắc chắn muốn hủy? Tiến trình của bạn sẽ bị mất."
     },
-    "search_input": {
-      "placeholder_default": "Tìm kiếm tài liệu...",
-      "clear": "Xóa tìm kiếm"
+    "errors": {
+        "document_locked": "Tài liệu này hiện đang được ký trên thiết bị khác. Vui lòng thử lại sau.",
+        "failed_to_start_signing": "Không thể bắt đầu phiên ký",
+        "failed_to_decline": "Không thể từ chối tài liệu",
+        "cannot_sign": "Không thể ký tài liệu này",
+        "session_expired": "Phiên đã hết hạn. Vui lòng thử lại.",
+        "session_not_found": "Không tìm thấy phiên. Vui lòng thử lại.",
+        "device_mismatch": "Phiên này được tạo trên thiết bị khác. Vui lòng tạo phiên mới trên thiết bị này.",
+        "signing_in_progress": "Đang ký, đang thử lại...",
+        "too_many_attempts": "Quá nhiều lần thử. Vui lòng tạo phiên mới.",
+        "failed_to_sign": "Không thể gửi chữ ký"
+    },
+    "auth": {
+        "login": {
+            "title": "Chào mừng trở lại",
+            "subtitle": "Vui lòng đăng nhập vào tài khoản của bạn",
+            "email_label": "Địa chỉ Email",
+            "password_label": "Mật khẩu",
+            "submit_button": "Đăng nhập",
+            "submitting": "Đang đăng nhập...",
+            "or_continue": "Hoặc tiếp tục với",
+            "hust_login": "Đăng nhập bằng HUST",
+            "not_member": "Chưa là thành viên?",
+            "register_link": "Đăng ký tại đây",
+            "hust_modal_title": "Đăng nhập bằng tài khoản HUST",
+            "hust_submit_button": "Đăng nhập bằng HUST",
+            "login_failed": "Đăng nhập thất bại: {{message}}",
+            "hust_login_failed": "Đăng nhập HUST thất bại: {{message}}"
+        },
+        "register": {
+            "title": "Tạo tài khoản",
+            "subtitle": "Đăng ký để bắt đầu ký tài liệu bảo mật",
+            "email_label": "Địa chỉ Email",
+            "password_label": "Mật khẩu",
+            "submit_button": "Tạo tài khoản",
+            "submitting": "Đang đăng ký...",
+            "already_member": "Đã là thành viên?",
+            "login_link": "Đăng nhập tại đây",
+            "success": "Đăng ký thành công! Vui lòng đăng nhập.",
+            "failed": "Đăng ký thất bại: {{message}}"
+        }
+    },
+    "home": {
+        "hero": {
+            "badge": "Chữ ký điện tử bảo mật",
+            "title_prefix": "Ký tài liệu,",
+            "title_suffix": "Dễ dàng & Bảo mật.",
+            "description": "RSign cung cấp giải pháp ký tài liệu điện tử nhanh chóng và có giá trị pháp lý. Được tin dùng bởi các chuyên gia trên toàn thế giới.",
+            "start_signing": "Bắt đầu ký miễn phí",
+            "view_demo": "Xem demo",
+            "no_credit_card": "Không cần thẻ tín dụng",
+            "legally_binding": "Có giá trị pháp lý",
+            "encrypted_storage": "Lưu trữ mã hóa"
+        },
+        "features": {
+            "title": "Tại sao chọn RSign?",
+            "subtitle": "Mọi thứ bạn cần để quản lý quy trình tài liệu hiệu quả và an toàn.",
+            "fast": {
+                "title": "Nhanh chóng & Hiệu quả",
+                "description": "Ký và gửi tài liệu trong vài phút. Không còn in ấn, scan hay fax. Tự động hóa quy trình làm việc của bạn ngay hôm nay."
+            },
+            "legal": {
+                "title": "Giá trị pháp lý",
+                "description": "Chữ ký điện tử của chúng tôi tuân thủ đầy đủ các luật về chữ ký điện tử (ESIGN, UETA, eIDAS) trên toàn cầu."
+            },
+            "secure": {
+                "title": "Bảo mật & Riêng tư",
+                "description": "Mã hóa cấp ngân hàng cho tài liệu của bạn. Quyền riêng tư và bảo mật dữ liệu của bạn là ưu tiên hàng đầu của chúng tôi."
+            }
+        }
+    },
+    "sign_document": {
+        "missing_session_id": "Thiếu ID phiên ký.",
+        "success": "Ký tài liệu thành công!",
+        "error_signing": "Không thể ký tài liệu: {{message}}",
+        "provide_signature": "Vui lòng cung cấp chữ ký.",
+        "error_loading": "Lỗi tải tài liệu: {{message}}",
+        "completed": "Tài liệu đã hoàn thành",
+        "review_title": "Xem lại tài liệu",
+        "sign_title": "Ký tài liệu",
+        "review_prefix": "Xem lại: ",
+        "review_instruction": "Vui lòng xem lại tài liệu cẩn thận trước khi ký.",
+        "proceed_to_sign": "Tiếp tục ký"
+    },
+    "header": {
+        "home": "Trang chủ",
+        "dashboard": "Danh sách tài liệu",
+        "login": "Đăng nhập",
+        "register": "Đăng ký",
+        "logout": "Đăng xuất"
+    },
+    "common": {
+        "loading": "Đang tải...",
+        "cancel": "Hủy",
+        "save": "Lưu",
+        "delete": "Xóa",
+        "edit": "Sửa",
+        "view": "Xem",
+        "back": "Quay lại",
+        "yes": "Có, Hủy",
+        "no": "Không, Tiếp tục",
+        "retry": "Thử lại",
+        "pagination": {
+            "previous": "Trước",
+            "next": "Tiếp",
+            "page_info": "Trang {{current}} trên {{total}}"
+        }
     }
-  },
-  "document_detail": {
-    "missing_id": "Thiếu ID tài liệu.",
-    "create_session_failed": "Không thể tạo phiên ký: {{message}}",
-    "signature_inserted": "Chèn chữ ký thành công.",
-    "insert_signature_failed": "Không thể chèn chữ ký: {{message}}",
-    "link_copied": "Đã sao chép liên kết ký vào bộ nhớ tạm!",
-    "copy_failed": "Không thể sao chép liên kết.",
-    "signature_unavailable": "Chữ ký không khả dụng cho tài liệu này.",
-    "error_loading": "Lỗi tải tài liệu: {{message}}",
-    "not_found": "Không tìm thấy tài liệu.",
-    "signature_heading": "Chữ ký",
-    "signed_by": "Được ký bởi: {{email}}",
-    "signed_on": "Đã ký vào: {{date}}",
-    "download": "Tải xuống",
-    "playback": "Phát lại",
-    "no_signatures": "Chưa có chữ ký",
-    "share_instruction": "Chia sẻ liên kết ký để nhận chữ ký cho tài liệu này.",
-    "authority": "Cơ quan ban hành:",
-    "created": "Được tạo:",
-    "deadline": "Hạn chót:",
-    "signed": "Đã ký:",
-    "view_instruction": "Nhấp bên dưới để xem tài liệu.",
-    "view_document": "Xem tài liệu",
-    "insert_signature": "Chèn chữ ký",
-    "placement_unlock_info": "Vị trí chữ ký sẽ mở khóa khi có ID chữ ký cuối cùng.",
-    "placement_format_info": "Vị trí chữ ký chỉ khả dụng cho tài liệu PDF hoặc hình ảnh.",
-    "signed_ready": "Tài liệu đã ký đã sẵn sàng.",
-    "preview_instruction": "Xem trước hoặc tải xuống tài liệu đã cập nhật bên dưới.",
-    "preview": "Xem trước",
-    "no_content": "Không có nội dung tài liệu hoặc tệp đính kèm.",
-    "creating_session": "Đang tạo phiên...",
-    "completed": "Hoàn thành",
-    "sign_here": "Ký tại đây",
-    "share_link_title": "Chia sẻ liên kết ký",
-    "session_expires": "Phiên hết hạn sau {{seconds}} giây",
-    "link_unavailable": "Liên kết ký không khả dụng",
-    "link_unavailable_desc": "Không thể tạo phiên ký cho tài liệu này.",
-    "document_preview": "Xem trước tài liệu",
-    "information": "Thông tin tài liệu",
-    "status": "Trạng thái",
-    "signature_location": "Vị trí chữ ký",
-    "page_number": "Trang {{page}}",
-    "actions": "Hành động",
-    "start_signing": "Bắt đầu ký",
-    "decline": "Từ chối tài liệu",
-    "decline_reason": "Lý do từ chối (tùy chọn):",
-    "declined_success": "Đã từ chối tài liệu thành công",
-    "cannot_sign": "Không thể ký tài liệu này nữa",
-    "help_text": "Nhấp \"Bắt đầu ký\" để bắt đầu quá trình ký. Bạn sẽ có 30 phút để hoàn thành chữ ký.",
-    "urgent_warning": "Tài liệu này sẽ hết hạn trong {{days}} ngày",
-    "days_remaining": "ngày còn lại"
-  },
-  "dashboard": {
-    "title": "Tài liệu",
-    "subtitle": "Quản lý và theo dõi các yêu cầu ký của bạn",
-    "new_document": "Tài liệu mới",
-    "search_placeholder": "Tìm kiếm tài liệu theo tiêu đề...",
-    "error": "Lỗi: {{message}}",
-    "empty_state": {
-        "title": "Không tìm thấy tài liệu",
-        "description": "Tạo tài liệu mới để bắt đầu"
-    },
-    "pending_documents": "Tài liệu chờ ký",
-    "pending_subtitle": "Các tài liệu đang chờ chữ ký của bạn",
-    "no_pending_documents": "Không có tài liệu chờ ký",
-    "all_caught_up": "Bạn đã hoàn thành tất cả!",
-    "view_and_sign": "Xem & Ký",
-    "showing_documents": "Hiển thị {{start}}-{{end}} trong tổng số {{total}} tài liệu"
-  },
-  "signing": {
-    "session_active": "Phiên đang hoạt động",
-    "cancel_confirm_title": "Hủy ký?",
-    "cancel_confirm_message": "Bạn có chắc chắn muốn hủy? Tiến trình của bạn sẽ bị mất."
-  },
-  "errors": {
-    "document_locked": "Tài liệu này hiện đang được ký trên thiết bị khác. Vui lòng thử lại sau.",
-    "failed_to_start_signing": "Không thể bắt đầu phiên ký",
-    "failed_to_decline": "Không thể từ chối tài liệu",
-    "cannot_sign": "Không thể ký tài liệu này",
-    "session_expired": "Phiên đã hết hạn. Vui lòng thử lại.",
-    "session_not_found": "Không tìm thấy phiên. Vui lòng thử lại.",
-    "device_mismatch": "Phiên này được tạo trên thiết bị khác. Vui lòng tạo phiên mới trên thiết bị này.",
-    "signing_in_progress": "Đang ký, đang thử lại...",
-    "too_many_attempts": "Quá nhiều lần thử. Vui lòng tạo phiên mới.",
-    "failed_to_sign": "Không thể gửi chữ ký"
-  },
-  "auth": {
-    "login": {
-      "title": "Chào mừng trở lại",
-      "subtitle": "Vui lòng đăng nhập vào tài khoản của bạn",
-      "email_label": "Địa chỉ Email",
-      "password_label": "Mật khẩu",
-      "submit_button": "Đăng nhập",
-      "submitting": "Đang đăng nhập...",
-      "or_continue": "Hoặc tiếp tục với",
-      "hust_login": "Đăng nhập bằng HUST",
-      "not_member": "Chưa là thành viên?",
-      "register_link": "Đăng ký tại đây",
-      "hust_modal_title": "Đăng nhập bằng tài khoản HUST",
-      "hust_submit_button": "Đăng nhập bằng HUST",
-      "login_failed": "Đăng nhập thất bại: {{message}}",
-      "hust_login_failed": "Đăng nhập HUST thất bại: {{message}}"
-    },
-    "register": {
-      "title": "Tạo tài khoản",
-      "subtitle": "Đăng ký để bắt đầu ký tài liệu bảo mật",
-      "email_label": "Địa chỉ Email",
-      "password_label": "Mật khẩu",
-      "submit_button": "Tạo tài khoản",
-      "submitting": "Đang đăng ký...",
-      "already_member": "Đã là thành viên?",
-      "login_link": "Đăng nhập tại đây",
-      "success": "Đăng ký thành công! Vui lòng đăng nhập.",
-      "failed": "Đăng ký thất bại: {{message}}"
-    }
-  },
-  "home": {
-    "hero": {
-      "badge": "Chữ ký điện tử bảo mật",
-      "title_prefix": "Ký tài liệu,",
-      "title_suffix": "Dễ dàng & Bảo mật.",
-      "description": "RSign cung cấp giải pháp ký tài liệu điện tử nhanh chóng và có giá trị pháp lý. Được tin dùng bởi các chuyên gia trên toàn thế giới.",
-      "start_signing": "Bắt đầu ký miễn phí",
-      "view_demo": "Xem demo",
-      "no_credit_card": "Không cần thẻ tín dụng",
-      "legally_binding": "Có giá trị pháp lý",
-      "encrypted_storage": "Lưu trữ mã hóa"
-    },
-    "features": {
-      "title": "Tại sao chọn RSign?",
-      "subtitle": "Mọi thứ bạn cần để quản lý quy trình tài liệu hiệu quả và an toàn.",
-      "fast": {
-        "title": "Nhanh chóng & Hiệu quả",
-        "description": "Ký và gửi tài liệu trong vài phút. Không còn in ấn, scan hay fax. Tự động hóa quy trình làm việc của bạn ngay hôm nay."
-      },
-      "legal": {
-        "title": "Giá trị pháp lý",
-        "description": "Chữ ký điện tử của chúng tôi tuân thủ đầy đủ các luật về chữ ký điện tử (ESIGN, UETA, eIDAS) trên toàn cầu."
-      },
-      "secure": {
-        "title": "Bảo mật & Riêng tư",
-        "description": "Mã hóa cấp ngân hàng cho tài liệu của bạn. Quyền riêng tư và bảo mật dữ liệu của bạn là ưu tiên hàng đầu của chúng tôi."
-      }
-    }
-  },
-  "sign_document": {
-    "missing_session_id": "Thiếu ID phiên ký.",
-    "success": "Ký tài liệu thành công!",
-    "error_signing": "Không thể ký tài liệu: {{message}}",
-    "provide_signature": "Vui lòng cung cấp chữ ký.",
-    "error_loading": "Lỗi tải tài liệu: {{message}}",
-    "completed": "Tài liệu đã hoàn thành",
-    "review_title": "Xem lại tài liệu",
-    "sign_title": "Ký tài liệu",
-    "review_prefix": "Xem lại: ",
-    "review_instruction": "Vui lòng xem lại tài liệu cẩn thận trước khi ký.",
-    "proceed_to_sign": "Tiếp tục ký"
-  },
-  "header": {
-    "home": "Trang chủ",
-    "dashboard": "Danh sách tài liệu",
-    "login": "Đăng nhập",
-    "register": "Đăng ký",
-    "logout": "Đăng xuất"
-  },
-  "common": {
-    "loading": "Đang tải...",
-    "cancel": "Hủy",
-    "save": "Lưu",
-    "delete": "Xóa",
-    "edit": "Sửa",
-    "view": "Xem",
-    "back": "Quay lại",
-    "yes": "Có, Hủy",
-    "no": "Không, Tiếp tục",
-    "retry": "Thử lại",
-    "pagination": {
-      "previous": "Trước",
-      "next": "Tiếp",
-      "page_info": "Trang {{current}} trên {{total}}"
-    }
-  }
 }
