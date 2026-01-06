@@ -147,7 +147,20 @@
     "signing": {
         "session_active": "Phiên đang hoạt động",
         "cancel_confirm_title": "Hủy ký?",
-        "cancel_confirm_message": "Bạn có chắc chắn muốn hủy? Tiến trình của bạn sẽ bị mất."
+        "cancel_confirm_message": "Bạn có chắc chắn muốn hủy? Tiến trình của bạn sẽ bị mất.",
+        "your_signature": "Chữ ký của bạn",
+        "draw_signature_below": "Vẽ chữ ký của bạn bên dưới",
+        "save_and_review": "✓ Lưu & Xem lại",
+        "view_preview": "Xem trước",
+        "saved": "Đã lưu",
+        "ready": "Sẵn sàng",
+        "review_signature": "Xem lại chữ ký",
+        "ready_to_submit": "Sẵn sàng gửi",
+        "submit_signature": "Gửi chữ ký",
+        "multi_sign_review": "Xem lại tài liệu và ký {{count}} vùng chữ ký",
+        "show_on_doc": "Xem trên tài liệu",
+        "hide_preview": "Ẩn xem trước",
+        "preview_mode_hint": "Chế độ xem trước - Vẽ để xem chữ ký trên tài liệu"
     },
     "errors": {
         "document_locked": "Tài liệu này hiện đang được ký trên thiết bị khác. Vui lòng thử lại sau.",
