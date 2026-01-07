@@ -5,11 +5,9 @@ import { Toaster } from 'react-hot-toast';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import DashboardPageV2 from './pages/DashboardPageV2';
-import DocumentDetailPageV2 from './pages/DocumentDetailPageV2';
-import MultiDocumentDetailPage from './pages/MultiDocumentDetailPage';
-import SigningPageV2 from './pages/SigningPageV2';
-import MultiSigningPage from './pages/MultiSigningPage';
+import DashboardPage from './pages/DashboardPage';
+import DocumentDetailPage from './pages/DocumentDetailPage';
+import SigningPage from './pages/SigningPage';
 import SigningSuccessPage from './pages/SigningSuccessPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
@@ -24,17 +22,15 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          
-          {/* V2 Signing Workflow - Outside Layout (full screen) */}
-          <Route path="/sign/:sessionId" element={<ProtectedRoute><SigningPageV2 /></ProtectedRoute>} />
-          <Route path="/multi-sign/:sessionId" element={<ProtectedRoute><MultiSigningPage /></ProtectedRoute>} />
+
+          {/* Signing Workflow */}
+          <Route path="/sign/:sessionId" element={<ProtectedRoute><SigningPage /></ProtectedRoute>} />
           <Route path="/signing-success" element={<ProtectedRoute><SigningSuccessPage /></ProtectedRoute>} />
 
-          {/* Dashboard & Document Details - Inside Layout */}
+          {/* Dashboard & Document Details */}
           <Route element={<Layout />}>
-            <Route path="/dashboard" element={<ProtectedRoute><DashboardPageV2 /></ProtectedRoute>} />
-            <Route path="/documents/:documentSignerId" element={<ProtectedRoute><DocumentDetailPageV2 /></ProtectedRoute>} />
-            <Route path="/multi-documents/:documentId" element={<ProtectedRoute><MultiDocumentDetailPage /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+            <Route path="/documents/:documentId" element={<ProtectedRoute><DocumentDetailPage /></ProtectedRoute>} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

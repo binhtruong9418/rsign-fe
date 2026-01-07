@@ -125,7 +125,19 @@
         "cannot_sign": "This document cannot be signed anymore",
         "help_text": "Click \"Start Signing\" to begin the signing process. You will have 30 minutes to complete the signature.",
         "urgent_warning": "This document expires in {{days}} days",
-        "days_remaining": "days remaining"
+        "days_remaining": "days remaining",
+        "overall_progress": "Overall Progress",
+        "signers_completed": "Signers completed",
+        "signers": "signers",
+        "my_status": "My Status",
+        "total_signatures_required": "Total signatures required",
+        "signatures_explanation": "(You need to sign this many signatures)",
+        "completed_signatures": "Completed",
+        "pending_signatures": "Remaining",
+        "signatures_unit": "signatures",
+        "waiting_previous": "Waiting for previous signer",
+        "all_completed": "Completed all signatures",
+        "signing_type": "Signing Type"
     },
     "dashboard": {
         "title": "Documents",
@@ -142,7 +154,16 @@
         "no_pending_documents": "No Pending Documents",
         "all_caught_up": "You're all caught up!",
         "view_and_sign": "View & Sign",
-        "showing_documents": "Showing {{start}}-{{end}} of {{total}} documents"
+        "showing_documents": "Showing {{start}}-{{end}} of {{total}} documents",
+        "signatures": "signatures",
+        "shared_signing": "Shared",
+        "sequential": "Sequential",
+        "signers_count": "Signers",
+        "progress": "Progress",
+        "my_signatures": "My signatures",
+        "completed_all": "Completed all",
+        "signatures_unit": "signatures",
+        "overdue": "Overdue"
     },
     "signing": {
         "session_active": "Session Active",

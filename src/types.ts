@@ -79,7 +79,7 @@ export interface PaginatedResponse<T> {
 export interface DocumentQueryParams {
     page?: number;
     limit?: number;
-    status?: DocumentStatus | 'ALL';
+    status?: DocumentStatus | "ALL";
     search?: string;
 }
 
@@ -120,13 +120,13 @@ export interface FileUploadProps {
 }
 
 // ============================================
-// V2 Signing Types (Session-based workflow)
+// Signing Types (Session-based workflow)
 // ============================================
 
 // Signing Session
 export interface SigningSession {
     id: string;
-    status: 'active' | 'completed' | 'expired';
+    status: "active" | "completed" | "expired";
     expiresAt: number;
     createdAt: number;
 }
@@ -189,7 +189,7 @@ export interface MultiDocumentDetailsResponse {
     signatureZones: Array<{
         documentSignerId: string;
         signatureZone: SignatureZone;
-        status: 'PENDING' | 'SIGNED' | 'DECLINED';
+        status: "PENDING" | "SIGNED" | "DECLINED";
         stepOrder: number;
     }>;
     totalSignatures: number;
@@ -204,7 +204,7 @@ export interface MultiSessionDetailsResponse {
         documentId: string;
         totalSignatures: number;
         completedSignatures: string[];
-        status: 'active' | 'completed' | 'expired';
+        status: "active" | "completed" | "expired";
         expiresAt: number;
     };
     document: {
@@ -221,8 +221,8 @@ export interface MultiSessionDetailsResponse {
     reason?: string;
 }
 
-// Signature Data (V2)
-export interface SignatureDataV2 {
+// Signature Data
+export interface SignatureData {
     strokes: Stroke[];
     color: string;
     width: number;
@@ -230,7 +230,7 @@ export interface SignatureDataV2 {
 
 // Submit Signature Request
 export interface SubmitSignatureRequest {
-    signatureData: SignatureDataV2;
+    signatureData: SignatureData;
     idempotencyKey: string;
 }
 
@@ -250,7 +250,7 @@ export interface SubmitSignatureResponse {
 export interface MultiSignatureSubmitRequest {
     signatures: Array<{
         documentSignerId: string;
-        signatureData: SignatureDataV2;
+        signatureData: SignatureData;
     }>;
     idempotencyKey: string;
 }
@@ -270,7 +270,7 @@ export interface MultiSignatureSubmitResponse {
     }>;
 }
 
-// Pending Document (V2)
+// Pending Document
 export interface PendingDocument {
     documentId: string;
     documentSignerId?: string;
@@ -278,11 +278,13 @@ export interface PendingDocument {
         id: string;
         title: string;
         originalFileUrl: string;
-        createdBy?: string | {
-            id: string;
-            fullName: string;
-            email: string;
-        };
+        createdBy?:
+            | string
+            | {
+                  id: string;
+                  fullName: string;
+                  email: string;
+              };
         deadline?: string;
         batchId?: string;
     };
@@ -291,10 +293,10 @@ export interface PendingDocument {
         signatureZone: SignatureZone;
     }>;
     canUseMultiSign?: boolean;
-    status: 'PENDING' | 'SIGNED' | 'DECLINED';
+    status: "PENDING" | "SIGNED" | "DECLINED";
 }
 
-// Paginated Response (V2)
+// Paginated Response
 export interface PageDto<T> {
     items: T[];
     page: number;
@@ -305,8 +307,8 @@ export interface PageDto<T> {
     hasPreviousPage: boolean;
 }
 
-// Document Details (V2)
-export interface DocumentDetailsV2 {
+// Document Details
+export interface DocumentDetails {
     id: string;
     document: {
         id: string;
@@ -315,5 +317,5 @@ export interface DocumentDetailsV2 {
         deadline?: string;
     };
     signatureZone: SignatureZone;
-    status: 'PENDING' | 'SIGNED' | 'DECLINED';
+    status: "PENDING" | "SIGNED" | "DECLINED";
 }

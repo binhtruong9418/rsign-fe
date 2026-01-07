@@ -19,7 +19,7 @@ interface MultiSignatureViewProps {
 
 type ViewMode = 'signing' | 'preview';
 
-const MultiSignatureViewV2: React.FC<MultiSignatureViewProps> = ({
+const MultiSignatureView: React.FC<MultiSignatureViewProps> = ({
     onBack,
     onSubmitAll,
     isSubmitting,
@@ -132,15 +132,13 @@ const MultiSignatureViewV2: React.FC<MultiSignatureViewProps> = ({
                             return (
                                 <div
                                     key={zone.documentSignerId}
-                                    className={`bg-white rounded-lg border-2 p-4 ${
-                                        isSigned ? 'border-green-300' : 'border-orange-300'
-                                    }`}
+                                    className={`bg-white rounded-lg border-2 p-4 ${isSigned ? 'border-green-300' : 'border-orange-300'
+                                        }`}
                                 >
                                     <div className="flex items-start justify-between mb-3">
                                         <div className="flex items-center gap-3">
-                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold text-sm ${
-                                                isSigned ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'
-                                            }`}>
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold text-sm ${isSigned ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'
+                                                }`}>
                                                 {isSigned ? <Check size={18} /> : index + 1}
                                             </div>
                                             <div>
@@ -312,13 +310,12 @@ const MultiSignatureViewV2: React.FC<MultiSignatureViewProps> = ({
                                 <button
                                     key={zone.documentSignerId}
                                     onClick={() => setCurrentZoneIndex(index)}
-                                    className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
-                                        isCurrent
+                                    className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all ${isCurrent
                                             ? 'bg-primary-600 text-white scale-110 shadow-lg'
                                             : isSigned
                                                 ? 'bg-green-100 text-green-700'
                                                 : 'bg-secondary-100 text-secondary-600'
-                                    }`}
+                                        }`}
                                 >
                                     {isSigned ? <Check size={16} /> : index + 1}
                                 </button>
@@ -391,4 +388,4 @@ const MultiSignatureViewV2: React.FC<MultiSignatureViewProps> = ({
     );
 };
 
-export default MultiSignatureViewV2;
+export default MultiSignatureView;

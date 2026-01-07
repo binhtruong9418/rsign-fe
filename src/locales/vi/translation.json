@@ -125,7 +125,19 @@
         "cannot_sign": "Không thể ký tài liệu này nữa",
         "help_text": "Nhấp \"Bắt đầu ký\" để bắt đầu quá trình ký. Bạn sẽ có 30 phút để hoàn thành chữ ký.",
         "urgent_warning": "Tài liệu này sẽ hết hạn trong {{days}} ngày",
-        "days_remaining": "ngày còn lại"
+        "days_remaining": "ngày còn lại",
+        "overall_progress": "Tiến độ chung",
+        "signers_completed": "Số người đã ký",
+        "signers": "người",
+        "my_status": "Trạng thái của tôi",
+        "total_signatures_required": "Tổng số chữ ký cần ký",
+        "signatures_explanation": "(Bạn cần ký đủ số chữ ký này)",
+        "completed_signatures": "Đã ký",
+        "pending_signatures": "Còn lại",
+        "signatures_unit": "chữ ký",
+        "waiting_previous": "Đang chờ người ký trước",
+        "all_completed": "Đã hoàn thành tất cả chữ ký",
+        "signing_type": "Loại ký"
     },
     "dashboard": {
         "title": "Tài liệu",
@@ -142,7 +154,16 @@
         "no_pending_documents": "Không có tài liệu chờ ký",
         "all_caught_up": "Bạn đã hoàn thành tất cả!",
         "view_and_sign": "Xem & Ký",
-        "showing_documents": "Hiển thị {{start}}-{{end}} trong tổng số {{total}} tài liệu"
+        "showing_documents": "Hiển thị {{start}}-{{end}} trong tổng số {{total}} tài liệu",
+        "signatures": "chữ ký",
+        "shared_signing": "Chung",
+        "sequential": "Tuần tự",
+        "signers_count": "Số người ký",
+        "progress": "Tiến độ",
+        "my_signatures": "Tôi cần ký",
+        "completed_all": "Đã ký đủ",
+        "signatures_unit": "chữ ký",
+        "overdue": "Quá hạn"
     },
     "signing": {
         "session_active": "Phiên đang hoạt động",

@@ -7,7 +7,7 @@ import DocumentContentViewer from '../components/DocumentContentViewer';
 import { signingApi } from '../services/signingApi';
 import { handleSigningError } from '../utils/errorHandler';
 import { showToast } from '../utils/toast';
-import type { DocumentDetails, PendingSignature } from '../types';
+import type { DocumentDetails } from '../types';
 
 /**
  * Document Detail Page
@@ -50,13 +50,12 @@ const DocumentDetailPage: React.FC = () => {
 
         setCreating(true);
         try {
-            const { sessionId, totalSignatures } = await signingApi.createCheckoutSession(documentId);
+            const { sessionId } = await signingApi.createCheckoutSession(documentId);
 
             // Navigate to unified signing page
             navigate(`/sign/${sessionId}`, {
                 state: {
                     documentId,
-                    totalSignatures,
                 }
             });
         } catch (err: any) {
@@ -115,10 +114,10 @@ const DocumentDetailPage: React.FC = () => {
         );
     }
 
-    const daysRemaining = getDaysRemaining(details.deadline);
+    const document = details.document;
+    const daysRemaining = document.deadline ? getDaysRemaining(document.deadline) : null;
     const isUrgent = daysRemaining !== null && daysRemaining <= 3;
-    const hasMultipleSignatures = details.mySigningStatus && details.mySigningStatus.totalRequired > 1;
-    const canSign = details.mySigningStatus?.status === 'PENDING';
+    const canSign = details.status === 'PENDING';
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -132,14 +131,14 @@ const DocumentDetailPage: React.FC = () => {
                     {t('common.back', 'Back')}
                 </button>
 
-                <h1 className="text-2xl sm:text-3xl font-bold text-secondary-900 break-words">{details.title}</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold text-secondary-900 wrap-break-word">{document.title}</h1>
             </div>
 
             {/* Urgent Warning */}
             {isUrgent && canSign && (
                 <div className="mb-4 sm:mb-6 bg-orange-50 border-l-4 border-orange-500 p-3 sm:p-4 rounded mx-4 sm:mx-0">
                     <div className="flex items-center gap-2">
-                        <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 flex-shrink-0" />
+                        <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 shrink-0" />
                         <p className="text-sm sm:text-base text-orange-800 font-medium">
                             ⚠️ {t('document_detail.urgent_warning', 'This document expires in {{days}} days', { days: daysRemaining })}
                         </p>
@@ -155,8 +154,8 @@ const DocumentDetailPage: React.FC = () => {
                             {t('document_detail.document_preview', 'Document Preview')}
                         </h2>
                         <DocumentContentViewer
-                            documentUri={details.originalFileUrl}
-                            documentTitle={details.title}
+                            documentUri={document.originalFileUrl}
+                            documentTitle={document.title}
                             className="h-full w-full"
                         />
                     </div>
@@ -177,49 +176,16 @@ const DocumentDetailPage: React.FC = () => {
                                     {t('document_detail.status', 'Status')}
                                 </label>
                                 <div className="mt-1">
-                                    <span className={`inline-flex items-center px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-medium ${details.status === 'COMPLETED' ? 'bg-green-100 text-green-800' :
+                                    <span className={`inline-flex items-center px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-medium ${details.status === 'SIGNED' ? 'bg-green-100 text-green-800' :
                                         details.status === 'PENDING' ? 'bg-blue-100 text-blue-800' :
-                                            details.status === 'IN_PROGRESS' ? 'bg-yellow-100 text-yellow-800' :
-                                                'bg-secondary-100 text-secondary-800'
+                                            'bg-secondary-100 text-secondary-800'
                                         }`}>
                                         {details.status}
                                     </span>
                                 </div>
                             </div>
-
-                            {/* Signing Progress - Overall Signers */}
-                            {details.signingProgress && (
-                                <div className="bg-secondary-50 p-3 rounded-lg">
-                                    <label className="text-xs sm:text-sm font-medium text-secondary-900 flex items-center gap-2">
-                                        <Users className="w-4 h-4" />
-                                        {t('document_detail.overall_progress', 'Overall Progress')}
-                                    </label>
-                                    <div className="mt-2 space-y-2">
-                                        <div className="flex items-center justify-between text-xs sm:text-sm">
-                                            <span className="text-secondary-600">
-                                                {t('document_detail.signers_completed', 'Signers completed')}
-                                            </span>
-                                            <span className="font-semibold text-secondary-900">
-                                                {details.signingProgress.completed} / {details.signingProgress.total} {t('document_detail.signers', 'signers')}
-                                            </span>
-                                        </div>
-                                        <div className="w-full bg-secondary-200 rounded-full h-2">
-                                            <div
-                                                className="bg-primary-600 h-2 rounded-full transition-all duration-300"
-                                                style={{ width: `${details.signingProgress.percentage}%` }}
-                                            />
-                                        </div>
-                                        <div className="text-right">
-                                            <span className="text-xs font-medium text-primary-600">
-                                                {details.signingProgress.percentage}%
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* My Signing Status - Signatures Required */}
-                            {details.mySigningStatus && (
+                            {/* My Signing Status - Temporarily disabled due to type limitations */}
+                            {/* {details.mySigningStatus && (
                                 <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
                                     <label className="text-xs sm:text-sm font-semibold text-blue-900 flex items-center gap-2">
                                         <PenTool className="w-4 h-4" />
@@ -271,16 +237,16 @@ const DocumentDetailPage: React.FC = () => {
                                         )}
                                     </div>
                                 </div>
-                            )}
+                            )} */}
 
                             {/* Deadline */}
-                            {details.timeInfo?.deadline && (
+                            {document.deadline && (
                                 <div>
                                     <label className="text-xs sm:text-sm font-medium text-secondary-600 flex items-center gap-2">
                                         <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                         {t('document_detail.deadline', 'Deadline')}
                                     </label>
-                                    <p className="mt-1 text-xs sm:text-sm text-secondary-900">{formatDate(details.deadline)}</p>
+                                    <p className="mt-1 text-xs sm:text-sm text-secondary-900">{formatDate(document.deadline)}</p>
                                     {daysRemaining !== null && (
                                         <p className={`text-xs sm:text-sm mt-1 ${isUrgent ? 'text-orange-600 font-medium' : 'text-secondary-600'}`}>
                                             ({daysRemaining} {t('document_detail.days_remaining', 'days remaining')})
@@ -288,55 +254,36 @@ const DocumentDetailPage: React.FC = () => {
                                     )}
                                 </div>
                             )}
-
-                            {/* Signing Mode & Flow */}
-                            <div>
-                                <label className="text-xs sm:text-sm font-medium text-secondary-600">
-                                    {t('document_detail.signing_type', 'Signing Type')}
-                                </label>
-                                <div className="mt-1 flex flex-wrap gap-2">
-                                    <span className="text-xs px-2 py-1 bg-secondary-100 text-secondary-700 rounded">
-                                        {details.signingMode}
-                                    </span>
-                                    <span className="text-xs px-2 py-1 bg-secondary-100 text-secondary-700 rounded">
-                                        {details.signingFlow}
-                                    </span>
-                                </div>
-                            </div>
                         </div>
                     </div>
 
-                    {/* Other Signers */}
+                    {/* Other sections temporarily disabled due to type limitations */}
+                    {/* Signing Mode & Flow
+                    <div>
+                        <label className="text-xs sm:text-sm font-medium text-secondary-600">
+                            {t('document_detail.signing_type', 'Signing Type')}
+                        </label>
+                        <div className="mt-1 flex flex-wrap gap-2">
+                            <span className="text-xs px-2 py-1 bg-secondary-100 text-secondary-700 rounded">
+                                {details.signingMode}
+                            </span>
+                            <span className="text-xs px-2 py-1 bg-secondary-100 text-secondary-700 rounded">
+                                {details.signingFlow}
+                            </span>
+                        </div>
+                    </div>
+                    */}
+
+                    {/* Other Signers - Temporarily disabled
                     {details.otherSigners && details.otherSigners.length > 0 && (
                         <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
                             <h2 className="text-base sm:text-lg font-semibold text-secondary-900 mb-3 sm:mb-4">
                                 {t('document_detail.other_signers', 'Other Signers')}
                             </h2>
-                            <div className="space-y-2 sm:space-y-3">
-                                {details.otherSigners.map((signer) => (
-                                    <div
-                                        key={signer.id}
-                                        className="flex items-center justify-between p-2.5 sm:p-3 bg-secondary-50 rounded-lg"
-                                    >
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-xs sm:text-sm font-medium text-secondary-900 truncate">
-                                                {signer.user.fullName}
-                                            </p>
-                                            <p className="text-xs text-secondary-600 truncate">
-                                                {signer.user.email}
-                                            </p>
-                                        </div>
-                                        <span className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ${signer.status === 'SIGNED' ? 'bg-green-100 text-green-700' :
-                                            signer.status === 'PENDING' ? 'bg-blue-100 text-blue-700' :
-                                                'bg-secondary-100 text-secondary-700'
-                                            }`}>
-                                            {signer.status}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
+                            ...
                         </div>
                     )}
+                    */}
 
                     {/* Actions */}
                     <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
@@ -358,22 +305,17 @@ const DocumentDetailPage: React.FC = () => {
                                 ) : (
                                     <>
                                         <FileText className="w-4 h-4 sm:w-5 sm:h-5" />
-                                        {hasMultipleSignatures
-                                            ? t('document_detail.sign_all', `Sign All (${details.mySigningStatus?.totalRequired})`)
-                                            : t('document_detail.start_signing', 'Start Signing')
-                                        }
+                                        {t('document_detail.start_signing', 'Start Signing')}
                                     </>
                                 )}
                             </button>
                         </div>
 
-                        {!canSign && details.mySigningStatus && (
+                        {!canSign && (
                             <p className="text-xs sm:text-sm text-secondary-600 mt-3 sm:mt-4 text-center">
-                                {details.mySigningStatus.status === 'COMPLETED'
-                                    ? t('document_detail.already_signed', 'You have completed all required signatures')
-                                    : details.mySigningStatus.status === 'WAITING'
-                                        ? t('document_detail.waiting_turn', 'Waiting for your turn to sign')
-                                        : t('document_detail.cannot_sign', 'This document cannot be signed at this time')
+                                {details.status === 'SIGNED'
+                                    ? t('document_detail.already_signed', 'You have completed your signature')
+                                    : t('document_detail.cannot_sign', 'This document cannot be signed at this time')
                                 }
                             </p>
                         )}
@@ -382,10 +324,7 @@ const DocumentDetailPage: React.FC = () => {
                     {/* Help Text */}
                     <div className="bg-blue-50 rounded-lg p-3 sm:p-4">
                         <p className="text-xs sm:text-sm text-blue-800">
-                            💡 {hasMultipleSignatures
-                                ? t('document_detail.multi_help_text', `You will sign ${details.mySigningStatus?.totalRequired} signature zones in one session. You have 30 minutes to complete.`)
-                                : t('document_detail.help_text', 'Click "Start Signing" to begin. You will have 30 minutes to complete the signature.')
-                            }
+                            💡 {t('document_detail.help_text', 'Click "Start Signing" to begin. You will have 30 minutes to complete the signature.')}
                         </p>
                     </div>
                 </div>

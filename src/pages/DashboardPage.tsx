@@ -5,13 +5,13 @@ import { FileText, Calendar, User, Users, PenTool } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Pagination from '../components/Pagination';
 import { signingApi } from '../services/signingApi';
-import type { DocumentItem, PageDto } from '../types';
+import type { PendingDocument, PageDto } from '../types';
 
 const DashboardPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const [documents, setDocuments] = useState<PageDto<DocumentItem> | null>(null);
+  const [documents, setDocuments] = useState<PageDto<PendingDocument> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
@@ -25,12 +25,7 @@ const DashboardPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await signingApi.getPendingDocuments({
-        page: currentPage,
-        limit: pageSize,
-        sortBy: 'deadline',
-        sortOrder: 'ASC',
-      });
+      const data = await signingApi.getPendingDocuments(currentPage, pageSize);
       setDocuments(data);
     } catch (err: any) {
       setError(err.message || 'Failed to load documents');
@@ -40,9 +35,9 @@ const DashboardPage: React.FC = () => {
     }
   };
 
-  const handleViewDocument = (item: DocumentItem) => {
-    // Use unified route for all documents
-    navigate(`/documents/${item.id}`);
+  const handleViewDocument = (item: PendingDocument) => {
+    // Navigate to document detail using documentId
+    navigate(`/documents/${item.documentId}`);
   };
 
   const formatDate = (dateString?: string) => {
@@ -126,13 +121,13 @@ const DashboardPage: React.FC = () => {
         <>
           <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {items.map((item) => {
-              const deadlineStatus = getDeadlineStatus(item.deadline);
-              const isMultiSign = item.userSignaturesRequired > 1;
-              const signatureCount = item.userSignaturesRequired;
+              const deadlineStatus = item.document.deadline ? getDeadlineStatus(item.document.deadline) : { text: '', className: '', icon: Calendar };
+              const isMultiSign = item.canUseMultiSign;
+              const signersCount = item.signers?.length || 0;
 
               return (
                 <div
-                  key={item.id}
+                  key={item.documentId}
                   className="bg-white rounded-lg sm:rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 p-4 sm:p-6 cursor-pointer border border-secondary-200 hover:border-primary-300 group"
                   onClick={() => handleViewDocument(item)}
                 >
@@ -144,7 +139,7 @@ const DashboardPage: React.FC = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-secondary-900 truncate text-sm sm:text-base group-hover:text-primary-600 transition-colors">
-                          {item.title}
+                          {item.document.title}
                         </h3>
                         <div className="flex gap-1.5 sm:gap-2 mt-1 flex-wrap">
                           <span className="inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
@@ -153,17 +148,7 @@ const DashboardPage: React.FC = () => {
                           {isMultiSign && (
                             <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                               <PenTool size={10} className="sm:w-3 sm:h-3" />
-                              <span>{signatureCount} {t('dashboard.signatures', 'signatures')}</span>
-                            </span>
-                          )}
-                          {item.signingMode === 'SHARED' && (
-                            <span className="inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                              {t('dashboard.shared_signing', 'Shared')}
-                            </span>
-                          )}
-                          {item.signingFlow === 'SEQUENTIAL' && (
-                            <span className="inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                              {t('dashboard.sequential', 'Sequential')}
+                              <span>{t('dashboard.multi_sign', 'Multi-sign')}</span>
                             </span>
                           )}
                         </div>
@@ -174,26 +159,12 @@ const DashboardPage: React.FC = () => {
                   {/* Document Info Grid */}
                   <div className="space-y-2 sm:space-y-2.5 text-xs sm:text-sm">
                     {/* Signers Info */}
-                    <div className="flex items-center gap-2 text-secondary-600">
-                      <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
-                      <span className="text-xs sm:text-sm">
-                        {t('dashboard.signers_count', 'Signers')}: <span className="font-semibold text-secondary-900">{item.completedSigners}/{item.totalSigners}</span>
-                      </span>
-                    </div>
-
-                    {/* Progress Bar */}
-                    {item.signingProgress > 0 && (
-                      <div>
-                        <div className="flex items-center justify-between text-xs text-secondary-600 mb-1">
-                          <span>{t('dashboard.progress', 'Progress')}</span>
-                          <span className="font-medium">{item.signingProgress}%</span>
-                        </div>
-                        <div className="w-full bg-secondary-200 rounded-full h-1.5">
-                          <div
-                            className="bg-primary-600 h-1.5 rounded-full transition-all duration-300"
-                            style={{ width: `${item.signingProgress}%` }}
-                          />
-                        </div>
+                    {signersCount > 0 && (
+                      <div className="flex items-center gap-2 text-secondary-600">
+                        <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                        <span className="text-xs sm:text-sm">
+                          {t('dashboard.signers_count', 'Signers')}: <span className="font-semibold text-secondary-900">{signersCount}</span>
+                        </span>
                       </div>
                     )}
 
@@ -201,29 +172,29 @@ const DashboardPage: React.FC = () => {
                     <div className="flex items-center gap-2 text-secondary-600">
                       <PenTool className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
                       <span className="truncate text-xs sm:text-sm">
-                        {item.userCompleted ? (
+                        {item.status === 'SIGNED' ? (
                           <span className="text-green-600 font-medium">
-                            ✓ {t('dashboard.completed_all', 'Completed all')} ({item.userSignaturesCompleted}/{item.userSignaturesRequired})
+                            ✓ {t('dashboard.completed', 'Completed')}
                           </span>
                         ) : (
                           <span>
-                            {t('dashboard.my_signatures', 'My signatures')}: <span className="font-semibold text-secondary-900">{item.userSignaturesCompleted}/{item.userSignaturesRequired}</span> {t('dashboard.signatures_unit', 'signatures')}
+                            {t('dashboard.status', 'Status')}: <span className="font-semibold text-secondary-900">{item.status}</span>
                           </span>
                         )}
                       </span>
                     </div>
 
                     {/* Deadline */}
-                    {item.deadline && (
+                    {item.document.deadline && (
                       <div className="flex items-center gap-2 text-secondary-600">
                         <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <span className="truncate text-xs sm:text-sm">{formatDate(item.deadline)}</span>
-                          {deadlineStatus && (
+                          <span className="truncate text-xs sm:text-sm">{formatDate(item.document.deadline)}</span>
+                          {deadlineStatus && deadlineStatus.text && (
                             <span className={`ml-1 sm:ml-2 text-xs font-medium ${deadlineStatus.className.includes('red') ? 'text-red-600' :
-                                deadlineStatus.className.includes('orange') ? 'text-orange-600' :
-                                  deadlineStatus.className.includes('yellow') ? 'text-yellow-600' :
-                                    'text-green-600'
+                              deadlineStatus.className.includes('orange') ? 'text-orange-600' :
+                                deadlineStatus.className.includes('yellow') ? 'text-yellow-600' :
+                                  'text-green-600'
                               }`}>
                               ({deadlineStatus.text})
                             </span>
@@ -234,13 +205,7 @@ const DashboardPage: React.FC = () => {
                   </div>
 
                   {/* Deadline Warning Badge */}
-                  {item.isOverdue ? (
-                    <div className="mt-3 sm:mt-4">
-                      <div className="inline-flex items-center px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-medium bg-red-100 text-red-800">
-                        ⚠️ {t('dashboard.overdue', 'Overdue')}
-                      </div>
-                    </div>
-                  ) : deadlineStatus && (deadlineStatus.className.includes('orange')) && (
+                  {deadlineStatus && deadlineStatus.text && (deadlineStatus.className.includes('red') || deadlineStatus.className.includes('orange')) && (
                     <div className="mt-3 sm:mt-4">
                       <div className={`inline-flex items-center px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-medium ${deadlineStatus.className}`}>
                         ⚠️ {deadlineStatus.text}
@@ -251,10 +216,7 @@ const DashboardPage: React.FC = () => {
                   {/* Action Button */}
                   <div className="mt-4 sm:mt-5 pt-3 sm:pt-4 border-t border-secondary-200">
                     <button className="w-full btn-primary text-xs sm:text-sm py-2 sm:py-2.5 group-hover:shadow-md transition-shadow">
-                      {isMultiSign
-                        ? `${t('dashboard.sign_all', 'Sign All')} (${signatureCount})`
-                        : t('dashboard.view_and_sign', 'View & Sign')
-                      } →
+                      {t('dashboard.view_and_sign', 'View & Sign')} →
                     </button>
                   </div>
                 </div>
