@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, FileText, Calendar, Users, AlertCircle, MapPin } from 'lucide-react';
+import { ArrowLeft, FileText, Calendar, Users, User, AlertCircle, MapPin, PenTool } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
 import DocumentContentViewer from '../components/DocumentContentViewer';
 import { signingApi } from '../services/signingApi';
@@ -10,8 +10,8 @@ import { showToast } from '../utils/toast';
 import type { DocumentDetails, PendingSignature } from '../types';
 
 /**
- * Unified Document Detail Page
- * Supports both single and multiple signature documents using the new Unified API v2.0
+ * Document Detail Page
+ * Supports both single and multiple signature documents
  */
 const DocumentDetailPage: React.FC = () => {
     const { documentId } = useParams<{ documentId: string }>();
@@ -187,59 +187,87 @@ const DocumentDetailPage: React.FC = () => {
                                 </div>
                             </div>
 
-                            {/* Signing Progress */}
+                            {/* Signing Progress - Overall Signers */}
                             {details.signingProgress && (
-                                <div>
-                                    <label className="text-xs sm:text-sm font-medium text-secondary-600">
+                                <div className="bg-secondary-50 p-3 rounded-lg">
+                                    <label className="text-xs sm:text-sm font-medium text-secondary-900 flex items-center gap-2">
+                                        <Users className="w-4 h-4" />
                                         {t('document_detail.overall_progress', 'Overall Progress')}
                                     </label>
-                                    <div className="mt-2">
-                                        <div className="flex items-center justify-between text-xs sm:text-sm mb-1">
+                                    <div className="mt-2 space-y-2">
+                                        <div className="flex items-center justify-between text-xs sm:text-sm">
                                             <span className="text-secondary-600">
+                                                {t('document_detail.signers_completed', 'Signers completed')}
+                                            </span>
+                                            <span className="font-semibold text-secondary-900">
                                                 {details.signingProgress.completed} / {details.signingProgress.total} {t('document_detail.signers', 'signers')}
                                             </span>
-                                            <span className="font-medium text-secondary-900">
-                                                {details.signingProgress.percentage}%
-                                            </span>
                                         </div>
-                                        <div className="w-full bg-secondary-200 rounded-full h-1.5 sm:h-2">
+                                        <div className="w-full bg-secondary-200 rounded-full h-2">
                                             <div
-                                                className="bg-primary-600 h-1.5 sm:h-2 rounded-full transition-all duration-300"
+                                                className="bg-primary-600 h-2 rounded-full transition-all duration-300"
                                                 style={{ width: `${details.signingProgress.percentage}%` }}
                                             />
+                                        </div>
+                                        <div className="text-right">
+                                            <span className="text-xs font-medium text-primary-600">
+                                                {details.signingProgress.percentage}%
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
                             )}
 
-                            {/* My Signing Status */}
+                            {/* My Signing Status - Signatures Required */}
                             {details.mySigningStatus && (
-                                <div>
-                                    <label className="text-xs sm:text-sm font-medium text-secondary-600 flex items-center gap-2">
-                                        <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
+                                    <label className="text-xs sm:text-sm font-semibold text-blue-900 flex items-center gap-2">
+                                        <PenTool className="w-4 h-4" />
                                         {t('document_detail.my_status', 'My Status')}
                                     </label>
-                                    <div className="mt-2 space-y-2">
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-xs sm:text-sm text-secondary-600">
-                                                {t('document_detail.required_signatures', 'Required signatures')}
-                                            </span>
-                                            <span className="text-xs sm:text-sm font-semibold text-secondary-900">
-                                                {details.mySigningStatus.totalRequired}
-                                            </span>
+                                    <div className="mt-3 space-y-2">
+                                        <div className="bg-white p-2.5 rounded border border-blue-100">
+                                            <div className="flex items-center justify-between mb-1">
+                                                <span className="text-xs sm:text-sm text-secondary-600">
+                                                    {t('document_detail.total_signatures_required', 'Total signatures required')}
+                                                </span>
+                                                <span className="text-base sm:text-lg font-bold text-blue-600">
+                                                    {details.mySigningStatus.totalRequired}
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-secondary-500 italic">
+                                                {t('document_detail.signatures_explanation', '(You need to sign this many signatures)')}
+                                            </p>
                                         </div>
                                         <div className="flex items-center justify-between">
                                             <span className="text-xs sm:text-sm text-secondary-600">
                                                 {t('document_detail.completed_signatures', 'Completed')}
                                             </span>
-                                            <span className="text-xs sm:text-sm font-semibold text-primary-600">
-                                                {details.mySigningStatus.completed}
+                                            <span className="text-xs sm:text-sm font-semibold text-green-600">
+                                                {details.mySigningStatus.completed} {t('document_detail.signatures_unit', 'signatures')}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-xs sm:text-sm text-secondary-600">
+                                                {t('document_detail.pending_signatures', 'Remaining')}
+                                            </span>
+                                            <span className="text-xs sm:text-sm font-semibold text-orange-600">
+                                                {details.mySigningStatus.pending} {t('document_detail.signatures_unit', 'signatures')}
                                             </span>
                                         </div>
                                         {details.mySigningStatus.status === 'WAITING' && (
-                                            <p className="text-xs sm:text-sm text-orange-600 mt-2">
-                                                ⏳ {t('document_detail.waiting_previous', 'Waiting for previous signer')}
-                                            </p>
+                                            <div className="bg-orange-50 border border-orange-200 p-2 rounded mt-2">
+                                                <p className="text-xs sm:text-sm text-orange-700 font-medium">
+                                                    ⏳ {t('document_detail.waiting_previous', 'Waiting for previous signer')}
+                                                </p>
+                                            </div>
+                                        )}
+                                        {details.mySigningStatus.status === 'COMPLETED' && (
+                                            <div className="bg-green-50 border border-green-200 p-2 rounded mt-2">
+                                                <p className="text-xs sm:text-sm text-green-700 font-medium">
+                                                    ✓ {t('document_detail.all_completed', 'Completed all signatures')}
+                                                </p>
+                                            </div>
                                         )}
                                     </div>
                                 </div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FileText, Calendar, User, Users } from 'lucide-react';
+import { FileText, Calendar, User, Users, PenTool } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Pagination from '../components/Pagination';
 import { signingApi } from '../services/signingApi';
@@ -152,9 +152,18 @@ const DashboardPage: React.FC = () => {
                           </span>
                           {isMultiSign && (
                             <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                              <Users size={10} className="sm:w-3 sm:h-3" />
-                              <span className="hidden xs:inline">{signatureCount} {t('dashboard.signatures', 'signatures')}</span>
-                              <span className="xs:hidden">{signatureCount}</span>
+                              <PenTool size={10} className="sm:w-3 sm:h-3" />
+                              <span>{signatureCount} {t('dashboard.signatures', 'signatures')}</span>
+                            </span>
+                          )}
+                          {item.signingMode === 'SHARED' && (
+                            <span className="inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              {t('dashboard.shared_signing', 'Shared')}
+                            </span>
+                          )}
+                          {item.signingFlow === 'SEQUENTIAL' && (
+                            <span className="inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                              {t('dashboard.sequential', 'Sequential')}
                             </span>
                           )}
                         </div>
@@ -164,6 +173,14 @@ const DashboardPage: React.FC = () => {
 
                   {/* Document Info Grid */}
                   <div className="space-y-2 sm:space-y-2.5 text-xs sm:text-sm">
+                    {/* Signers Info */}
+                    <div className="flex items-center gap-2 text-secondary-600">
+                      <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                      <span className="text-xs sm:text-sm">
+                        {t('dashboard.signers_count', 'Signers')}: <span className="font-semibold text-secondary-900">{item.completedSigners}/{item.totalSigners}</span>
+                      </span>
+                    </div>
+
                     {/* Progress Bar */}
                     {item.signingProgress > 0 && (
                       <div>
@@ -181,14 +198,20 @@ const DashboardPage: React.FC = () => {
                     )}
 
                     {/* My Signatures Status */}
-                    {item.userSignaturesCompleted > 0 && (
-                      <div className="flex items-center gap-2 text-secondary-600">
-                        <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
-                        <span className="truncate text-xs sm:text-sm">
-                          {t('dashboard.my_progress', 'My progress')}: {item.userSignaturesCompleted} / {item.userSignaturesRequired}
-                        </span>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-2 text-secondary-600">
+                      <PenTool className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                      <span className="truncate text-xs sm:text-sm">
+                        {item.userCompleted ? (
+                          <span className="text-green-600 font-medium">
+                            ✓ {t('dashboard.completed_all', 'Completed all')} ({item.userSignaturesCompleted}/{item.userSignaturesRequired})
+                          </span>
+                        ) : (
+                          <span>
+                            {t('dashboard.my_signatures', 'My signatures')}: <span className="font-semibold text-secondary-900">{item.userSignaturesCompleted}/{item.userSignaturesRequired}</span> {t('dashboard.signatures_unit', 'signatures')}
+                          </span>
+                        )}
+                      </span>
+                    </div>
 
                     {/* Deadline */}
                     {item.deadline && (
