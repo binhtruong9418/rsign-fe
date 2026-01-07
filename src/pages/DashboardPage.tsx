@@ -198,9 +198,9 @@ const DashboardPage: React.FC = () => {
                           <span className="truncate text-xs sm:text-sm">{formatDate(item.deadline)}</span>
                           {deadlineStatus && (
                             <span className={`ml-1 sm:ml-2 text-xs font-medium ${deadlineStatus.className.includes('red') ? 'text-red-600' :
-                              deadlineStatus.className.includes('orange') ? 'text-orange-600' :
-                                deadlineStatus.className.includes('yellow') ? 'text-yellow-600' :
-                                  'text-green-600'
+                                deadlineStatus.className.includes('orange') ? 'text-orange-600' :
+                                  deadlineStatus.className.includes('yellow') ? 'text-yellow-600' :
+                                    'text-green-600'
                               }`}>
                               ({deadlineStatus.text})
                             </span>
