@@ -7,6 +7,8 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import DocumentDetailPage from './pages/DocumentDetailPage';
+import CompletedDocumentsPage from './pages/CompletedDocumentsPage';
+import CompletedDocumentDetailPage from './pages/CompletedDocumentDetailPage';
 import SigningPage from './pages/SigningPage';
 import SigningSuccessPage from './pages/SigningSuccessPage';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -31,6 +33,8 @@ function App() {
           <Route element={<Layout />}>
             <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
             <Route path="/documents/:documentId" element={<ProtectedRoute><DocumentDetailPage /></ProtectedRoute>} />
+            <Route path="/completed" element={<ProtectedRoute><CompletedDocumentsPage /></ProtectedRoute>} />
+            <Route path="/documents/:documentId/completed" element={<ProtectedRoute><CompletedDocumentDetailPage /></ProtectedRoute>} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

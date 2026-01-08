@@ -67,6 +67,100 @@ export interface InsertSignatureResponse {
 // Enums and types
 export type DocumentStatus = "PENDING" | "COMPLETED" | "EXPIRED";
 
+// Pending Document Detail API Response
+export interface PendingDocumentDetail {
+    document: {
+        id: string;
+        title: string;
+        status: string;
+        flow: string;
+        createdAt: string;
+        deadline: string;
+        isOverdue: boolean;
+    };
+    file: string;
+    status: {
+        totalRequired: number;
+        completed: number;
+        pending: number;
+        canSignNow: boolean;
+    };
+    zones: Array<{
+        id: string;
+        page: number;
+        position: {
+            x: number;
+            y: number;
+            w: number;
+            h: number;
+        };
+        label?: string;
+    }>;
+    progress: {
+        current: number;
+        total: number;
+        percentage: number;
+    };
+    currentStepSigners: Array<{
+        user: {
+            id: string;
+            fullName: string;
+            email: string;
+        };
+        status: "PENDING" | "SIGNED" | "DECLINED";
+    }>;
+}
+
+// Completed Document Detail API Response
+export interface CompletedDocumentDetail {
+    document: {
+        id: string;
+        title: string;
+        status: "COMPLETED";
+        completedAt: string;
+        createdAt: string;
+    };
+    signedFile: string;
+    signatures: Array<{
+        id: string;
+        signedAt: string;
+        zone: {
+            page: number;
+            position: {
+                x: number;
+                y: number;
+                w: number;
+                h: number;
+            };
+        } | null;
+        signature: {
+            previewUrl: string;
+            hash: string;
+            playback: {
+                strokes: Array<{
+                    points: Array<{ x: number; y: number }>;
+                }>;
+                color: string;
+                width: number;
+            };
+        } | null;
+    }>;
+    activities: Array<{
+        type: "SESSION_CREATED" | "SIGNATURE_APPLIED" | "DOCUMENT_VIEWED";
+        time: string;
+        description: string;
+    }>;
+    metadata: {
+        totalSigners: number;
+        completedSigners: number;
+        createdBy: {
+            id: string;
+            fullName: string;
+            email: string;
+        };
+    };
+}
+
 // Pagination interfaces
 export interface PaginatedResponse<T> {
     data: T[];
@@ -149,6 +243,12 @@ export interface SignatureZone {
     label?: string;
 }
 
+// Pending Signature Item
+export interface PendingSignature {
+    documentSignerId: string;
+    signatureZone: SignatureZone;
+}
+
 // Session Details Response
 export interface SessionDetailsResponse {
     session: SigningSession;
@@ -159,6 +259,8 @@ export interface SessionDetailsResponse {
         signatureZone: SignatureZone;
         deadline?: string;
     };
+    pendingSignatures: PendingSignature[];
+    completedSignatures: string[];
     canSign: boolean;
     reason?: string;
 }
@@ -228,22 +330,21 @@ export interface SignatureData {
     width: number;
 }
 
-// Submit Signature Request
+// Submit Signature Request (unified format with array)
 export interface SubmitSignatureRequest {
-    signatureData: SignatureData;
-    idempotencyKey: string;
+    signatures: Array<{
+        documentSignerId: string;
+        signatureData: SignatureData;
+    }>;
+    idempotencyKey?: string; // Optional - auto-generated if not provided
 }
 
 // Submit Signature Response
 export interface SubmitSignatureResponse {
     success: boolean;
     documentComplete: boolean;
-    documentSigner?: {
-        id: string;
-        status: string;
-        signedAt: string;
-    };
-    signedFileUrl?: string;
+    completedSignatures: string[];
+    pendingSignatures: string[];
 }
 
 // Multi-Signature Submit Request
@@ -270,30 +371,36 @@ export interface MultiSignatureSubmitResponse {
     }>;
 }
 
-// Pending Document
+// Pending Document List Item (from /api/documents/pending)
 export interface PendingDocument {
-    documentId: string;
-    documentSignerId?: string;
-    document: {
-        id: string;
-        title: string;
-        originalFileUrl: string;
-        createdBy?:
-            | string
-            | {
-                  id: string;
-                  fullName: string;
-                  email: string;
-              };
-        deadline?: string;
-        batchId?: string;
-    };
-    signers?: Array<{
-        documentSignerId: string;
-        signatureZone: SignatureZone;
-    }>;
-    canUseMultiSign?: boolean;
-    status: "PENDING" | "SIGNED" | "DECLINED";
+    id: string;
+    title: string;
+    status: string;
+    signingMode: string;
+    signingFlow: string;
+    createdAt: string;
+    deadline: string | null;
+    isOverdue: boolean;
+    totalSignatures: number;
+    completedSignatures: number;
+    signedCount: number;
+    requiredCount: number;
+}
+
+// Completed Document List Item (from /api/documents/completed)
+export interface CompletedDocumentListItem {
+    id: string;
+    title: string;
+    status: string;
+    signingMode: string;
+    signingFlow: string;
+    createdAt: string;
+    deadline: string | null;
+    isOverdue: boolean;
+    totalSignatures: number;
+    completedSignatures: number;
+    signedCount: number;
+    requiredCount: number;
 }
 
 // Paginated Response

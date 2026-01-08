@@ -128,8 +128,8 @@ const SigningPage: React.FC = () => {
       // Generate idempotency key
       const idempotencyKey = crypto.randomUUID();
 
-      // Submit using unified API (supports array of signatures)
-      const response = await signingApi.submitSignatures(sessionId, {
+      // Submit signature (API expects signatures array format)
+      const response = await signingApi.submitSignature(sessionId, {
         signatures: [{
           documentSignerId: currentSig.documentSignerId,
           signatureData: {

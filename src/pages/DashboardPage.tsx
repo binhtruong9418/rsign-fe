@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 import { FileText, Calendar, User, Users, PenTool } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Pagination from '../components/Pagination';
@@ -10,34 +11,19 @@ import type { PendingDocument, PageDto } from '../types';
 const DashboardPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-
-  const [documents, setDocuments] = useState<PageDto<PendingDocument> | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
   const pageSize = 10;
 
-  useEffect(() => {
-    loadPendingDocuments();
-  }, [currentPage]);
-
-  const loadPendingDocuments = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await signingApi.getPendingDocuments(currentPage, pageSize);
-      setDocuments(data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load documents');
-      console.error('Failed to load pending documents:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Use React Query for data fetching
+  const { data: documents, isLoading, error, refetch } = useQuery<PageDto<PendingDocument>>({
+    queryKey: ['pendingDocuments', currentPage, pageSize],
+    queryFn: () => signingApi.getPendingDocuments(currentPage, pageSize),
+    staleTime: 30000, // 30 seconds
+  });
 
   const handleViewDocument = (item: PendingDocument) => {
-    // Navigate to document detail using documentId
-    navigate(`/documents/${item.documentId}`);
+    // Navigate to document detail using id
+    navigate(`/documents/${item.id}`);
   };
 
   const formatDate = (dateString?: string) => {
@@ -67,7 +53,7 @@ const DashboardPage: React.FC = () => {
     return { text: `${daysRemaining} days left`, className: 'bg-green-100 text-green-800' };
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
         <LoadingSpinner />
@@ -78,9 +64,9 @@ const DashboardPage: React.FC = () => {
   if (error) {
     return (
       <div className="text-center py-12">
-        <p className="text-red-600 mb-4">{error}</p>
-        <button onClick={loadPendingDocuments} className="btn-primary">
-          Retry
+        <p className="text-red-600 mb-4">{error instanceof Error ? error.message : 'Failed to load documents'}</p>
+        <button onClick={() => refetch()} className="btn-primary">
+          {t('common.retry', 'Retry')}
         </button>
       </div>
     );
@@ -121,13 +107,9 @@ const DashboardPage: React.FC = () => {
         <>
           <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {items.map((item) => {
-              const deadlineStatus = item.document.deadline ? getDeadlineStatus(item.document.deadline) : { text: '', className: '', icon: Calendar };
-              const isMultiSign = item.canUseMultiSign;
-              const signersCount = item.signers?.length || 0;
-
               return (
                 <div
-                  key={item.documentId}
+                  key={item.id}
                   className="bg-white rounded-lg sm:rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 p-4 sm:p-6 cursor-pointer border border-secondary-200 hover:border-primary-300 group"
                   onClick={() => handleViewDocument(item)}
                 >
@@ -139,18 +121,15 @@ const DashboardPage: React.FC = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-secondary-900 truncate text-sm sm:text-base group-hover:text-primary-600 transition-colors">
-                          {item.document.title}
+                          {item.title}
                         </h3>
                         <div className="flex gap-1.5 sm:gap-2 mt-1 flex-wrap">
                           <span className="inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                             {item.status}
                           </span>
-                          {isMultiSign && (
-                            <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                              <PenTool size={10} className="sm:w-3 sm:h-3" />
-                              <span>{t('dashboard.multi_sign', 'Multi-sign')}</span>
-                            </span>
-                          )}
+                          <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                            <span>{item.signingMode} • {item.signingFlow}</span>
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -158,60 +137,37 @@ const DashboardPage: React.FC = () => {
 
                   {/* Document Info Grid */}
                   <div className="space-y-2 sm:space-y-2.5 text-xs sm:text-sm">
-                    {/* Signers Info */}
-                    {signersCount > 0 && (
-                      <div className="flex items-center gap-2 text-secondary-600">
-                        <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
-                        <span className="text-xs sm:text-sm">
-                          {t('dashboard.signers_count', 'Signers')}: <span className="font-semibold text-secondary-900">{signersCount}</span>
-                        </span>
-                      </div>
-                    )}
-
-                    {/* My Signatures Status */}
+                    {/* User's Personal Progress */}
                     <div className="flex items-center gap-2 text-secondary-600">
                       <PenTool className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
-                      <span className="truncate text-xs sm:text-sm">
-                        {item.status === 'SIGNED' ? (
-                          <span className="text-green-600 font-medium">
-                            ✓ {t('dashboard.completed', 'Completed')}
-                          </span>
-                        ) : (
-                          <span>
-                            {t('dashboard.status', 'Status')}: <span className="font-semibold text-secondary-900">{item.status}</span>
-                          </span>
-                        )}
+                      <span className="text-xs sm:text-sm">
+                        {t('dashboard.your_progress', 'Your progress')}: <span className="font-semibold text-secondary-900">{item.signedCount}/{item.requiredCount}</span>
+                      </span>
+                    </div>
+
+                    {/* Overall Progress */}
+                    <div className="flex items-center gap-2 text-secondary-600">
+                      <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                      <span className="text-xs sm:text-sm">
+                        {t('dashboard.overall_progress', 'Overall')}: <span className="font-semibold text-secondary-900">{item.completedSignatures}/{item.totalSignatures}</span>
                       </span>
                     </div>
 
                     {/* Deadline */}
-                    {item.document.deadline && (
+                    {item.deadline && (
                       <div className="flex items-center gap-2 text-secondary-600">
                         <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <span className="truncate text-xs sm:text-sm">{formatDate(item.document.deadline)}</span>
-                          {deadlineStatus && deadlineStatus.text && (
-                            <span className={`ml-1 sm:ml-2 text-xs font-medium ${deadlineStatus.className.includes('red') ? 'text-red-600' :
-                              deadlineStatus.className.includes('orange') ? 'text-orange-600' :
-                                deadlineStatus.className.includes('yellow') ? 'text-yellow-600' :
-                                  'text-green-600'
-                              }`}>
-                              ({deadlineStatus.text})
+                          <span className="truncate text-xs sm:text-sm">{formatDate(item.deadline)}</span>
+                          {item.isOverdue && (
+                            <span className="ml-1 sm:ml-2 text-xs font-medium text-red-600">
+                              ({t('dashboard.overdue', 'Overdue')})
                             </span>
                           )}
                         </div>
                       </div>
                     )}
                   </div>
-
-                  {/* Deadline Warning Badge */}
-                  {deadlineStatus && deadlineStatus.text && (deadlineStatus.className.includes('red') || deadlineStatus.className.includes('orange')) && (
-                    <div className="mt-3 sm:mt-4">
-                      <div className={`inline-flex items-center px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-medium ${deadlineStatus.className}`}>
-                        ⚠️ {deadlineStatus.text}
-                      </div>
-                    </div>
-                  )}
 
                   {/* Action Button */}
                   <div className="mt-4 sm:mt-5 pt-3 sm:pt-4 border-t border-secondary-200">

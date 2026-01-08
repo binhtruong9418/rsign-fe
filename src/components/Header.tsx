@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { LogOut, User as UserIcon, LayoutDashboard, Menu, X, ChevronDown, FileText } from 'lucide-react';
+import { LogOut, User as UserIcon, LayoutDashboard, Menu, X, ChevronDown, FileText, CheckCircle } from 'lucide-react';
 import LanguageSwitcher from './LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
 
@@ -79,7 +79,16 @@ const Header: React.FC = () => {
                       onClick={() => setIsProfileOpen(false)}
                     >
                       <FileText size={18} />
-                      <span>{t('header.dashboard')}</span>
+                      <span>{t('header.pending_documents', 'Pending Documents')}</span>
+                    </Link>
+
+                    <Link
+                      to="/completed"
+                      className="flex items-center space-x-3 px-4 py-2.5 text-sm text-secondary-700 hover:bg-secondary-50 hover:text-primary-600 transition-colors"
+                      onClick={() => setIsProfileOpen(false)}
+                    >
+                      <CheckCircle size={18} />
+                      <span>{t('header.completed_documents', 'Completed Documents')}</span>
                     </Link>
 
                     <div className="border-t border-secondary-100 my-1"></div>

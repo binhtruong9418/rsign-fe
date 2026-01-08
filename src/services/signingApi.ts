@@ -12,6 +12,9 @@ import type {
     MultiSessionDetailsResponse,
     MultiSignatureSubmitRequest,
     MultiSignatureSubmitResponse,
+    PendingDocumentDetail,
+    CompletedDocumentDetail,
+    CompletedDocumentListItem,
 } from "../types";
 
 /**
@@ -21,13 +24,16 @@ import type {
 export const signingApi = {
     /**
      * Get pending documents for current user
+     * Returns list of documents where user hasn't completed their signatures yet
      */
     getPendingDocuments: async (
         page = 0,
-        limit = 10
+        limit = 10,
+        sortBy: "createdAt" | "deadline" | "title" = "createdAt",
+        sortOrder: "ASC" | "DESC" = "DESC"
     ): Promise<PageDto<PendingDocument>> => {
         const response = await api.get("/api/documents/pending", {
-            params: { page, limit },
+            params: { page, limit, sortBy, sortOrder },
         });
         return response.data;
     },
@@ -157,5 +163,43 @@ export const signingApi = {
      */
     cancelMultiSession: async (sessionId: string): Promise<void> => {
         await api.delete(`/api/documents/multi-sessions/${sessionId}/cancel`);
+    },
+
+    /**
+     * Get pending document detail (for signing preparation)
+     */
+    getPendingDocumentDetail: async (
+        documentId: string
+    ): Promise<PendingDocumentDetail> => {
+        const response = await api.get(`/api/documents/${documentId}/pending`);
+        return response.data;
+    },
+
+    /**
+     * Get completed document detail (for review)
+     */
+    getCompletedDocumentDetail: async (
+        documentId: string
+    ): Promise<CompletedDocumentDetail> => {
+        const response = await api.get(
+            `/api/documents/${documentId}/completed`
+        );
+        return response.data;
+    },
+
+    /**
+     * Get list of completed documents for current user
+     * Returns documents where user has completed their signatures
+     */
+    getCompletedDocuments: async (
+        page = 0,
+        limit = 10,
+        sortBy: "createdAt" | "deadline" | "title" = "createdAt",
+        sortOrder: "ASC" | "DESC" = "DESC"
+    ): Promise<PageDto<CompletedDocumentListItem>> => {
+        const response = await api.get("/api/documents/completed", {
+            params: { page, limit, sortBy, sortOrder },
+        });
+        return response.data;
     },
 };

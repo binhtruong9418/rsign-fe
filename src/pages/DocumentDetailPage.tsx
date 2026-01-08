@@ -1,24 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, FileText, Calendar, Users, User, AlertCircle, MapPin, PenTool } from 'lucide-react';
+import { ArrowLeft, FileText, Calendar, Users, AlertCircle, PenTool, CheckCircle } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
 import DocumentContentViewer from '../components/DocumentContentViewer';
 import { signingApi } from '../services/signingApi';
 import { handleSigningError } from '../utils/errorHandler';
 import { showToast } from '../utils/toast';
-import type { DocumentDetails } from '../types';
+import type { PendingDocumentDetail } from '../types';
 
 /**
- * Document Detail Page
- * Supports both single and multiple signature documents
+ * Pending Document Detail Page
+ * For documents that are ready to be signed
  */
 const DocumentDetailPage: React.FC = () => {
     const { documentId } = useParams<{ documentId: string }>();
     const navigate = useNavigate();
     const { t } = useTranslation();
 
-    const [details, setDetails] = useState<DocumentDetails | null>(null);
+    const [details, setDetails] = useState<PendingDocumentDetail | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [creating, setCreating] = useState(false);
@@ -35,7 +35,7 @@ const DocumentDetailPage: React.FC = () => {
         try {
             setLoading(true);
             setError(null);
-            const data = await signingApi.getDocumentDetails(documentId);
+            const data = await signingApi.getPendingDocumentDetail(documentId);
             setDetails(data);
         } catch (err: any) {
             setError(err.message || 'Failed to load document details');
@@ -116,8 +116,8 @@ const DocumentDetailPage: React.FC = () => {
 
     const document = details.document;
     const daysRemaining = document.deadline ? getDaysRemaining(document.deadline) : null;
-    const isUrgent = daysRemaining !== null && daysRemaining <= 3;
-    const canSign = details.status === 'PENDING';
+    const isUrgent = (daysRemaining !== null && daysRemaining <= 3) || document.isOverdue;
+    const canSign = details.status.canSignNow;
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -154,7 +154,7 @@ const DocumentDetailPage: React.FC = () => {
                             {t('document_detail.document_preview', 'Document Preview')}
                         </h2>
                         <DocumentContentViewer
-                            documentUri={document.originalFileUrl}
+                            documentUri={details.file}
                             documentTitle={document.title}
                             className="h-full w-full"
                         />
@@ -176,68 +176,77 @@ const DocumentDetailPage: React.FC = () => {
                                     {t('document_detail.status', 'Status')}
                                 </label>
                                 <div className="mt-1">
-                                    <span className={`inline-flex items-center px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-medium ${details.status === 'SIGNED' ? 'bg-green-100 text-green-800' :
-                                        details.status === 'PENDING' ? 'bg-blue-100 text-blue-800' :
-                                            'bg-secondary-100 text-secondary-800'
+                                    <span className={`inline-flex items-center px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-medium ${document.status === 'IN_PROGRESS' ? 'bg-yellow-100 text-yellow-800' :
+                                            document.status === 'PENDING' ? 'bg-blue-100 text-blue-800' :
+                                                'bg-secondary-100 text-secondary-800'
                                         }`}>
-                                        {details.status}
+                                        {document.status}
                                     </span>
                                 </div>
                             </div>
-                            {/* My Signing Status - Temporarily disabled due to type limitations */}
-                            {/* {details.mySigningStatus && (
-                                <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
-                                    <label className="text-xs sm:text-sm font-semibold text-blue-900 flex items-center gap-2">
-                                        <PenTool className="w-4 h-4" />
-                                        {t('document_detail.my_status', 'My Status')}
-                                    </label>
-                                    <div className="mt-3 space-y-2">
-                                        <div className="bg-white p-2.5 rounded border border-blue-100">
-                                            <div className="flex items-center justify-between mb-1">
-                                                <span className="text-xs sm:text-sm text-secondary-600">
-                                                    {t('document_detail.total_signatures_required', 'Total signatures required')}
-                                                </span>
-                                                <span className="text-base sm:text-lg font-bold text-blue-600">
-                                                    {details.mySigningStatus.totalRequired}
-                                                </span>
-                                            </div>
-                                            <p className="text-xs text-secondary-500 italic">
-                                                {t('document_detail.signatures_explanation', '(You need to sign this many signatures)')}
-                                            </p>
-                                        </div>
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-xs sm:text-sm text-secondary-600">
-                                                {t('document_detail.completed_signatures', 'Completed')}
-                                            </span>
-                                            <span className="text-xs sm:text-sm font-semibold text-green-600">
-                                                {details.mySigningStatus.completed} {t('document_detail.signatures_unit', 'signatures')}
-                                            </span>
-                                        </div>
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-xs sm:text-sm text-secondary-600">
-                                                {t('document_detail.pending_signatures', 'Remaining')}
-                                            </span>
-                                            <span className="text-xs sm:text-sm font-semibold text-orange-600">
-                                                {details.mySigningStatus.pending} {t('document_detail.signatures_unit', 'signatures')}
-                                            </span>
-                                        </div>
-                                        {details.mySigningStatus.status === 'WAITING' && (
-                                            <div className="bg-orange-50 border border-orange-200 p-2 rounded mt-2">
-                                                <p className="text-xs sm:text-sm text-orange-700 font-medium">
-                                                    ⏳ {t('document_detail.waiting_previous', 'Waiting for previous signer')}
-                                                </p>
-                                            </div>
-                                        )}
-                                        {details.mySigningStatus.status === 'COMPLETED' && (
-                                            <div className="bg-green-50 border border-green-200 p-2 rounded mt-2">
-                                                <p className="text-xs sm:text-sm text-green-700 font-medium">
-                                                    ✓ {t('document_detail.all_completed', 'Completed all signatures')}
-                                                </p>
-                                            </div>
-                                        )}
+
+                            {/* Signing Progress */}
+                            <div className="bg-secondary-50 p-3 rounded-lg">
+                                <label className="text-xs sm:text-sm font-medium text-secondary-900 flex items-center gap-2">
+                                    <PenTool className="w-4 h-4" />
+                                    {t('document_detail.my_signing_status', 'My Signing Status')}
+                                </label>
+                                <div className="mt-2 space-y-2">
+                                    <div className="flex items-center justify-between text-xs sm:text-sm">
+                                        <span className="text-secondary-600">
+                                            {t('document_detail.signatures_required', 'Required')}
+                                        </span>
+                                        <span className="font-semibold text-primary-600">
+                                            {details.status.totalRequired}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center justify-between text-xs sm:text-sm">
+                                        <span className="text-secondary-600">
+                                            ✓ {t('document_detail.completed', 'Completed')}
+                                        </span>
+                                        <span className="font-semibold text-green-600">
+                                            {details.status.completed}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center justify-between text-xs sm:text-sm">
+                                        <span className="text-secondary-600">
+                                            ⏳ {t('document_detail.pending', 'Pending')}
+                                        </span>
+                                        <span className="font-semibold text-orange-600">
+                                            {details.status.pending}
+                                        </span>
                                     </div>
                                 </div>
-                            )} */}
+                            </div>
+
+                            {/* Overall Progress */}
+                            <div className="bg-secondary-50 p-3 rounded-lg">
+                                <label className="text-xs sm:text-sm font-medium text-secondary-900 flex items-center gap-2">
+                                    <Users className="w-4 h-4" />
+                                    {t('document_detail.overall_progress', 'Overall Progress')}
+                                </label>
+                                <div className="mt-2 space-y-2">
+                                    <div className="flex items-center justify-between text-xs sm:text-sm">
+                                        <span className="text-secondary-600">
+                                            {t('document_detail.step', 'Step')}
+                                        </span>
+                                        <span className="font-semibold text-secondary-900">
+                                            {details.progress.current} / {details.progress.total}
+                                        </span>
+                                    </div>
+                                    <div className="w-full bg-secondary-200 rounded-full h-2">
+                                        <div
+                                            className="bg-primary-600 h-2 rounded-full transition-all duration-300"
+                                            style={{ width: `${details.progress.percentage}%` }}
+                                        />
+                                    </div>
+                                    <div className="text-right">
+                                        <span className="text-xs font-medium text-primary-600">
+                                            {details.progress.percentage}%
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
 
                             {/* Deadline */}
                             {document.deadline && (
@@ -252,38 +261,88 @@ const DocumentDetailPage: React.FC = () => {
                                             ({daysRemaining} {t('document_detail.days_remaining', 'days remaining')})
                                         </p>
                                     )}
+                                    {document.isOverdue && (
+                                        <p className="text-xs sm:text-sm mt-1 text-red-600 font-medium">
+                                            ⚠️ {t('document_detail.overdue', 'Overdue')}
+                                        </p>
+                                    )}
                                 </div>
                             )}
+
+                            {/* Document Flow */}
+                            <div>
+                                <label className="text-xs sm:text-sm font-medium text-secondary-600">
+                                    {t('document_detail.signing_flow', 'Signing Flow')}
+                                </label>
+                                <div className="mt-1">
+                                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-secondary-100 text-secondary-700">
+                                        {document.flow}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    {/* Other sections temporarily disabled due to type limitations */}
-                    {/* Signing Mode & Flow
-                    <div>
-                        <label className="text-xs sm:text-sm font-medium text-secondary-600">
-                            {t('document_detail.signing_type', 'Signing Type')}
-                        </label>
-                        <div className="mt-1 flex flex-wrap gap-2">
-                            <span className="text-xs px-2 py-1 bg-secondary-100 text-secondary-700 rounded">
-                                {details.signingMode}
-                            </span>
-                            <span className="text-xs px-2 py-1 bg-secondary-100 text-secondary-700 rounded">
-                                {details.signingFlow}
-                            </span>
-                        </div>
-                    </div>
-                    */}
-
-                    {/* Other Signers - Temporarily disabled
-                    {details.otherSigners && details.otherSigners.length > 0 && (
+                    {/* Current Step Signers (for Sequential flow) */}
+                    {document.flow === 'SEQUENTIAL' && details.currentStepSigners.length > 0 && (
                         <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
                             <h2 className="text-base sm:text-lg font-semibold text-secondary-900 mb-3 sm:mb-4">
-                                {t('document_detail.other_signers', 'Other Signers')}
+                                {t('document_detail.current_step_signers', 'Current Step Signers')}
                             </h2>
-                            ...
+                            <div className="space-y-2 sm:space-y-3">
+                                {details.currentStepSigners.map((signer, index) => (
+                                    <div
+                                        key={index}
+                                        className="flex items-center justify-between p-2.5 sm:p-3 bg-secondary-50 rounded-lg"
+                                    >
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-xs sm:text-sm font-medium text-secondary-900 truncate">
+                                                {signer.user.fullName}
+                                            </p>
+                                            <p className="text-xs text-secondary-600 truncate">
+                                                {signer.user.email}
+                                            </p>
+                                        </div>
+                                        <span className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ${signer.status === 'SIGNED' ? 'bg-green-100 text-green-700' :
+                                                signer.status === 'PENDING' ? 'bg-blue-100 text-blue-700' :
+                                                    'bg-red-100 text-red-700'
+                                            }`}>
+                                            {signer.status}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     )}
-                    */}
+
+                    {/* Signature Zones */}
+                    {details.zones.length > 0 && (
+                        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+                            <h2 className="text-base sm:text-lg font-semibold text-secondary-900 mb-3 sm:mb-4">
+                                {t('document_detail.signature_zones', 'Signature Zones')}
+                            </h2>
+                            <div className="space-y-2">
+                                {details.zones.map((zone, index) => (
+                                    <div
+                                        key={zone.id}
+                                        className="flex items-center justify-between p-2.5 bg-secondary-50 rounded-lg"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs font-medium text-secondary-600">
+                                                #{index + 1}
+                                            </span>
+                                            <span className="text-xs text-secondary-900">
+                                                {zone.label || `Zone ${index + 1}`}
+                                            </span>
+                                        </div>
+                                        <span className="text-xs text-secondary-600">
+                                            {t('document_detail.page', 'Page')} {zone.page}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Actions */}
                     <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
@@ -313,9 +372,9 @@ const DocumentDetailPage: React.FC = () => {
 
                         {!canSign && (
                             <p className="text-xs sm:text-sm text-secondary-600 mt-3 sm:mt-4 text-center">
-                                {details.status === 'SIGNED'
-                                    ? t('document_detail.already_signed', 'You have completed your signature')
-                                    : t('document_detail.cannot_sign', 'This document cannot be signed at this time')
+                                {document.status === 'COMPLETED'
+                                    ? t('document_detail.already_completed', 'This document has been completed')
+                                    : t('document_detail.cannot_sign_now', 'You cannot sign this document right now. Please wait for your turn.')
                                 }
                             </p>
                         )}
