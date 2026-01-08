@@ -164,7 +164,7 @@ const SingleSignatureView: React.FC<SingleSignatureViewProps> = ({
 
                 {/* Signature Preview */}
                 <div className="flex-grow overflow-y-auto px-4 py-6 bg-secondary-50">
-                    <div className="max-w-lg mx-auto">
+                    <div className="max-w-md mx-auto">
                         <div className="bg-white rounded-lg border-2 border-green-300 p-4">
                             <div className="flex items-start justify-between mb-3">
                                 <div className="flex items-center gap-3">
@@ -343,7 +343,7 @@ const SingleSignatureView: React.FC<SingleSignatureViewProps> = ({
                 {showDocPreview && documentUrl && signatureZone ? (
                     /* Document Preview with Signature Overlay */
                     <div className="grow flex items-center justify-center overflow-auto">
-                        <div className="relative max-w-4xl max-h-full">
+                        <div className="relative max-w-2xl lg:max-w-3xl max-h-full">
                             <img
                                 src={documentUrl}
                                 alt={documentTitle}
@@ -379,7 +379,7 @@ const SingleSignatureView: React.FC<SingleSignatureViewProps> = ({
                 ) : (
                     /* Normal Signature Pad */
                     <div className="grow flex items-center justify-center">
-                        <div className="w-full max-w-lg aspect-[4/3] bg-white border-4 border-primary-200 rounded-2xl shadow-lg overflow-hidden">
+                        <div className="w-full max-w-sm lg:max-w-md aspect-[3/2] lg:aspect-[5/3] bg-white border-4 border-primary-200 rounded-2xl shadow-lg overflow-hidden">
                             <SignaturePad
                                 ref={signaturePadRef}
                                 strokeColor={DEFAULT_SIGNATURE_COLOR}
@@ -391,31 +391,34 @@ const SingleSignatureView: React.FC<SingleSignatureViewProps> = ({
             </div>
 
             {/* Action Buttons */}
-            <div className="sticky bottom-0 p-4 bg-white border-t border-secondary-200 shadow-lg space-y-3">
-                {/* Clear Button */}
-                <button
-                    onClick={handleClearSignature}
-                    disabled={!hasDrawn}
-                    className="w-full flex items-center justify-center gap-2 py-3 bg-white border-2 border-secondary-300 text-secondary-700 rounded-xl font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-secondary-50 transition-colors"
-                >
-                    <X size={20} />
-                    {t('sign_components.signature_view.clear', 'Clear')}
-                </button>
+            <div className="sticky bottom-0 p-4 bg-white border-t border-secondary-200 shadow-lg">
+                <div className="flex flex-col lg:flex-row gap-3">
+                    {/* Clear Button */}
+                    <button
+                        onClick={handleClearSignature}
+                        disabled={!hasDrawn}
+                        className="w-full lg:w-auto lg:flex-1 flex items-center justify-center gap-2 py-3 bg-white border-2 border-secondary-300 text-secondary-700 rounded-xl font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-secondary-50 transition-colors"
+                    >
+                        <X size={20} />
+                        <span className="hidden lg:inline">{t('sign_components.signature_view.clear', 'Clear')}</span>
+                        <span className="lg:hidden">{t('sign_components.signature_view.clear', 'Clear')}</span>
+                    </button>
 
-                {/* Save & Review */}
-                <button
-                    onClick={handleSaveAndPreview}
-                    disabled={!hasDrawn}
-                    className="w-full py-4 bg-primary-600 text-white rounded-xl font-semibold text-base disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary-700 transition-colors shadow-md disabled:shadow-none"
-                >
-                    {t('signing.save_and_review', '✓ Save & Review')}
-                </button>
+                    {/* Save & Review */}
+                    <button
+                        onClick={handleSaveAndPreview}
+                        disabled={!hasDrawn}
+                        className="w-full lg:flex-[2] py-4 lg:py-3 bg-primary-600 text-white rounded-xl font-semibold text-base disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary-700 transition-colors shadow-md disabled:shadow-none"
+                    >
+                        {t('signing.save_and_review', '✓ Save & Review')}
+                    </button>
+                </div>
 
                 {/* Preview Button (if already saved) */}
                 {signature && (
                     <button
                         onClick={() => setViewMode('preview')}
-                        className="w-full py-3 bg-secondary-100 text-secondary-700 rounded-xl font-medium flex items-center justify-center gap-2 hover:bg-secondary-200 transition-colors"
+                        className="w-full mt-3 py-3 bg-secondary-100 text-secondary-700 rounded-xl font-medium flex items-center justify-center gap-2 hover:bg-secondary-200 transition-colors"
                     >
                         <Eye size={18} />
                         {t('signing.view_preview', 'View Preview')}

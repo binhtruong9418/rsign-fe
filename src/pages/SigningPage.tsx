@@ -270,8 +270,8 @@ const SigningPage: React.FC = () => {
       <div className="flex-grow flex flex-col items-center justify-start p-2 sm:p-4 lg:p-8">
         <div
           className={`w-full bg-white shadow-xl border border-secondary-200 flex flex-col rounded-lg sm:rounded-xl overflow-hidden transition-all duration-300 ${view === 'sign'
-            ? 'h-[calc(100vh-6rem)] sm:h-[80vh] max-w-4xl'
-            : 'h-[calc(100vh-6rem)] sm:h-[85vh] max-w-5xl'
+            ? 'h-[calc(100vh-6rem)] sm:h-[80vh] max-w-2xl lg:max-w-2xl'
+            : 'h-[calc(100vh-6rem)] lg:h-auto lg:min-h-[600px] max-w-3xl lg:max-w-3xl'
             }`}
         >
           {view === 'document' ? (
