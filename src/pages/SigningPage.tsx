@@ -3,7 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import LoadingSpinner from '../components/LoadingSpinner';
 import DocumentContentViewer from '../components/DocumentContentViewer';
-import MultiSignatureView from '../components/sign/MultiSignatureView';
+import SignatureView from '../components/sign/SignatureView';
 import Header from '../components/Header';
 import SessionTimer from '../components/SessionTimer';
 import { signingApi } from '../services/signingApi';
@@ -326,7 +326,7 @@ const SigningPage: React.FC = () => {
             </div>
           ) : (
             // Unified Signature View (handles both single and multi signature)
-            <MultiSignatureView
+            <SignatureView
               onBack={handleBack}
               onSubmitAll={handleSubmitSignatures}
               isSubmitting={submitting}
