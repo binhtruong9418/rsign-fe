@@ -137,9 +137,7 @@ export interface CompletedDocumentDetail {
             previewUrl: string;
             hash: string;
             playback: {
-                strokes: Array<{
-                    points: Array<{ x: number; y: number }>;
-                }>;
+                strokes: Stroke[];
                 color: string;
                 width: number;
             };
