@@ -142,7 +142,7 @@ const SignaturePreview: React.FC<SignaturePreviewProps> = ({
         const fetchPreviewImage = async () => {
             try {
                 const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
-                const response = await fetch(`${import.meta.env.VITE_API_URL}${signature.previewUrl}`, {
+                const response = await fetch(`${signature.previewUrl}`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },

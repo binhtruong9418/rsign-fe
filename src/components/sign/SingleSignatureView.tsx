@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Check, X, Eye, EyeOff } from 'lucide-react';
 import SignaturePad, { SignaturePadRef } from '../SignaturePad';
+import DocumentContentViewer from '../DocumentContentViewer';
 import { DEFAULT_SIGNATURE_COLOR, DEFAULT_SIGNATURE_WIDTH } from '../../constants/app';
 import { useTranslation } from 'react-i18next';
 import type { Stroke } from '../../types';
@@ -39,6 +40,8 @@ const SingleSignatureView: React.FC<SingleSignatureViewProps> = ({
     const [hasDrawn, setHasDrawn] = useState(false);
     const [showDocPreview, setShowDocPreview] = useState(false);
     const [signatureDataUrl, setSignatureDataUrl] = useState<string | null>(null);
+    const [previewSignatureImage, setPreviewSignatureImage] = useState<string | null>(null);
+    const [currentDocPage, setCurrentDocPage] = useState(1);
 
     // Track if user has drawn
     useEffect(() => {
@@ -121,6 +124,59 @@ const SingleSignatureView: React.FC<SingleSignatureViewProps> = ({
         }
 
         setSignature(strokesData);
+
+        // Generate signature image for preview
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+            // Get bounding box
+            let minX = Infinity, minY = Infinity;
+            let maxX = -Infinity, maxY = -Infinity;
+
+            strokesData.forEach(stroke => {
+                stroke.points.forEach(point => {
+                    minX = Math.min(minX, point.x);
+                    minY = Math.min(minY, point.y);
+                    maxX = Math.max(maxX, point.x);
+                    maxY = Math.max(maxY, point.y);
+                });
+            });
+
+            const signatureWidth = maxX - minX;
+            const signatureHeight = maxY - minY;
+            const padding = 20;
+
+            canvas.width = signatureWidth + padding * 2;
+            canvas.height = signatureHeight + padding * 2;
+
+            // Fill with transparent background
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.strokeStyle = DEFAULT_SIGNATURE_COLOR;
+            ctx.lineWidth = DEFAULT_SIGNATURE_WIDTH;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            strokesData.forEach(stroke => {
+                if (stroke.points.length > 0) {
+                    ctx.beginPath();
+                    ctx.moveTo(
+                        stroke.points[0].x - minX + padding,
+                        stroke.points[0].y - minY + padding
+                    );
+                    for (let i = 1; i < stroke.points.length; i++) {
+                        ctx.lineTo(
+                            stroke.points[i].x - minX + padding,
+                            stroke.points[i].y - minY + padding
+                        );
+                    }
+                    ctx.stroke();
+                }
+            });
+
+            setPreviewSignatureImage(canvas.toDataURL('image/png'));
+        }
+
         setViewMode('preview');
     };
 
@@ -162,105 +218,159 @@ const SingleSignatureView: React.FC<SingleSignatureViewProps> = ({
                     </h2>
                 </div>
 
-                {/* Signature Preview */}
+                {/* Document Preview with Signature Overlay */}
                 <div className="flex-grow overflow-y-auto px-4 py-6 bg-secondary-50">
-                    <div className="max-w-md mx-auto">
-                        <div className="bg-white rounded-lg border-2 border-green-300 p-4">
-                            <div className="flex items-start justify-between mb-3">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full flex items-center justify-center font-semibold bg-green-100 text-green-700">
-                                        <Check size={20} />
+                    {documentUrl && signatureZone && signature ? (
+                        /* Document with signature overlay */
+                        <div className="flex flex-col items-center gap-4">
+                            {/* Status Card */}
+                            <div className="w-full max-w-3xl bg-white rounded-lg border-2 border-green-300 p-3 shadow-sm">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full flex items-center justify-center font-semibold bg-green-100 text-green-700">
+                                            <Check size={16} />
+                                        </div>
+                                        <div>
+                                            <p className="font-semibold text-secondary-900 text-sm">
+                                                {signatureLabel || t('signing.your_signature', 'Your Signature')}
+                                            </p>
+                                            <p className="text-xs text-secondary-600">
+                                                {t('signing.ready_to_submit', 'Ready to submit')}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="font-semibold text-secondary-900 text-base">
-                                            {signatureLabel || t('signing.your_signature', 'Your Signature')}
-                                        </p>
-                                        <p className="text-sm text-secondary-600">
-                                            {t('signing.ready_to_submit', 'Ready to submit')}
-                                        </p>
-                                    </div>
+                                    <button
+                                        onClick={handleEditSignature}
+                                        className="text-sm text-primary-600 font-medium px-3 py-1 rounded-full bg-primary-50 hover:bg-primary-100"
+                                    >
+                                        {t('common.edit', 'Edit')}
+                                    </button>
                                 </div>
-                                <button
-                                    onClick={handleEditSignature}
-                                    className="text-sm text-primary-600 font-medium px-3 py-1 rounded-full bg-primary-50 hover:bg-primary-100"
-                                >
-                                    {t('common.edit', 'Edit')}
-                                </button>
                             </div>
 
-                            {/* Signature Canvas Preview */}
-                            {signature && (
-                                <div className="border-2 border-secondary-200 rounded-lg p-3 bg-secondary-50">
-                                    <canvas
-                                        ref={(canvas) => {
-                                            if (canvas && signature) {
-                                                const ctx = canvas.getContext('2d');
-                                                if (ctx) {
-                                                    // Get bounding box of signature
-                                                    let minX = Infinity, minY = Infinity;
-                                                    let maxX = -Infinity, maxY = -Infinity;
+                            {/* Document with Signature Overlay */}
+                            <div className="w-full max-w-3xl relative">
+                                <DocumentContentViewer
+                                    documentUri={documentUrl}
+                                    documentTitle={documentTitle}
+                                    className="rounded-lg shadow-lg border-2 border-secondary-200 min-h-[400px]"
+                                    onPageChange={setCurrentDocPage}
+                                />
 
-                                                    signature.forEach(stroke => {
-                                                        stroke.points.forEach(point => {
-                                                            minX = Math.min(minX, point.x);
-                                                            minY = Math.min(minY, point.y);
-                                                            maxX = Math.max(maxX, point.x);
-                                                            maxY = Math.max(maxY, point.y);
-                                                        });
-                                                    });
-
-                                                    const signatureWidth = maxX - minX;
-                                                    const signatureHeight = maxY - minY;
-
-                                                    // Set canvas size to fit container
-                                                    const canvasWidth = 400;
-                                                    const canvasHeight = 150;
-                                                    canvas.width = canvasWidth;
-                                                    canvas.height = canvasHeight;
-
-                                                    // Calculate scale to fit signature in canvas with padding
-                                                    const padding = 20;
-                                                    const scaleX = (canvasWidth - padding * 2) / signatureWidth;
-                                                    const scaleY = (canvasHeight - padding * 2) / signatureHeight;
-                                                    const scale = Math.min(scaleX, scaleY);
-
-                                                    // Calculate offset to center signature
-                                                    const offsetX = (canvasWidth - signatureWidth * scale) / 2 - minX * scale;
-                                                    const offsetY = (canvasHeight - signatureHeight * scale) / 2 - minY * scale;
-
-                                                    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-                                                    ctx.strokeStyle = DEFAULT_SIGNATURE_COLOR;
-                                                    ctx.lineWidth = DEFAULT_SIGNATURE_WIDTH * scale;
-                                                    ctx.lineCap = 'round';
-                                                    ctx.lineJoin = 'round';
-
-                                                    signature.forEach(stroke => {
-                                                        if (stroke.points.length > 0) {
-                                                            ctx.beginPath();
-                                                            const firstPoint = stroke.points[0];
-                                                            ctx.moveTo(
-                                                                firstPoint.x * scale + offsetX,
-                                                                firstPoint.y * scale + offsetY
-                                                            );
-                                                            for (let i = 1; i < stroke.points.length; i++) {
-                                                                const point = stroke.points[i];
-                                                                ctx.lineTo(
-                                                                    point.x * scale + offsetX,
-                                                                    point.y * scale + offsetY
-                                                                );
-                                                            }
-                                                            ctx.stroke();
-                                                        }
-                                                    });
-                                                }
-                                            }
+                                {/* Signature Image Overlay - Only show on correct page */}
+                                {previewSignatureImage && currentDocPage === (signatureZone.pageNumber || 1) && (
+                                    <div
+                                        className="absolute pointer-events-none"
+                                        style={{
+                                            left: `calc(${signatureZone.x}% + 1rem)`,
+                                            top: `calc(${signatureZone.y}% + 4rem)`,
+                                            width: `${signatureZone.width}%`,
+                                            height: `${signatureZone.height}%`,
                                         }}
-                                        className="w-full"
-                                    />
-                                </div>
-                            )}
+                                    >
+                                        <img
+                                            src={previewSignatureImage}
+                                            alt="Signature preview"
+                                            className="w-full h-full object-contain"
+                                        />
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                    </div>
+                    ) : (
+                        /* Fallback: Simple signature preview */
+                        <div className="max-w-md mx-auto">
+                            <div className="bg-white rounded-lg border-2 border-green-300 p-4">
+                                <div className="flex items-start justify-between mb-3">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full flex items-center justify-center font-semibold bg-green-100 text-green-700">
+                                            <Check size={20} />
+                                        </div>
+                                        <div>
+                                            <p className="font-semibold text-secondary-900 text-base">
+                                                {signatureLabel || t('signing.your_signature', 'Your Signature')}
+                                            </p>
+                                            <p className="text-sm text-secondary-600">
+                                                {t('signing.ready_to_submit', 'Ready to submit')}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={handleEditSignature}
+                                        className="text-sm text-primary-600 font-medium px-3 py-1 rounded-full bg-primary-50 hover:bg-primary-100"
+                                    >
+                                        {t('common.edit', 'Edit')}
+                                    </button>
+                                </div>
+
+                                {signature && (
+                                    <div className="border-2 border-secondary-200 rounded-lg p-3 bg-secondary-50">
+                                        <canvas
+                                            ref={(canvas) => {
+                                                if (canvas && signature) {
+                                                    const ctx = canvas.getContext('2d');
+                                                    if (ctx) {
+                                                        let minX = Infinity, minY = Infinity;
+                                                        let maxX = -Infinity, maxY = -Infinity;
+
+                                                        signature.forEach(stroke => {
+                                                            stroke.points.forEach(point => {
+                                                                minX = Math.min(minX, point.x);
+                                                                minY = Math.min(minY, point.y);
+                                                                maxX = Math.max(maxX, point.x);
+                                                                maxY = Math.max(maxY, point.y);
+                                                            });
+                                                        });
+
+                                                        const signatureWidth = maxX - minX;
+                                                        const signatureHeight = maxY - minY;
+                                                        const canvasWidth = 400;
+                                                        const canvasHeight = 150;
+                                                        canvas.width = canvasWidth;
+                                                        canvas.height = canvasHeight;
+
+                                                        const padding = 20;
+                                                        const scaleX = (canvasWidth - padding * 2) / signatureWidth;
+                                                        const scaleY = (canvasHeight - padding * 2) / signatureHeight;
+                                                        const scale = Math.min(scaleX, scaleY);
+
+                                                        const offsetX = (canvasWidth - signatureWidth * scale) / 2 - minX * scale;
+                                                        const offsetY = (canvasHeight - signatureHeight * scale) / 2 - minY * scale;
+
+                                                        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+                                                        ctx.strokeStyle = DEFAULT_SIGNATURE_COLOR;
+                                                        ctx.lineWidth = DEFAULT_SIGNATURE_WIDTH * scale;
+                                                        ctx.lineCap = 'round';
+                                                        ctx.lineJoin = 'round';
+
+                                                        signature.forEach(stroke => {
+                                                            if (stroke.points.length > 0) {
+                                                                ctx.beginPath();
+                                                                const firstPoint = stroke.points[0];
+                                                                ctx.moveTo(
+                                                                    firstPoint.x * scale + offsetX,
+                                                                    firstPoint.y * scale + offsetY
+                                                                );
+                                                                for (let i = 1; i < stroke.points.length; i++) {
+                                                                    const point = stroke.points[i];
+                                                                    ctx.lineTo(
+                                                                        point.x * scale + offsetX,
+                                                                        point.y * scale + offsetY
+                                                                    );
+                                                                }
+                                                                ctx.stroke();
+                                                            }
+                                                        });
+                                                    }
+                                                }
+                                            }}
+                                            className="w-full"
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Submit Button */}

@@ -81,6 +81,7 @@ interface DocumentContentViewerProps {
   className?: string;
   signatureZone?: SignatureZone;  // Optional single signature zone to highlight
   signatureZones?: SignatureZone[];  // Optional multiple signature zones to highlight
+  onPageChange?: (page: number) => void;  // Callback when page changes
 }
 
 const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
@@ -124,8 +125,7 @@ const DocumentContentViewer: React.FC<DocumentContentViewerProps> = ({
   documentTitle,
   className = '',
   signatureZone,
-  signatureZones,
-}) => {
+  signatureZones, onPageChange, }) => {
   const { t } = useTranslation();
   const mediaType = useMemo(() => detectDocumentMediaType(documentUri), [documentUri]);
   const [scale, setScale] = useState(1);
@@ -151,7 +151,10 @@ const DocumentContentViewer: React.FC<DocumentContentViewerProps> = ({
     setScale(1);
     setRotation(0);
   };
-  const handlePageChange = (page: number) => setCurrentPage(page);
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    onPageChange?.(page);
+  };
 
   if (!documentUri) {
     return (
