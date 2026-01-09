@@ -1,12 +1,14 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { CheckCircle, Clock, Home } from 'lucide-react';
+import { CheckCircle, Clock, Home, FileText } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 interface LocationState {
   documentComplete?: boolean;
   documentTitle?: string;
+  totalSignatures?: number;
+  documentId?: string;
 }
 
 const SigningSuccessPage: React.FC = () => {
@@ -15,7 +17,8 @@ const SigningSuccessPage: React.FC = () => {
   const { t } = useTranslation();
 
   const state = (location.state as LocationState) || {};
-  const { documentComplete = false, documentTitle = 'Document' } = state;
+  const { documentComplete = false, documentTitle = 'Document', totalSignatures = 1, documentId } = state;
+  const signedAt = new Date().toLocaleString();
 
   useEffect(() => {
     // Trigger confetti animation
@@ -53,7 +56,7 @@ const SigningSuccessPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-linear-to-br from-primary-50 to-secondary-50 flex items-center justify-center px-4">
       <div className="max-w-2xl w-full">
         <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 text-center">
           {/* Success Icon */}
@@ -67,7 +70,29 @@ const SigningSuccessPage: React.FC = () => {
           </h1>
 
           {/* Document Title */}
-          <p className="text-xl text-secondary-700 mb-8">{documentTitle}</p>
+          <p className="text-xl text-secondary-700 mb-6">{documentTitle}</p>
+
+          {/* Document Details */}
+          <div className="bg-secondary-50 border border-secondary-200 rounded-xl p-5 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+              <div>
+                <p className="text-sm text-secondary-500 mb-1">
+                  {t('success.signatures_submitted', 'Signatures Submitted')}
+                </p>
+                <p className="text-lg font-semibold text-secondary-900">
+                  {totalSignatures} {totalSignatures === 1 ? t('success.signature', 'signature') : t('success.signatures', 'signatures')}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-secondary-500 mb-1">
+                  {t('success.signed_at', 'Signed At')}
+                </p>
+                <p className="text-lg font-semibold text-secondary-900">
+                  {signedAt}
+                </p>
+              </div>
+            </div>
+          </div>
 
           {/* Status Message */}
           {documentComplete ? (
@@ -104,9 +129,19 @@ const SigningSuccessPage: React.FC = () => {
 
           {/* Actions */}
           <div className="space-y-3">
+            {documentComplete && documentId && (
+              <button
+                onClick={() => navigate(`/documents/${documentId}/completed`)}
+                className="w-full btn-primary flex items-center justify-center gap-2"
+              >
+                <FileText className="w-5 h-5" />
+                {t('success.view_document_details', 'View Document Details')}
+              </button>
+            )}
+
             <button
               onClick={() => navigate('/dashboard')}
-              className="w-full btn-primary flex items-center justify-center gap-2"
+              className={`w-full ${documentComplete && documentId ? 'btn-secondary' : 'btn-primary'} flex items-center justify-center gap-2`}
             >
               <Home className="w-5 h-5" />
               {t('success.back_to_dashboard', 'Back to Dashboard')}

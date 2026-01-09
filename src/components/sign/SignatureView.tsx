@@ -40,13 +40,52 @@ const SignatureView: React.FC<SignatureViewProps> = ({
         if (!showPreview || !signaturePadRef.current) return;
 
         const updatePreview = () => {
-            const canvas = signaturePadRef.current?.getCanvas();
-            if (canvas) {
+            const strokes = signaturePadRef.current?.getSignature();
+            if (strokes && strokes.length > 0) {
                 try {
+                    // Create temporary canvas to render signature
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    if (!ctx) return;
+
+                    // Get bounding box
+                    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+                    strokes.forEach(stroke => {
+                        stroke.points.forEach(point => {
+                            minX = Math.min(minX, point.x);
+                            minY = Math.min(minY, point.y);
+                            maxX = Math.max(maxX, point.x);
+                            maxY = Math.max(maxY, point.y);
+                        });
+                    });
+
+                    const width = maxX - minX + 40;
+                    const height = maxY - minY + 40;
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    ctx.strokeStyle = DEFAULT_SIGNATURE_COLOR;
+                    ctx.lineWidth = DEFAULT_SIGNATURE_WIDTH;
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+
+                    strokes.forEach(stroke => {
+                        if (stroke.points.length > 0) {
+                            ctx.beginPath();
+                            ctx.moveTo(stroke.points[0].x - minX + 20, stroke.points[0].y - minY + 20);
+                            for (let i = 1; i < stroke.points.length; i++) {
+                                ctx.lineTo(stroke.points[i].x - minX + 20, stroke.points[i].y - minY + 20);
+                            }
+                            ctx.stroke();
+                        }
+                    });
+
                     setSignaturePreview(canvas.toDataURL('image/png'));
                 } catch (e) {
                     console.error('Failed to generate signature preview:', e);
                 }
+            } else {
+                setSignaturePreview(null);
             }
         };
 

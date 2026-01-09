@@ -184,16 +184,17 @@
         "preview_mode_hint": "Chế độ xem trước - Vẽ để xem chữ ký trên tài liệu"
     },
     "errors": {
+        "modal_title": "Đã xảy ra lỗi",
         "document_locked": "Tài liệu này hiện đang được ký trên thiết bị khác. Vui lòng thử lại sau.",
         "failed_to_start_signing": "Không thể bắt đầu phiên ký",
         "failed_to_decline": "Không thể từ chối tài liệu",
         "cannot_sign": "Không thể ký tài liệu này",
-        "session_expired": "Phiên đã hết hạn. Vui lòng thử lại.",
+        "session_expired": "Phiên ký của bạn đã hết hạn. Vui lòng quay lại trang chủ và tạo phiên ký mới.",
         "session_not_found": "Không tìm thấy phiên. Vui lòng thử lại.",
-        "device_mismatch": "Phiên này được tạo trên thiết bị khác. Vui lòng tạo phiên mới trên thiết bị này.",
+        "device_mismatch": "Xác minh thiết bị thất bại. Phiên này được tạo trên thiết bị khác. Vì lý do bảo mật, vui lòng quay lại trang chủ và tạo phiên ký mới từ thiết bị này.",
         "signing_in_progress": "Đang ký, đang thử lại...",
-        "too_many_attempts": "Quá nhiều lần thử. Vui lòng tạo phiên mới.",
-        "failed_to_sign": "Không thể gửi chữ ký"
+        "too_many_attempts": "Phát hiện quá nhiều lần thử ký. Vì lý do bảo mật, phiên này đã bị khóa. Vui lòng quay lại trang chủ và tạo phiên ký mới.",
+        "failed_to_sign": "Không thể gửi chữ ký. Vui lòng thử lại hoặc liên hệ hỗ trợ nếu vấn đề vẫn tiếp diễn."
     },
     "auth": {
         "login": {
@@ -282,6 +283,8 @@
         "edit": "Sửa",
         "view": "Xem",
         "back": "Quay lại",
+        "back_to_dashboard": "Quay lại trang chủ",
+        "confirm": "Xác nhận",
         "yes": "Có, Hủy",
         "no": "Không, Tiếp tục",
         "retry": "Thử lại",

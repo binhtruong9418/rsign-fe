@@ -3,7 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import LoadingSpinner from '../components/LoadingSpinner';
 import DocumentContentViewer from '../components/DocumentContentViewer';
-import SingleSignatureView from '../components/sign/SingleSignatureView';
+import MultiSignatureView from '../components/sign/MultiSignatureView';
 import Header from '../components/Header';
 import SessionTimer from '../components/SessionTimer';
 import { signingApi } from '../services/signingApi';
@@ -30,10 +30,7 @@ const SigningPage: React.FC = () => {
   const [view, setView] = useState<View>('document');
   const [submitting, setSubmitting] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
-
-  // For multi-signature workflow
-  const [currentSignatureIndex, setCurrentSignatureIndex] = useState(0);
-  const [completedSignatures, setCompletedSignatures] = useState<string[]>([]);
+  const [errorModal, setErrorModal] = useState<{ show: boolean; code?: string; message?: string }>({ show: false });
 
   // Use body scroll lock when in sign view
   useBodyScrollLock(view === 'sign');
@@ -76,7 +73,6 @@ const SigningPage: React.FC = () => {
       }
 
       setSessionDetails(data);
-      setCompletedSignatures(data.completedSignatures || []);
     } catch (err: any) {
       handleSigningError(err, {
         onSessionExpired: () => {
@@ -111,82 +107,87 @@ const SigningPage: React.FC = () => {
     navigate('/dashboard');
   }, [navigate, t]);
 
-  const handleSubmitSignature = async (strokesData: Stroke[]) => {
+  // Unified handler for both single and multi signature submission
+  const handleSubmitSignatures = async (signaturesMap: Map<string, Stroke[]>) => {
     if (!sessionId || !sessionDetails) return;
-
-    const pendingSigs = sessionDetails.pendingSignatures;
-    const currentSig = pendingSigs[currentSignatureIndex];
-
-    if (!currentSig) {
-      showToast.error('No signature to submit');
-      return;
-    }
 
     setSubmitting(true);
 
     try {
-      // Generate idempotency key
       const idempotencyKey = crypto.randomUUID();
 
-      // Submit signature (API expects signatures array format)
+      // Convert Map to API format
+      const signatures = Array.from(signaturesMap.entries()).map(([documentSignerId, strokes]) => ({
+        documentSignerId,
+        signatureData: {
+          strokes,
+          color: DEFAULT_SIGNATURE_COLOR,
+          width: DEFAULT_SIGNATURE_WIDTH,
+        },
+      }));
+
       const response = await signingApi.submitSignature(sessionId, {
-        signatures: [{
-          documentSignerId: currentSig.documentSignerId,
-          signatureData: {
-            strokes: strokesData,
-            color: DEFAULT_SIGNATURE_COLOR,
-            width: DEFAULT_SIGNATURE_WIDTH,
-          },
-        }],
+        signatures,
         idempotencyKey,
       });
 
       if (response.success) {
-        const newCompleted = [...completedSignatures, currentSig.documentSignerId];
-        setCompletedSignatures(newCompleted);
-
-        // Check if there are more signatures to sign
-        const remainingSignatures = pendingSigs.length - (currentSignatureIndex + 1);
-
-        if (remainingSignatures > 0) {
-          // Move to next signature
-          showToast.success(
-            t('sign_document.signature_saved', 'Signature {{current}} of {{total}} saved!', {
-              current: currentSignatureIndex + 1,
-              total: pendingSigs.length,
+        const isSingle = signatures.length === 1;
+        showToast.success(
+          isSingle
+            ? t('sign_document.signature_submitted', 'Signature submitted successfully!')
+            : t('sign_document.all_signatures_submitted', 'All {{count}} signatures submitted successfully!', {
+              count: signatures.length,
             })
-          );
-          setCurrentSignatureIndex(prev => prev + 1);
-          setView('document'); // Go back to review next signature zone
-        } else {
-          // All signatures completed
-          showToast.success(t('sign_document.all_completed', 'All signatures submitted successfully!'));
-          navigate('/signing-success', {
-            state: {
-              documentComplete: response.documentComplete,
-              documentTitle: sessionDetails?.document.title,
-              totalSignatures: pendingSigs.length,
-            },
-          });
-        }
+        );
+        navigate('/signing-success', {
+          state: {
+            documentComplete: response.documentComplete,
+            documentTitle: sessionDetails?.document.title,
+            totalSignatures: signatures.length,
+            documentId: sessionDetails?.document.id,
+          },
+        });
       }
     } catch (err: any) {
       handleSigningError(err, {
         onSessionExpired: () => {
-          showToast.error(t('errors.session_expired', 'Session expired. Please create a new session.'));
-          navigate('/dashboard');
+          setErrorModal({
+            show: true,
+            code: 'SESSION_EXPIRED',
+            message: t('errors.session_expired', 'Session expired. Please create a new session.')
+          });
+        },
+        onDeviceMismatch: () => {
+          setErrorModal({
+            show: true,
+            code: 'SESSION_DEVICE_MISMATCH',
+            message: t('errors.device_mismatch', 'This session was created on a different device. Please create a new session on this device.')
+          });
         },
         onSigningInProgress: () => {
-          // Retry after 1 second
           showToast.info(t('errors.signing_in_progress', 'Signing in progress, retrying...'));
-          setTimeout(() => handleSubmitSignature(strokesData), 1000);
+          setTimeout(() => handleSubmitSignatures(signaturesMap), 1000);
         },
         onTooManyAttempts: () => {
-          showToast.error(t('errors.too_many_attempts', 'Too many attempts. Please create a new session.'));
-          navigate('/dashboard');
+          setErrorModal({
+            show: true,
+            code: 'TOO_MANY_ATTEMPTS',
+            message: t('errors.too_many_attempts', 'Too many attempts. Please create a new session.')
+          });
+        },
+        onDocumentLocked: () => {
+          setErrorModal({
+            show: true,
+            code: 'DOCUMENT_LOCKED',
+            message: t('errors.document_locked', 'This document is currently being signed by another device. Please try again later.')
+          });
         },
         onDefault: (message) => {
-          showToast.error(message || t('errors.failed_to_sign', 'Failed to submit signature'));
+          setErrorModal({
+            show: true,
+            message: message || t('errors.failed_to_sign', 'Failed to submit signature')
+          });
         },
       });
     } finally {
@@ -241,7 +242,6 @@ const SigningPage: React.FC = () => {
   }
 
   const { session, document, pendingSignatures } = sessionDetails;
-  const currentSignature = pendingSignatures[currentSignatureIndex];
   const isMultiSignature = pendingSignatures.length > 1;
 
   return (
@@ -258,7 +258,7 @@ const SigningPage: React.FC = () => {
               </span>
               {isMultiSignature && (
                 <span className="text-xs sm:text-sm font-medium text-primary-600">
-                  {t('signing.progress', 'Progress')}: {completedSignatures.length} / {pendingSignatures.length}
+                  {t('signing.signatures_required', '{{count}} signatures required', { count: pendingSignatures.length })}
                 </span>
               )}
             </div>
@@ -285,9 +285,8 @@ const SigningPage: React.FC = () => {
                     </h1>
                     <p className="text-xs sm:text-sm text-secondary-500 mt-0.5 sm:mt-1">
                       {isMultiSignature
-                        ? t('sign_document.multi_review_instruction', 'Signature {{current}} of {{total}} - Review before signing', {
-                          current: currentSignatureIndex + 1,
-                          total: pendingSignatures.length,
+                        ? t('sign_document.multi_review_instruction', 'Review the document with {{count}} signature zones', {
+                          count: pendingSignatures.length,
                         })
                         : t('sign_document.review_instruction', 'Please review the document before signing')
                       }
@@ -307,7 +306,7 @@ const SigningPage: React.FC = () => {
                   documentUri={document.originalFileUrl}
                   documentTitle={document.title}
                   className="h-full w-full shadow-sm bg-white rounded-none sm:rounded"
-                  signatureZone={currentSignature?.signatureZone}
+                  signatureZones={pendingSignatures.map(sig => sig.signatureZone)}
                 />
               </div>
 
@@ -317,9 +316,8 @@ const SigningPage: React.FC = () => {
                   className="w-full btn-primary text-sm sm:text-base lg:text-lg py-2.5 sm:py-3 shadow-lg sm:shadow-sm"
                 >
                   {isMultiSignature
-                    ? t('sign_document.sign_this_zone', 'Sign Zone {{current}} of {{total}}', {
-                      current: currentSignatureIndex + 1,
-                      total: pendingSignatures.length,
+                    ? t('sign_document.proceed_to_sign_all', 'Proceed to Sign All ({{count}})', {
+                      count: pendingSignatures.length,
                     })
                     : t('sign_document.proceed_to_sign', 'Proceed to Sign')
                   }
@@ -327,15 +325,18 @@ const SigningPage: React.FC = () => {
               </div>
             </div>
           ) : (
-            // Single Signature View
-            <SingleSignatureView
+            // Unified Signature View (handles both single and multi signature)
+            <MultiSignatureView
               onBack={handleBack}
-              onSubmit={handleSubmitSignature}
+              onSubmitAll={handleSubmitSignatures}
               isSubmitting={submitting}
+              signatureZones={pendingSignatures.map(sig => ({
+                documentSignerId: sig.documentSignerId,
+                signatureZone: sig.signatureZone,
+              }))}
               documentTitle={document.title}
-              signatureLabel={currentSignature?.signatureZone.label || `Signature ${currentSignatureIndex + 1}`}
+              sessionExpiresAt={session.expiresAt}
               documentUrl={document.originalFileUrl}
-              signatureZone={currentSignature?.signatureZone}
             />
           )}
         </div>
@@ -349,10 +350,9 @@ const SigningPage: React.FC = () => {
               {t('signing.cancel_confirm_title', 'Cancel Signing?')}
             </h3>
             <p className="text-sm sm:text-base text-secondary-600 mb-4 sm:mb-6">
-              {isMultiSignature && completedSignatures.length > 0
-                ? t('signing.cancel_confirm_multi_message', 'You have completed {{count}} of {{total}} signatures. Are you sure you want to cancel?', {
-                  count: completedSignatures.length,
-                  total: pendingSignatures.length,
+              {isMultiSignature
+                ? t('signing.cancel_confirm_multi_message', 'You have {{count}} signatures to sign. Are you sure you want to cancel?', {
+                  count: pendingSignatures.length,
                 })
                 : t('signing.cancel_confirm_message', 'Are you sure you want to cancel? Your progress will be lost.')
               }
@@ -363,6 +363,45 @@ const SigningPage: React.FC = () => {
               </button>
               <button onClick={confirmCancel} className="flex-1 btn-primary bg-red-600 hover:bg-red-700 text-sm sm:text-base py-2 sm:py-2.5">
                 {t('common.yes', 'Yes, Cancel')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Error Modal */}
+      {errorModal.show && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+            {/* Header */}
+            <div className="bg-red-600 px-6 py-5">
+              <h3 className="text-xl font-bold text-white">
+                {t('errors.modal_title', 'Error Occurred')}
+              </h3>
+            </div>
+
+            {/* Body */}
+            <div className="px-6 py-6">
+              {errorModal.code && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm font-mono text-red-800">{errorModal.code}</p>
+                </div>
+              )}
+              <p className="text-secondary-700 text-base leading-relaxed">
+                {errorModal.message}
+              </p>
+            </div>
+
+            {/* Actions */}
+            <div className="px-6 py-5 bg-secondary-50 border-t border-secondary-200 flex gap-3">
+              <button
+                onClick={() => {
+                  setErrorModal({ show: false });
+                  navigate('/dashboard');
+                }}
+                className="flex-1 py-3 px-4 bg-primary-600 text-white rounded-xl font-semibold hover:bg-primary-700 transition-colors"
+              >
+                {t('common.back_to_dashboard', 'Back to Dashboard')}
               </button>
             </div>
           </div>

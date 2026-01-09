@@ -184,16 +184,17 @@
         "preview_mode_hint": "Preview mode - Draw to see signature on document"
     },
     "errors": {
+        "modal_title": "Error Occurred",
         "document_locked": "This document is currently being signed by another device. Please try again later.",
         "failed_to_start_signing": "Failed to start signing session",
         "failed_to_decline": "Failed to decline document",
         "cannot_sign": "Cannot sign this document",
-        "session_expired": "Session expired. Please try again.",
+        "session_expired": "Your signing session has expired. Please return to the dashboard and create a new signing session.",
         "session_not_found": "Session not found. Please try again.",
-        "device_mismatch": "This session was created on a different device. Please create a new session on this device.",
+        "device_mismatch": "Device verification failed. This session was created on a different device. For security reasons, please return to the dashboard and create a new signing session from this device.",
         "signing_in_progress": "Signing in progress, retrying...",
-        "too_many_attempts": "Too many attempts. Please create a new session.",
-        "failed_to_sign": "Failed to submit signature"
+        "too_many_attempts": "Too many signing attempts detected. For security reasons, this session has been locked. Please return to the dashboard and create a new signing session.",
+        "failed_to_sign": "Failed to submit signature. Please try again or contact support if the problem persists."
     },
     "auth": {
         "login": {
@@ -282,6 +283,8 @@
         "edit": "Edit",
         "view": "View",
         "back": "Back",
+        "back_to_dashboard": "Back to Dashboard",
+        "confirm": "Confirm",
         "yes": "Yes, Cancel",
         "no": "No, Continue",
         "retry": "Retry",
