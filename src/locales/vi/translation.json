@@ -222,8 +222,30 @@
             "submitting": "Đang đăng ký...",
             "already_member": "Đã là thành viên?",
             "login_link": "Đăng nhập tại đây",
-            "success": "Đăng ký thành công! Vui lòng đăng nhập.",
-            "failed": "Đăng ký thất bại: {{message}}"
+            "success": "Đăng ký thành công! Vui lòng kiểm tra email để xác thực.",
+            "failed": "Đăng ký thất bại: {{message}}",
+            "verify_email_message": "Đăng ký thành công! Vui lòng kiểm tra email để nhận mã xác thực."
+        },
+        "verify_email": {
+            "title": "Xác thực Email",
+            "subtitle": "Nhập mã 6 số đã được gửi đến email của bạn",
+            "email_label": "Địa chỉ Email",
+            "code_label": "Mã xác thực",
+            "code_hint": "Nhập mã 6 chữ số từ email",
+            "sent_to": "Mã đã được gửi đến",
+            "submit_button": "Xác thực Email",
+            "verifying": "Đang xác thực...",
+            "success": "Email đã được xác thực! Bạn có thể đăng nhập ngay.",
+            "failed": "Xác thực thất bại: {{message}}",
+            "invalid_code": "Mã xác thực không đúng. Vui lòng thử lại.",
+            "expired_code": "Mã đã hết hạn. Vui lòng gửi lại mã mới.",
+            "already_verified": "Email đã được xác thực rồi. Bạn có thể đăng nhập ngay.",
+            "no_code": "Không nhận được mã?",
+            "resend_button": "Gửi lại mã",
+            "resend_cooldown": "Gửi lại sau {{seconds}}s",
+            "resend_success": "Mã xác thực mới đã được gửi! Vui lòng kiểm tra email.",
+            "resend_failed": "Không thể gửi lại mã. Vui lòng thử lại sau.",
+            "back_to_login": "Quay lại đăng nhập"
         }
     },
     "home": {

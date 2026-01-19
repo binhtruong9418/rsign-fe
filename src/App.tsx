@@ -5,6 +5,7 @@ import { Toaster } from 'react-hot-toast';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import VerifyEmailPage from './pages/VerifyEmailPage';
 import DashboardPage from './pages/DashboardPage';
 import DocumentDetailPage from './pages/DocumentDetailPage';
 import CompletedDocumentsPage from './pages/CompletedDocumentsPage';
@@ -24,6 +25,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
 
           {/* Signing Workflow */}
           <Route path="/sign/:sessionId" element={<ProtectedRoute><SigningPage /></ProtectedRoute>} />

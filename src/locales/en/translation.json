@@ -222,8 +222,30 @@
             "submitting": "Registering...",
             "already_member": "Already a member?",
             "login_link": "Login here",
-            "success": "Registration successful! Please login.",
-            "failed": "Registration failed: {{message}}"
+            "success": "Registration successful! Please check your email to verify.",
+            "failed": "Registration failed: {{message}}",
+            "verify_email_message": "Registration successful! Please check your email for the verification code."
+        },
+        "verify_email": {
+            "title": "Verify Email",
+            "subtitle": "Enter the 6-digit code sent to your email",
+            "email_label": "Email address",
+            "code_label": "Verification Code",
+            "code_hint": "Enter the 6-digit code from your email",
+            "sent_to": "Code sent to",
+            "submit_button": "Verify Email",
+            "verifying": "Verifying...",
+            "success": "Email verified successfully! You can now log in.",
+            "failed": "Verification failed: {{message}}",
+            "invalid_code": "Invalid verification code. Please try again.",
+            "expired_code": "Code has expired. Please request a new one.",
+            "already_verified": "Email is already verified. You can log in now.",
+            "no_code": "Didn't receive the code?",
+            "resend_button": "Resend Code",
+            "resend_cooldown": "Resend in {{seconds}}s",
+            "resend_success": "New verification code sent! Please check your email.",
+            "resend_failed": "Failed to resend code. Please try again later.",
+            "back_to_login": "Back to Login"
         }
     },
     "home": {

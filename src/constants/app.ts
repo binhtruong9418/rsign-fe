@@ -32,6 +32,8 @@ export const API_ENDPOINTS = {
     LOGIN: "/api/users/login",
     LOGIN_HUST: "/api/users/login-hust",
     REGISTER: "/api/users/register",
+    VERIFY_EMAIL: "/api/users/verify-email",
+    RESEND_VERIFICATION: "/api/users/resend-verification",
     MY_DOCUMENTS: "/api/documents/created/me",
     DOCUMENTS: "/api/documents",
     DOCUMENT_BY_TOKEN: "/api/documents/get-by-token",

@@ -17,7 +17,13 @@ const RegisterPage: React.FC = () => {
     mutationFn: (newUser) => api.post('/api/users/register', newUser).then(res => res.data),
     onSuccess: () => {
       showToast.success(t('auth.register.success'));
-      navigate('/login', { state: location.state });
+      // Redirect to verify-email page with email pre-filled
+      navigate('/verify-email', {
+        state: {
+          email,
+          message: t('auth.register.verify_email_message'),
+        },
+      });
     },
     onError: (error: any) => {
       showToast.error(t('auth.register.failed', { message: error?.response?.data?.message || 'Unknown error' }));

@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { LogOut, User as UserIcon, LayoutDashboard, Menu, X, ChevronDown, FileText, CheckCircle } from 'lucide-react';
-import LanguageSwitcher from './LanguageSwitcher';
+import { LogOut, User as UserIcon, Menu, X, ChevronDown, FileText, CheckCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 const Header: React.FC = () => {
@@ -51,8 +50,6 @@ const Header: React.FC = () => {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-4">
-            <LanguageSwitcher />
-
             {isAuthenticated ? (
               <div className="relative" ref={profileDropdownRef}>
                 <button
@@ -120,7 +117,6 @@ const Header: React.FC = () => {
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center space-x-2">
-            <LanguageSwitcher />
             <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="inline-flex items-center justify-center p-2 rounded-md text-secondary-500 hover:text-primary-600 hover:bg-secondary-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500">
               <span className="sr-only">Open main menu</span>
               {isMenuOpen ? <X className="block h-6 w-6" /> : <Menu className="block h-6 w-6" />}

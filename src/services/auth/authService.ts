@@ -7,6 +7,14 @@ export interface LoginResponse {
     user: User;
 }
 
+export interface VerifyEmailResponse {
+    message: string;
+}
+
+export interface ResendVerificationResponse {
+    message: string;
+}
+
 export const authService = {
     /**
      * Regular user login
@@ -39,6 +47,25 @@ export const authService = {
         fullName: string;
     }): Promise<LoginResponse> => {
         const { data } = await api.post(API_ENDPOINTS.REGISTER, userData);
+        return data;
+    },
+
+    /**
+     * Verify email with 6-digit code
+     */
+    verifyEmail: async (data: {
+        email: string;
+        code: string;
+    }): Promise<VerifyEmailResponse> => {
+        const { data: response } = await api.post(API_ENDPOINTS.VERIFY_EMAIL, data);
+        return response;
+    },
+
+    /**
+     * Resend verification code
+     */
+    resendVerification: async (email: string): Promise<ResendVerificationResponse> => {
+        const { data } = await api.post(API_ENDPOINTS.RESEND_VERIFICATION, { email });
         return data;
     },
 };
