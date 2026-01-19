@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Check, X, Eye } from 'lucide-react';
 import SignaturePad, { SignaturePadRef } from '../SignaturePad';
-import DocumentContentViewer from '../DocumentContentViewer';
+import DocumentContentViewer, { SignatureImage } from '../DocumentContentViewer';
 import SignatureConfirmDialog from './SignatureConfirmDialog';
 import { DEFAULT_SIGNATURE_COLOR, DEFAULT_SIGNATURE_WIDTH } from '../../constants/app';
 import { useTranslation } from 'react-i18next';
@@ -77,10 +77,11 @@ const SignatureView: React.FC<SignatureViewProps> = ({
             return;
         }
 
-        // Generate signature image
+        // Generate signature image with proper aspect ratio matching the signature zone
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
-        if (ctx) {
+        if (ctx && selectedZone) {
+            // Calculate bounding box of all strokes
             let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
             strokesData.forEach(stroke => {
                 stroke.points.forEach(point => {
@@ -90,26 +91,62 @@ const SignatureView: React.FC<SignatureViewProps> = ({
                     maxY = Math.max(maxY, point.y);
                 });
             });
+
             const signatureWidth = maxX - minX;
             const signatureHeight = maxY - minY;
-            const padding = 20;
-            canvas.width = signatureWidth + padding * 2;
-            canvas.height = signatureHeight + padding * 2;
+
+            // Use a reasonable canvas size that maintains quality
+            // We use 1200px width as base for higher quality, height calculated from signature zone aspect ratio
+            const zoneAspectRatio = selectedZone.signatureZone.width / selectedZone.signatureZone.height;
+            const baseWidth = 1200;
+            const baseHeight = baseWidth / zoneAspectRatio;
+
+            canvas.width = baseWidth;
+            canvas.height = baseHeight;
+
+            // Clear canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Calculate scaling to fit signature into canvas with minimal padding (10% of canvas size)
+            const paddingPercent = 0.05; // 5% padding on each side
+            const paddingX = canvas.width * paddingPercent;
+            const paddingY = canvas.height * paddingPercent;
+            const availableWidth = canvas.width - paddingX * 2;
+            const availableHeight = canvas.height - paddingY * 2;
+
+            const scaleX = availableWidth / signatureWidth;
+            const scaleY = availableHeight / signatureHeight;
+            const scale = Math.min(scaleX, scaleY); // Use smaller scale to fit in both dimensions
+
+            // Center the signature
+            const scaledWidth = signatureWidth * scale;
+            const scaledHeight = signatureHeight * scale;
+            const offsetX = (canvas.width - scaledWidth) / 2 - minX * scale;
+            const offsetY = (canvas.height - scaledHeight) / 2 - minY * scale;
+
+            // Draw signature with scaling and centering
             ctx.strokeStyle = DEFAULT_SIGNATURE_COLOR;
-            ctx.lineWidth = DEFAULT_SIGNATURE_WIDTH;
+            ctx.lineWidth = DEFAULT_SIGNATURE_WIDTH * scale;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
+
             strokesData.forEach(stroke => {
                 if (stroke.points.length > 0) {
                     ctx.beginPath();
-                    ctx.moveTo(stroke.points[0].x - minX + padding, stroke.points[0].y - minY + padding);
+                    ctx.moveTo(
+                        stroke.points[0].x * scale + offsetX,
+                        stroke.points[0].y * scale + offsetY
+                    );
                     for (let i = 1; i < stroke.points.length; i++) {
-                        ctx.lineTo(stroke.points[i].x - minX + padding, stroke.points[i].y - minY + padding);
+                        ctx.lineTo(
+                            stroke.points[i].x * scale + offsetX,
+                            stroke.points[i].y * scale + offsetY
+                        );
                     }
                     ctx.stroke();
                 }
             });
+
             setSignatureImages(prev => new Map(prev).set(selectedZoneId, canvas.toDataURL('image/png')));
         }
 
@@ -208,54 +245,27 @@ const SignatureView: React.FC<SignatureViewProps> = ({
                                 </div>
 
                                 {/* Document with Multiple Signature Overlays */}
-                                <div className="w-full max-w-3xl relative">
+                                <div className="w-full max-w-3xl">
+                                    {/* Prepare signature images for DocumentContentViewer */}
                                     <DocumentContentViewer
                                         documentUri={documentUrl}
                                         documentTitle={documentTitle}
                                         className="rounded-lg shadow-lg border-2 border-secondary-200 min-h-[400px]"
                                         onPageChange={setCurrentDocPage}
+                                        signatureImages={Array.from(signatures.entries()).map(([documentSignerId, _]) => {
+                                            const zone = signatureZones.find(z => z.documentSignerId === documentSignerId);
+                                            const imgData = signatureImages.get(documentSignerId);
+                                            if (!zone || !imgData) return null;
+                                            return {
+                                                pageNumber: zone.signatureZone.pageNumber,
+                                                x: zone.signatureZone.x,
+                                                y: zone.signatureZone.y,
+                                                width: zone.signatureZone.width,
+                                                height: zone.signatureZone.height,
+                                                imageData: imgData,
+                                            } as SignatureImage;
+                                        }).filter((img): img is SignatureImage => img !== null)}
                                     />
-
-                                    {/* Signature Zones Overlays - Show zones with borders and labels */}
-                                    {signatureZones.map((zone, index) => {
-                                        if (zone.signatureZone.pageNumber !== currentDocPage) return null;
-
-                                        const signatureImage = signatureImages.get(zone.documentSignerId);
-                                        const isSigned = !!signatureImage;
-
-                                        return (
-                                            <div
-                                                key={zone.documentSignerId}
-                                                className={`absolute ${isSigned
-                                                    ? 'border-2 border-green-500 bg-green-500/5'
-                                                    : 'border-4 border-primary-500 bg-primary-500/10'
-                                                    } rounded`}
-                                                style={{
-                                                    left: `calc(${zone.signatureZone.x}% + 1rem)`,
-                                                    top: `calc(${zone.signatureZone.y}% + 4rem)`,
-                                                    width: `${zone.signatureZone.width}%`,
-                                                    height: `${zone.signatureZone.height}%`,
-                                                }}
-                                            >
-                                                {/* Signature Image */}
-                                                {signatureImage && (
-                                                    <img
-                                                        src={signatureImage}
-                                                        alt={`Signature ${zone.signatureZone.label || index + 1}`}
-                                                        className="w-full h-full object-contain p-1"
-                                                    />
-                                                )}
-
-                                                {/* Zone Label */}
-                                                <div className={`absolute -top-7 left-0 ${isSigned
-                                                    ? 'bg-green-500'
-                                                    : 'bg-primary-500'
-                                                    } text-white text-xs px-2 py-1 rounded font-semibold shadow-md whitespace-nowrap`}>
-                                                    {isSigned ? '✓' : '✍️'} {zone.signatureZone.label || `${t('signing.signature', 'Signature')} ${index + 1}`}
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
                                 </div>
                             </div>
                         ) : (

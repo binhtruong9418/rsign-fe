@@ -75,12 +75,22 @@ interface SignatureZone {
   label?: string;
 }
 
+interface SignatureImage {
+  pageNumber: number;
+  x: number;        // Percentage (0-100) from left edge
+  y: number;        // Percentage (0-100) from top edge
+  width: number;    // Percentage (0-100) of page width
+  height: number;   // Percentage (0-100) of page height
+  imageData: string; // Base64 or data URL
+}
+
 interface DocumentContentViewerProps {
   documentUri: string;
   documentTitle: string;
   className?: string;
   signatureZone?: SignatureZone;  // Optional single signature zone to highlight
   signatureZones?: SignatureZone[];  // Optional multiple signature zones to highlight
+  signatureImages?: SignatureImage[]; // Optional signature images to display
   onPageChange?: (page: number) => void;  // Callback when page changes
 }
 
@@ -125,7 +135,10 @@ const DocumentContentViewer: React.FC<DocumentContentViewerProps> = ({
   documentTitle,
   className = '',
   signatureZone,
-  signatureZones, onPageChange, }) => {
+  signatureZones,
+  signatureImages,
+  onPageChange,
+}) => {
   const { t } = useTranslation();
   const mediaType = useMemo(() => detectDocumentMediaType(documentUri), [documentUri]);
   const [scale, setScale] = useState(1);
@@ -219,7 +232,7 @@ const DocumentContentViewer: React.FC<DocumentContentViewerProps> = ({
       case 'image':
         return <ImagePreview url={documentUri} title={documentTitle} scale={scale} rotation={rotation} />;
       case 'pdf':
-        return <PdfPreview url={documentUri} scale={scale} rotation={rotation} signatureZones={allZones} currentPage={currentPage} onTotalPagesChange={setTotalPages} />;
+        return <PdfPreview url={documentUri} scale={scale} rotation={rotation} signatureZones={allZones} signatureImages={signatureImages} currentPage={currentPage} onTotalPagesChange={setTotalPages} />;
       case 'docx':
         return <DocxPreview url={documentUri} scale={scale} rotation={rotation} />;
       default:
@@ -276,11 +289,12 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({ url, title, scale, rotation
 interface PdfPreviewProps extends PreviewProps {
   url: string;
   signatureZones?: SignatureZone[];
+  signatureImages?: SignatureImage[];
   currentPage: number;
   onTotalPagesChange: (total: number) => void;
 }
 
-const PdfPreview: React.FC<PdfPreviewProps> = ({ url, scale, rotation, signatureZones = [], currentPage, onTotalPagesChange }) => {
+const PdfPreview: React.FC<PdfPreviewProps> = ({ url, scale, rotation, signatureZones = [], signatureImages = [], currentPage, onTotalPagesChange }) => {
   const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -423,6 +437,26 @@ const PdfPreview: React.FC<PdfPreviewProps> = ({ url, scale, rotation, signature
           canvasContainer.appendChild(overlay);
         });
 
+        // Add signature images for current page (render on top of zones)
+        const imagesOnThisPage = signatureImages.filter(img => img.pageNumber === currentPage);
+
+        imagesOnThisPage.forEach((sigImage) => {
+          const imgOverlay = document.createElement('div');
+          imgOverlay.className = 'absolute pointer-events-none';
+          imgOverlay.style.left = `${sigImage.x}%`;
+          imgOverlay.style.top = `${sigImage.y}%`;
+          imgOverlay.style.width = `${sigImage.width}%`;
+          imgOverlay.style.height = `${sigImage.height}%`;
+
+          const img = document.createElement('img');
+          img.src = sigImage.imageData;
+          img.alt = 'Signature';
+          img.className = 'w-full h-full object-contain';
+          imgOverlay.appendChild(img);
+
+          canvasContainer.appendChild(imgOverlay);
+        });
+
         pageWrapper.appendChild(canvasContainer);
         container.appendChild(pageWrapper);
 
@@ -440,7 +474,7 @@ const PdfPreview: React.FC<PdfPreviewProps> = ({ url, scale, rotation, signature
     return () => {
       isMounted = false;
     };
-  }, [currentPage, scale, rotation, signatureZones, isLoading, t]);
+  }, [currentPage, scale, rotation, signatureZones, signatureImages, isLoading, t]);
 
   return (
     <div className="relative w-full flex flex-col items-center">
@@ -542,3 +576,4 @@ const DocxPreview: React.FC<DocxPreviewProps> = ({ url, scale, rotation }) => {
 };
 
 export default DocumentContentViewer;
+export type { SignatureImage };
