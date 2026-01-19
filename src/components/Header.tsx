@@ -1,12 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { LogOut, User as UserIcon, Menu, X, ChevronDown, FileText, CheckCircle } from 'lucide-react';
+import { LogOut, User as UserIcon, Menu, X, ChevronDown, FileText, CheckCircle, Settings } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 const Header: React.FC = () => {
   const { isAuthenticated, user, logout } = useAuthStore();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
@@ -32,7 +33,13 @@ const Header: React.FC = () => {
     };
   }, []);
 
-  const navLinkClasses = "text-secondary-600 hover:text-primary-600 flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium transition-colors duration-200";
+  const isActiveRoute = (path: string) => location.pathname === path;
+
+  const navLinkClasses = (path: string) =>
+    `flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${isActiveRoute(path)
+      ? 'text-primary-600 bg-primary-50'
+      : 'text-secondary-600 hover:text-primary-600 hover:bg-secondary-50'
+    }`;
   const mobileNavLinkClasses = "text-secondary-600 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200";
 
   return (
@@ -49,65 +56,73 @@ const Header: React.FC = () => {
           </div>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-1">
             {isAuthenticated ? (
-              <div className="relative" ref={profileDropdownRef}>
-                <button
-                  onClick={() => setIsProfileOpen(!isProfileOpen)}
-                  className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-secondary-50 transition-colors duration-200 border border-transparent hover:border-secondary-200"
-                >
-                  <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-600">
-                    <UserIcon size={18} />
-                  </div>
-                  <span className="text-sm font-medium text-secondary-700 max-w-[150px] truncate">{user?.email}</span>
-                  <ChevronDown size={16} className={`text-secondary-400 transition-transform duration-200 ${isProfileOpen ? 'transform rotate-180' : ''}`} />
-                </button>
+              <>
+                {/* Navigation Links */}
+                <Link to="/dashboard" className={navLinkClasses('/dashboard')}>
+                  <FileText size={18} />
+                  <span>{t('header.pending_documents', 'Pending')}</span>
+                </Link>
 
-                {isProfileOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-secondary-200 py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
-                    <div className="px-4 py-3 border-b border-secondary-100 mb-1">
-                      <p className="text-xs text-secondary-500 uppercase font-semibold tracking-wider">Account</p>
-                      <p className="text-sm font-medium text-secondary-900 truncate">{user?.email}</p>
+                <Link to="/completed" className={navLinkClasses('/completed')}>
+                  <CheckCircle size={18} />
+                  <span>{t('header.completed_documents', 'Completed')}</span>
+                </Link>
+
+                {/* Profile Dropdown */}
+                <div className="relative ml-2" ref={profileDropdownRef}>
+                  <button
+                    onClick={() => setIsProfileOpen(!isProfileOpen)}
+                    className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-secondary-50 transition-colors duration-200 border border-transparent hover:border-secondary-200"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-600">
+                      <UserIcon size={18} />
                     </div>
+                    <span className="text-sm font-medium text-secondary-700 max-w-[150px] truncate">{user?.fullName || user?.email}</span>
+                    <ChevronDown size={16} className={`text-secondary-400 transition-transform duration-200 ${isProfileOpen ? 'transform rotate-180' : ''}`} />
+                  </button>
 
-                    <Link
-                      to="/dashboard"
-                      className="flex items-center space-x-3 px-4 py-2.5 text-sm text-secondary-700 hover:bg-secondary-50 hover:text-primary-600 transition-colors"
-                      onClick={() => setIsProfileOpen(false)}
-                    >
-                      <FileText size={18} />
-                      <span>{t('header.pending_documents', 'Pending Documents')}</span>
-                    </Link>
+                  {isProfileOpen && (
+                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-secondary-200 py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
+                      <div className="px-4 py-3 border-b border-secondary-100 mb-1">
+                        <p className="text-xs text-secondary-500 uppercase font-semibold tracking-wider">Account</p>
+                        <p className="text-sm font-medium text-secondary-900 truncate">{user?.email}</p>
+                        {user?.fullName && (
+                          <p className="text-xs text-secondary-600 mt-0.5 truncate">{user.fullName}</p>
+                        )}
+                      </div>
 
-                    <Link
-                      to="/completed"
-                      className="flex items-center space-x-3 px-4 py-2.5 text-sm text-secondary-700 hover:bg-secondary-50 hover:text-primary-600 transition-colors"
-                      onClick={() => setIsProfileOpen(false)}
-                    >
-                      <CheckCircle size={18} />
-                      <span>{t('header.completed_documents', 'Completed Documents')}</span>
-                    </Link>
+                      <Link
+                        to="/profile"
+                        className="flex items-center space-x-3 px-4 py-2.5 text-sm text-secondary-700 hover:bg-secondary-50 hover:text-primary-600 transition-colors"
+                        onClick={() => setIsProfileOpen(false)}
+                      >
+                        <Settings size={18} />
+                        <span>{t('header.profile', 'Profile Settings')}</span>
+                      </Link>
 
-                    <div className="border-t border-secondary-100 my-1"></div>
+                      <div className="border-t border-secondary-100 my-1"></div>
 
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                    >
-                      <LogOut size={18} />
-                      <span>{t('header.logout')}</span>
-                    </button>
-                  </div>
-                )}
-              </div>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                      >
+                        <LogOut size={18} />
+                        <span>{t('header.logout')}</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </>
             ) : (
               <>
-                <Link to="/login" className={navLinkClasses}>
+                <Link to="/login" className={navLinkClasses('/login')}>
                   {t('header.login')}
                 </Link>
                 <Link
                   to="/register"
-                  className="btn-primary"
+                  className="btn-primary ml-2"
                 >
                   {t('header.register')}
                 </Link>
@@ -137,8 +152,8 @@ const Header: React.FC = () => {
                       <UserIcon size={20} />
                     </div>
                     <div className="overflow-hidden">
-                      <p className="text-sm font-medium text-secondary-900 truncate">{user?.email}</p>
-                      <p className="text-xs text-secondary-500">Member</p>
+                      <p className="text-sm font-medium text-secondary-900 truncate">{user?.fullName || user?.email}</p>
+                      <p className="text-xs text-secondary-500 truncate">{user?.email}</p>
                     </div>
                   </div>
                 </div>
@@ -146,9 +161,25 @@ const Header: React.FC = () => {
                 <Link to="/dashboard" onClick={() => setIsMenuOpen(false)} className={mobileNavLinkClasses}>
                   <div className="flex items-center space-x-2">
                     <FileText size={18} />
-                    <span>{t('header.dashboard')}</span>
+                    <span>{t('header.pending_documents', 'Pending Documents')}</span>
                   </div>
                 </Link>
+
+                <Link to="/completed" onClick={() => setIsMenuOpen(false)} className={mobileNavLinkClasses}>
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle size={18} />
+                    <span>{t('header.completed_documents', 'Completed Documents')}</span>
+                  </div>
+                </Link>
+
+                <Link to="/profile" onClick={() => setIsMenuOpen(false)} className={mobileNavLinkClasses}>
+                  <div className="flex items-center space-x-2">
+                    <Settings size={18} />
+                    <span>{t('header.profile', 'Profile Settings')}</span>
+                  </div>
+                </Link>
+
+                <div className="border-t border-secondary-100 my-2"></div>
 
                 <button onClick={handleLogout} className="w-full text-left text-red-600 hover:bg-red-50 block px-3 py-2 rounded-md text-base font-medium transition-colors">
                   <div className="flex items-center space-x-2">

@@ -57,15 +57,44 @@ export const authService = {
         email: string;
         code: string;
     }): Promise<VerifyEmailResponse> => {
-        const { data: response } = await api.post(API_ENDPOINTS.VERIFY_EMAIL, data);
+        const { data: response } = await api.post(
+            API_ENDPOINTS.VERIFY_EMAIL,
+            data,
+        );
         return response;
     },
 
     /**
      * Resend verification code
      */
-    resendVerification: async (email: string): Promise<ResendVerificationResponse> => {
-        const { data } = await api.post(API_ENDPOINTS.RESEND_VERIFICATION, { email });
+    resendVerification: async (
+        email: string,
+    ): Promise<ResendVerificationResponse> => {
+        const { data } = await api.post(API_ENDPOINTS.RESEND_VERIFICATION, {
+            email,
+        });
+        return data;
+    },
+
+    /**
+     * Request password reset code
+     */
+    forgotPassword: async (email: string): Promise<{ message: string }> => {
+        const { data } = await api.post("/api/users/forgot-password", {
+            email,
+        });
+        return data;
+    },
+
+    /**
+     * Reset password with code
+     */
+    resetPassword: async (payload: {
+        email: string;
+        code: string;
+        newPassword: string;
+    }): Promise<{ message: string }> => {
+        const { data } = await api.post("/api/users/reset-password", payload);
         return data;
     },
 };

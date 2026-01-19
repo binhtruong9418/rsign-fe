@@ -1,6 +1,6 @@
-import React, {useState} from 'react';
-import {Link} from 'react-router-dom';
-import {useLogin, useHustLogin} from '@/hooks';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useLogin, useHustLogin } from '@/hooks';
 import showToast from "@/utils/toast.ts";
 import { useTranslation } from 'react-i18next';
 
@@ -17,7 +17,7 @@ const LoginPage: React.FC = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        loginMutation.mutate({email, password}, {
+        loginMutation.mutate({ email, password }, {
             onError: (error: any) => {
                 showToast.error(t('auth.login.login_failed', { message: error?.response?.data?.message || 'Unknown error' }));
             }
@@ -26,7 +26,7 @@ const LoginPage: React.FC = () => {
 
     const handleHustSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        hustMutation.mutate({email: hustEmail, password: hustPassword}, {
+        hustMutation.mutate({ email: hustEmail, password: hustPassword }, {
             onSuccess: () => {
                 setIsHustModalOpen(false);
             },
@@ -43,7 +43,7 @@ const LoginPage: React.FC = () => {
                     <h2 className="text-3xl font-bold text-secondary-900">{t('auth.login.title')}</h2>
                     <p className="mt-2 text-sm text-secondary-600">{t('auth.login.subtitle')}</p>
                 </div>
-                
+
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
                         <label htmlFor="email" className="label-text">
@@ -76,6 +76,14 @@ const LoginPage: React.FC = () => {
                             className="input-field"
                             placeholder="••••••••"
                         />
+                        <div className="mt-2 text-right">
+                            <Link
+                                to="/forgot-password"
+                                className="text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors"
+                            >
+                                {t('auth.login.forgot_password', 'Forgot password?')}
+                            </Link>
+                        </div>
                     </div>
                     <div>
                         <button
@@ -90,7 +98,7 @@ const LoginPage: React.FC = () => {
 
                 <div className="mt-6 relative">
                     <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-secondary-200"/>
+                        <div className="w-full border-t border-secondary-200" />
                     </div>
                     <div className="relative flex justify-center text-sm">
                         <span className="px-2 bg-white text-secondary-500">{t('auth.login.or_continue')}</span>
@@ -104,7 +112,7 @@ const LoginPage: React.FC = () => {
                         onClick={() => setIsHustModalOpen(true)}
                         className="w-full btn-secondary flex justify-center items-center"
                     >
-                        <img src="/image/logo-hust.png" alt="HUST Logo" className="w-5 h-5 mr-3 object-contain"/>
+                        <img src="/image/logo-hust.png" alt="HUST Logo" className="w-5 h-5 mr-3 object-contain" />
                         {t('auth.login.hust_login')}
                     </button>
                 </div>
@@ -119,11 +127,11 @@ const LoginPage: React.FC = () => {
 
             {isHustModalOpen && (
                 <div className="fixed inset-0 bg-secondary-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-                     onClick={() => setIsHustModalOpen(false)}>
+                    onClick={() => setIsHustModalOpen(false)}>
                     <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md m-4 border border-secondary-200"
-                         onClick={(e) => e.stopPropagation()}>
+                        onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-center mb-6">
-                            <img src="/image/logo-hust.png" alt="HUST Logo" className="w-16 h-16 object-contain"/>
+                            <img src="/image/logo-hust.png" alt="HUST Logo" className="w-16 h-16 object-contain" />
                         </div>
                         <h2 className="text-2xl font-bold text-center text-secondary-900 mb-6">{t('auth.login.hust_modal_title')}</h2>
                         <form onSubmit={handleHustSubmit} className="space-y-6">
