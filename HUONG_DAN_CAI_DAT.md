@@ -7,11 +7,13 @@ Tài liệu hướng dẫn cài đặt và chạy dự án RSign Frontend - Hệ
 ## 📋 Yêu Cầu Hệ Thống
 
 ### Phần mềm bắt buộc:
+
 - **Node.js**: Phiên bản 18.x trở lên (khuyến nghị 20.x LTS)
 - **npm**: Phiên bản 9.x trở lên (đi kèm với Node.js)
 - **Git**: Để clone repository
 
 ### Kiểm tra phiên bản đã cài đặt:
+
 ```bash
 node --version
 npm --version
@@ -19,6 +21,7 @@ git --version
 ```
 
 ### Hệ điều hành hỗ trợ:
+
 - ✅ Windows 10/11
 - ✅ macOS 12+
 - ✅ Linux (Ubuntu 20.04+, Fedora, etc.)
@@ -73,6 +76,7 @@ npm run dev
 ```
 
 Sau khi chạy lệnh, ứng dụng sẽ khởi động tại:
+
 - **Local**: `http://localhost:5173`
 - **Network**: `http://192.168.x.x:5173` (truy cập từ thiết bị khác trong mạng LAN)
 
@@ -134,29 +138,35 @@ rsign-fe/
 ## 🛠 Công Nghệ Sử Dụng
 
 ### Core
+
 - **React 19.1.1**: UI library
 - **TypeScript 5.8.2**: Type-safe JavaScript
 - **Vite 6.2.0**: Build tool & dev server
 
 ### Routing & State
+
 - **React Router DOM 7.9.3**: Client-side routing
 - **Zustand 5.0.8**: State management
 - **TanStack Query 5.90.2**: Data fetching & caching
 
 ### UI & Styling
+
 - **Tailwind CSS 4.1.17**: Utility-first CSS framework
 - **Lucide React**: Icon library
 - **React Hot Toast**: Toast notifications
 
 ### Document Handling
+
 - **pdfjs-dist 2.12.313**: PDF rendering
 - **docx-preview 0.3.2**: DOCX preview
 
 ### Internationalization
+
 - **i18next 25.7.2**: i18n framework
 - **react-i18next 16.4.0**: React bindings cho i18next
 
 ### Other
+
 - **Axios 1.12.2**: HTTP client
 - **QRCode.react**: QR code generation
 - **Canvas Confetti**: Celebration effects
@@ -165,12 +175,12 @@ rsign-fe/
 
 ## 🔧 Scripts NPM
 
-| Lệnh | Mô Tả |
-|------|-------|
-| `npm install` | Cài đặt dependencies |
-| `npm run dev` | Chạy development server (port 5173) |
-| `npm run build` | Build production bundle |
-| `npm run preview` | Preview production build |
+| Lệnh              | Mô Tả                               |
+| ----------------- | ----------------------------------- |
+| `npm install`     | Cài đặt dependencies                |
+| `npm run dev`     | Chạy development server (port 5173) |
+| `npm run build`   | Build production bundle             |
+| `npm run preview` | Preview production build            |
 
 ---
 
@@ -179,6 +189,7 @@ rsign-fe/
 ### Development Server
 
 Server mặc định chạy trên:
+
 - **Port**: 5173
 - **Host**: `0.0.0.0` (cho phép truy cập từ mạng LAN)
 - **Allowed Hosts**: `*.ducbinh203.tech`
@@ -244,10 +255,12 @@ npm run dev
 ## 📱 Hỗ Trợ Đa Ngôn Ngữ
 
 Dự án hỗ trợ 2 ngôn ngữ:
+
 - 🇬🇧 **Tiếng Anh** (English)
 - 🇻🇳 **Tiếng Việt** (Vietnamese)
 
 File translation nằm trong `src/locales/`:
+
 - `src/locales/en/translation.json`
 - `src/locales/vi/translation.json`
 
@@ -256,30 +269,30 @@ File translation nằm trong `src/locales/`:
 ## 🔐 Tính Năng Chính
 
 1. **Authentication**
-   - Đăng nhập / Đăng ký
-   - Quên mật khẩu (2 bước: Email → OTP + Reset)
-   - Xác thực email
-   - Quản lý profile
+    - Đăng nhập / Đăng ký
+    - Quên mật khẩu (2 bước: Email → OTP + Reset)
+    - Xác thực email
+    - Quản lý profile
 
 2. **Document Management**
-   - Xem danh sách tài liệu (Pending / Completed)
-   - Chi tiết tài liệu
-   - Preview PDF/DOCX/Image
-   - Upload tài liệu
+    - Xem danh sách tài liệu (Pending / Completed)
+    - Chi tiết tài liệu
+    - Preview PDF/DOCX/Image
+    - Upload tài liệu
 
 3. **Digital Signature**
-   - Ký số trên PDF
-   - Vẽ chữ ký tay
-   - Preview chữ ký trên document
-   - Session-based signing (30 phút)
-   - Multi-signature support
+    - Ký số trên PDF
+    - Vẽ chữ ký tay
+    - Preview chữ ký trên document
+    - Session-based signing (30 phút)
+    - Multi-signature support
 
 4. **UI/UX**
-   - Responsive design
-   - Dark/Light theme support (qua Tailwind)
-   - Toast notifications
-   - Loading states
-   - Error handling
+    - Responsive design
+    - Dark/Light theme support (qua Tailwind)
+    - Toast notifications
+    - Loading states
+    - Error handling
 
 ---
 

@@ -120,23 +120,23 @@ const DocumentDetailPage: React.FC = () => {
     const canSign = details.status.canSignNow;
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
             {/* Header */}
-            <div className="mb-4 sm:mb-6">
+            <div className="mb-3 sm:mb-6">
                 <button
                     onClick={() => navigate('/dashboard')}
-                    className="flex items-center gap-2 text-secondary-600 hover:text-secondary-900 mb-3 sm:mb-4 text-sm sm:text-base"
+                    className="flex items-center gap-2 text-secondary-600 hover:text-secondary-900 mb-2 sm:mb-4 text-sm sm:text-base"
                 >
                     <ArrowLeft className="w-4 h-4" />
                     {t('common.back', 'Back')}
                 </button>
 
-                <h1 className="text-2xl sm:text-3xl font-bold text-secondary-900 wrap-break-word">{document.title}</h1>
+                <h1 className="text-xl sm:text-3xl font-bold text-secondary-900 wrap-break-word">{document.title}</h1>
             </div>
 
             {/* Urgent Warning */}
             {isUrgent && canSign && (
-                <div className="mb-4 sm:mb-6 bg-orange-50 border-l-4 border-orange-500 p-3 sm:p-4 rounded mx-4 sm:mx-0">
+                <div className="mb-3 sm:mb-6 bg-orange-50 border-l-4 border-orange-500 p-2 sm:p-4 rounded">
                     <div className="flex items-center gap-2">
                         <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 shrink-0" />
                         <p className="text-sm sm:text-base text-orange-800 font-medium">
@@ -146,11 +146,11 @@ const DocumentDetailPage: React.FC = () => {
                 </div>
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-6">
                 {/* Main Content - PDF Viewer */}
                 <div className="lg:col-span-2 order-2 lg:order-1">
-                    <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
-                        <h2 className="text-base sm:text-lg font-semibold text-secondary-900 mb-3 sm:mb-4">
+                    <div className="bg-white rounded-lg shadow-sm p-2 sm:p-6">
+                        <h2 className="text-sm sm:text-lg font-semibold text-secondary-900 mb-2 sm:mb-4">
                             {t('document_detail.document_preview', 'Document Preview')}
                         </h2>
                         <DocumentContentViewer
@@ -162,14 +162,14 @@ const DocumentDetailPage: React.FC = () => {
                 </div>
 
                 {/* Sidebar - Document Info & Actions */}
-                <div className="space-y-4 sm:space-y-6 order-1 lg:order-2">
+                <div className="space-y-3 sm:space-y-6 order-1 lg:order-2">
                     {/* Document Information */}
-                    <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
-                        <h2 className="text-base sm:text-lg font-semibold text-secondary-900 mb-3 sm:mb-4">
+                    <div className="bg-white rounded-lg shadow-sm p-3 sm:p-6">
+                        <h2 className="text-sm sm:text-lg font-semibold text-secondary-900 mb-2 sm:mb-4">
                             {t('document_detail.information', 'Document Information')}
                         </h2>
 
-                        <div className="space-y-3 sm:space-y-4">
+                        <div className="space-y-2 sm:space-y-4">
                             {/* Status */}
                             <div>
                                 <label className="text-xs sm:text-sm font-medium text-secondary-600">
@@ -177,8 +177,8 @@ const DocumentDetailPage: React.FC = () => {
                                 </label>
                                 <div className="mt-1">
                                     <span className={`inline-flex items-center px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-medium ${document.status === 'IN_PROGRESS' ? 'bg-yellow-100 text-yellow-800' :
-                                            document.status === 'PENDING' ? 'bg-blue-100 text-blue-800' :
-                                                'bg-secondary-100 text-secondary-800'
+                                        document.status === 'PENDING' ? 'bg-blue-100 text-blue-800' :
+                                            'bg-secondary-100 text-secondary-800'
                                         }`}>
                                         {document.status}
                                     </span>
@@ -285,8 +285,8 @@ const DocumentDetailPage: React.FC = () => {
 
                     {/* Current Step Signers (for Sequential flow) */}
                     {document.flow === 'SEQUENTIAL' && details.currentStepSigners.length > 0 && (
-                        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
-                            <h2 className="text-base sm:text-lg font-semibold text-secondary-900 mb-3 sm:mb-4">
+                        <div className="bg-white rounded-lg shadow-sm p-3 sm:p-6">
+                            <h2 className="text-sm sm:text-lg font-semibold text-secondary-900 mb-2 sm:mb-4">
                                 {t('document_detail.current_step_signers', 'Current Step Signers')}
                             </h2>
                             <div className="space-y-2 sm:space-y-3">
@@ -304,8 +304,8 @@ const DocumentDetailPage: React.FC = () => {
                                             </p>
                                         </div>
                                         <span className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ${signer.status === 'SIGNED' ? 'bg-green-100 text-green-700' :
-                                                signer.status === 'PENDING' ? 'bg-blue-100 text-blue-700' :
-                                                    'bg-red-100 text-red-700'
+                                            signer.status === 'PENDING' ? 'bg-blue-100 text-blue-700' :
+                                                'bg-red-100 text-red-700'
                                             }`}>
                                             {signer.status}
                                         </span>
@@ -317,8 +317,8 @@ const DocumentDetailPage: React.FC = () => {
 
                     {/* Signature Zones */}
                     {details.zones.length > 0 && (
-                        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
-                            <h2 className="text-base sm:text-lg font-semibold text-secondary-900 mb-3 sm:mb-4">
+                        <div className="bg-white rounded-lg shadow-sm p-3 sm:p-6">
+                            <h2 className="text-sm sm:text-lg font-semibold text-secondary-900 mb-2 sm:mb-4">
                                 {t('document_detail.signature_zones', 'Signature Zones')}
                             </h2>
                             <div className="space-y-2">
@@ -345,8 +345,8 @@ const DocumentDetailPage: React.FC = () => {
                     )}
 
                     {/* Actions */}
-                    <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
-                        <h2 className="text-base sm:text-lg font-semibold text-secondary-900 mb-3 sm:mb-4">
+                    <div className="bg-white rounded-lg shadow-sm p-3 sm:p-6">
+                        <h2 className="text-sm sm:text-lg font-semibold text-secondary-900 mb-2 sm:mb-4">
                             {t('document_detail.actions', 'Actions')}
                         </h2>
 
@@ -354,7 +354,7 @@ const DocumentDetailPage: React.FC = () => {
                             <button
                                 onClick={handleStartSigning}
                                 disabled={creating || !canSign}
-                                className="w-full btn-primary flex items-center justify-center gap-2 text-sm sm:text-base py-2.5 sm:py-3"
+                                className="w-full btn-primary flex items-center justify-center gap-2 text-sm sm:text-base py-3 sm:py-3"
                             >
                                 {creating ? (
                                     <>
