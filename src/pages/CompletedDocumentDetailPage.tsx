@@ -53,13 +53,17 @@ const CompletedDocumentDetailPage: React.FC = () => {
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
-        return date.toLocaleDateString('vi-VN', {
+        const locale = t('locale', 'en-US');
+        const datePart = date.toLocaleDateString(locale, {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
+        });
+        const timePart = date.toLocaleTimeString(locale, {
             hour: '2-digit',
             minute: '2-digit',
         });
+        return `${datePart}, ${timePart}`;
     };
 
     if (loading) {
@@ -229,13 +233,18 @@ const SignatureCard: React.FC<SignatureCardProps> = ({ signature }) => {
     const { t } = useTranslation();
 
     const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('vi-VN', {
+        const date = new Date(dateString);
+        const locale = t('locale', 'en-US');
+        const datePart = date.toLocaleDateString(locale, {
             year: 'numeric',
             month: 'short',
             day: 'numeric',
+        });
+        const timePart = date.toLocaleTimeString(locale, {
             hour: '2-digit',
             minute: '2-digit',
         });
+        return `${datePart}, ${timePart}`;
     };
 
     return (

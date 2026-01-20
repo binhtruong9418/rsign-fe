@@ -46,7 +46,7 @@ const DashboardPage: React.FC = () => {
   const formatDate = (dateString?: string) => {
     if (!dateString) return null;
     const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN', {
+    return date.toLocaleDateString(t('locale', 'en-US'), {
       year: 'numeric',
       month: 'long',
       day: 'numeric',

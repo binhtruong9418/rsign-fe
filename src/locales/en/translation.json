@@ -1,4 +1,5 @@
 {
+    "locale": "en-US",
     "sign_components": {
         "completed_view": {
             "title": "Document Completed",

@@ -44,13 +44,17 @@ const CompletedDocumentsPage: React.FC = () => {
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
-        return date.toLocaleDateString('vi-VN', {
+        const locale = t('locale', 'en-US');
+        const datePart = date.toLocaleDateString(locale, {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
+        });
+        const timePart = date.toLocaleTimeString(locale, {
             hour: '2-digit',
             minute: '2-digit',
         });
+        return `${datePart}, ${timePart}`;
     };
 
     if (isLoading) {
