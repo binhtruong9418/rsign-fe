@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { FileText, Calendar, User, Users, PenTool } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Pagination from '../components/Pagination';
+import DocumentFilters, { DocumentFilterParams } from '../components/DocumentFilters';
 import { signingApi } from '../services/signingApi';
 import type { PendingDocument, PageDto } from '../types';
 
@@ -12,14 +13,30 @@ const DashboardPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(0);
-  const pageSize = 10;
+  const pageSize = 9;
+  const [filters, setFilters] = useState<DocumentFilterParams>({
+    sortBy: 'createdAt',
+    sortOrder: 'DESC',
+  });
 
   // Use React Query for data fetching
   const { data: documents, isLoading, error, refetch } = useQuery<PageDto<PendingDocument>>({
-    queryKey: ['pendingDocuments', currentPage, pageSize],
-    queryFn: () => signingApi.getPendingDocuments(currentPage, pageSize),
+    queryKey: ['pendingDocuments', currentPage, pageSize, filters],
+    queryFn: () => signingApi.getPendingDocuments(
+      currentPage,
+      pageSize,
+      filters.sortBy || 'createdAt',
+      filters.sortOrder || 'DESC',
+      filters.title,
+      filters.signingMode
+    ),
     staleTime: 30000, // 30 seconds
   });
+
+  const handleFiltersChange = (newFilters: DocumentFilterParams) => {
+    setFilters(newFilters);
+    setCurrentPage(0); // Reset to first page when filters change
+  };
 
   const handleViewDocument = (item: PendingDocument) => {
     // Navigate to document detail using id
@@ -87,6 +104,13 @@ const DashboardPage: React.FC = () => {
         </p>
       </div>
 
+      {/* Filters */}
+      <DocumentFilters
+        filters={filters}
+        onFiltersChange={handleFiltersChange}
+        showSigningModeFilter={true}
+      />
+
       {/* Empty State */}
       {isEmpty && (
         <div className="text-center py-12 sm:py-16 bg-white rounded-lg shadow-sm mx-4 sm:mx-0">
@@ -116,7 +140,7 @@ const DashboardPage: React.FC = () => {
                   {/* Header with Icon and Status */}
                   <div className="flex items-start justify-between mb-3 sm:mb-4">
                     <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                      <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-primary-100 to-primary-50 rounded-lg sm:rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <div className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-linear-to-br from-primary-100 to-primary-50 rounded-lg sm:rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
                         <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-primary-600" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -139,7 +163,7 @@ const DashboardPage: React.FC = () => {
                   <div className="space-y-2 sm:space-y-2.5 text-xs sm:text-sm">
                     {/* User's Personal Progress */}
                     <div className="flex items-center gap-2 text-secondary-600">
-                      <PenTool className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                      <PenTool className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
                       <span className="text-xs sm:text-sm">
                         {t('dashboard.your_progress', 'Your progress')}: <span className="font-semibold text-secondary-900">{item.signedCount}/{item.requiredCount}</span>
                       </span>
@@ -147,7 +171,7 @@ const DashboardPage: React.FC = () => {
 
                     {/* Overall Progress */}
                     <div className="flex items-center gap-2 text-secondary-600">
-                      <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                      <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
                       <span className="text-xs sm:text-sm">
                         {t('dashboard.overall_progress', 'Overall')}: <span className="font-semibold text-secondary-900">{item.completedSignatures}/{item.totalSignatures}</span>
                       </span>
@@ -156,7 +180,7 @@ const DashboardPage: React.FC = () => {
                     {/* Deadline */}
                     {item.deadline && (
                       <div className="flex items-center gap-2 text-secondary-600">
-                        <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                        <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
                         <div className="flex-1 min-w-0">
                           <span className="truncate text-xs sm:text-sm">{formatDate(item.deadline)}</span>
                           {item.isOverdue && (

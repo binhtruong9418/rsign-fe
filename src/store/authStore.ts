@@ -8,6 +8,7 @@ interface AuthState {
     isAuthenticated: boolean;
     login: (user: User, token: string) => void;
     logout: () => void;
+    setUser: (user: User) => void;
     init: () => void;
 }
 
@@ -25,6 +26,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         localStorage.removeItem(STORAGE_KEYS.USER);
         set({ user: null, token: null, isAuthenticated: false });
     },
+    setUser: (user) => {
+        localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+        set({ user });
+    },
     init: () => {
         try {
             const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
@@ -36,7 +41,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         } catch (error) {
             console.error(
                 "Failed to initialize auth state from localStorage",
-                error
+                error,
             );
             get().logout();
         }

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation } from '@tanstack/react-query';
-import { User, Lock, Mail, Save, Eye, EyeOff } from 'lucide-react';
+import { User, Lock, Mail, Save, Eye, EyeOff, Phone } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
-import api from '../services/api';
+import userService from '../services/user/userService';
 import { showToast } from '../utils/toast';
 import LoadingSpinner from '../components/LoadingSpinner';
 
@@ -13,10 +13,21 @@ interface ChangePasswordData {
     confirmPassword: string;
 }
 
+interface ProfileFormData {
+    fullName: string;
+    phoneNumber: string;
+}
+
 const ProfilePage: React.FC = () => {
     const { t } = useTranslation();
-    const { user } = useAuthStore();
+    const { user, setUser } = useAuthStore();
     const [activeTab, setActiveTab] = useState<'profile' | 'password'>('profile');
+
+    // Profile form state
+    const [profileData, setProfileData] = useState<ProfileFormData>({
+        fullName: user?.fullName || '',
+        phoneNumber: user?.phoneNumber || '',
+    });
 
     // Password change state
     const [passwordData, setPasswordData] = useState<ChangePasswordData>({
@@ -28,11 +39,26 @@ const ProfilePage: React.FC = () => {
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+    // Update profile mutation
+    const updateProfileMutation = useMutation({
+        mutationFn: async (data: { fullName?: string; phoneNumber?: string }) => {
+            return await userService.updateProfile(data);
+        },
+        onSuccess: (response) => {
+            showToast.success(t('profile.update.success', 'Profile updated successfully'));
+            // Update user in auth store
+            setUser(response.data);
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message || t('profile.update.error', 'Failed to update profile');
+            showToast.error(message);
+        },
+    });
+
     // Change password mutation
     const changePasswordMutation = useMutation({
         mutationFn: async (data: { currentPassword: string; newPassword: string }) => {
-            const response = await api.post('/api/users/change-password', data);
-            return response.data;
+            return await userService.changePassword(data);
         },
         onSuccess: () => {
             showToast.success(t('profile.password.success', 'Password changed successfully'));
@@ -47,6 +73,23 @@ const ProfilePage: React.FC = () => {
             showToast.error(message);
         },
     });
+
+    const handleProfileUpdate = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        // Prepare data - only send fields that are not empty
+        const updateData: { fullName?: string; phoneNumber?: string } = {};
+
+        if (profileData.fullName.trim()) {
+            updateData.fullName = profileData.fullName.trim();
+        }
+
+        if (profileData.phoneNumber.trim()) {
+            updateData.phoneNumber = profileData.phoneNumber.trim();
+        }
+
+        updateProfileMutation.mutate(updateData);
+    };
 
     const handlePasswordChange = (e: React.FormEvent) => {
         e.preventDefault();
@@ -86,8 +129,8 @@ const ProfilePage: React.FC = () => {
                     <button
                         onClick={() => setActiveTab('profile')}
                         className={`flex-1 px-6 py-4 text-sm font-medium transition-colors ${activeTab === 'profile'
-                                ? 'text-primary-600 border-b-2 border-primary-600 bg-primary-50/50'
-                                : 'text-secondary-600 hover:text-secondary-900 hover:bg-secondary-50'
+                            ? 'text-primary-600 border-b-2 border-primary-600 bg-primary-50/50'
+                            : 'text-secondary-600 hover:text-secondary-900 hover:bg-secondary-50'
                             }`}
                     >
                         <div className="flex items-center justify-center space-x-2">
@@ -98,8 +141,8 @@ const ProfilePage: React.FC = () => {
                     <button
                         onClick={() => setActiveTab('password')}
                         className={`flex-1 px-6 py-4 text-sm font-medium transition-colors ${activeTab === 'password'
-                                ? 'text-primary-600 border-b-2 border-primary-600 bg-primary-50/50'
-                                : 'text-secondary-600 hover:text-secondary-900 hover:bg-secondary-50'
+                            ? 'text-primary-600 border-b-2 border-primary-600 bg-primary-50/50'
+                            : 'text-secondary-600 hover:text-secondary-900 hover:bg-secondary-50'
                             }`}
                     >
                         <div className="flex items-center justify-center space-x-2">
@@ -112,7 +155,7 @@ const ProfilePage: React.FC = () => {
                 <div className="p-6 sm:p-8">
                     {/* Profile Tab */}
                     {activeTab === 'profile' && (
-                        <div className="space-y-6">
+                        <form onSubmit={handleProfileUpdate} className="space-y-6">
                             <div>
                                 <label className="label-text">
                                     {t('profile.email', 'Email Address')}
@@ -134,7 +177,7 @@ const ProfilePage: React.FC = () => {
                             </div>
 
                             <div>
-                                <label className="label-text">
+                                <label htmlFor="fullName" className="label-text">
                                     {t('profile.full_name', 'Full Name')}
                                 </label>
                                 <div className="relative">
@@ -142,12 +185,56 @@ const ProfilePage: React.FC = () => {
                                         <User className="h-5 w-5 text-secondary-400" />
                                     </div>
                                     <input
+                                        id="fullName"
                                         type="text"
-                                        value={user?.fullName || t('profile.not_provided', 'Not provided')}
-                                        disabled
-                                        className="input-field pl-10 bg-secondary-50 cursor-not-allowed"
+                                        value={profileData.fullName}
+                                        onChange={(e) => setProfileData({ ...profileData, fullName: e.target.value })}
+                                        placeholder={t('profile.full_name_placeholder', 'Enter your full name')}
+                                        className="input-field pl-10"
                                     />
                                 </div>
+                            </div>
+
+                            <div>
+                                <label htmlFor="phoneNumber" className="label-text">
+                                    {t('profile.phone_number', 'Phone Number')}
+                                    <span className="text-secondary-400 text-xs ml-1">
+                                        ({t('profile.optional', 'Optional')})
+                                    </span>
+                                </label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <Phone className="h-5 w-5 text-secondary-400" />
+                                    </div>
+                                    <input
+                                        id="phoneNumber"
+                                        type="tel"
+                                        value={profileData.phoneNumber}
+                                        onChange={(e) => setProfileData({ ...profileData, phoneNumber: e.target.value })}
+                                        placeholder={t('profile.phone_number_placeholder', 'Enter your phone number')}
+                                        className="input-field pl-10"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="pt-4">
+                                <button
+                                    type="submit"
+                                    disabled={updateProfileMutation.isPending}
+                                    className="btn-primary w-full sm:w-auto px-6 py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {updateProfileMutation.isPending ? (
+                                        <span className="flex items-center justify-center space-x-2">
+                                            <LoadingSpinner />
+                                            <span>{t('profile.updating', 'Updating...')}</span>
+                                        </span>
+                                    ) : (
+                                        <span className="flex items-center justify-center space-x-2">
+                                            <Save size={18} />
+                                            <span>{t('profile.update_button', 'Update Profile')}</span>
+                                        </span>
+                                    )}
+                                </button>
                             </div>
 
                             <div className="pt-4 border-t border-secondary-200">
@@ -165,7 +252,7 @@ const ProfilePage: React.FC = () => {
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </form>
                     )}
 
                     {/* Password Tab */}

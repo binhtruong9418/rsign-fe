@@ -30,11 +30,15 @@ export const signingApi = {
         page = 0,
         limit = 10,
         sortBy: "createdAt" | "deadline" | "title" = "createdAt",
-        sortOrder: "ASC" | "DESC" = "DESC"
+        sortOrder: "ASC" | "DESC" = "DESC",
+        title?: string,
+        signingMode?: "INDIVIDUAL" | "SHARED",
     ): Promise<PageDto<PendingDocument>> => {
-        const response = await api.get("/api/documents/pending", {
-            params: { page, limit, sortBy, sortOrder },
-        });
+        const params: any = { page, limit, sortBy, sortOrder };
+        if (title) params.title = title;
+        if (signingMode) params.signingMode = signingMode;
+
+        const response = await api.get("/api/documents/pending", { params });
         return response.data;
     },
 
@@ -42,10 +46,10 @@ export const signingApi = {
      * Get document details for signing
      */
     getDocumentDetails: async (
-        documentSignerId: string
+        documentSignerId: string,
     ): Promise<DocumentDetails> => {
         const response = await api.get(
-            `/api/documents/${documentSignerId}/details`
+            `/api/documents/${documentSignerId}/details`,
         );
         return response.data;
     },
@@ -54,10 +58,10 @@ export const signingApi = {
      * Create checkout session (device-locked, 30-minute TTL)
      */
     createCheckoutSession: async (
-        documentSignerId: string
+        documentSignerId: string,
     ): Promise<CheckoutSessionResponse> => {
         const response = await api.post(
-            `/api/documents/${documentSignerId}/checkout`
+            `/api/documents/${documentSignerId}/checkout`,
         );
         return response.data;
     },
@@ -75,11 +79,11 @@ export const signingApi = {
      */
     submitSignature: async (
         sessionId: string,
-        data: SubmitSignatureRequest
+        data: SubmitSignatureRequest,
     ): Promise<SubmitSignatureResponse> => {
         const response = await api.post(
             `/api/documents/sessions/${sessionId}/sign`,
-            data
+            data,
         );
         return response.data;
     },
@@ -89,7 +93,7 @@ export const signingApi = {
      */
     cancelSession: async (sessionId: string): Promise<{ success: boolean }> => {
         const response = await api.delete(
-            `/api/documents/sessions/${sessionId}/cancel`
+            `/api/documents/sessions/${sessionId}/cancel`,
         );
         return response.data;
     },
@@ -99,11 +103,11 @@ export const signingApi = {
      */
     declineDocument: async (
         documentSignerId: string,
-        reason?: string
+        reason?: string,
     ): Promise<{ success: boolean }> => {
         const response = await api.post(
             `/api/documents/${documentSignerId}/decline`,
-            { reason }
+            { reason },
         );
         return response.data;
     },
@@ -112,10 +116,10 @@ export const signingApi = {
      * Get multi-document details before creating session
      */
     getMultiDocumentDetails: async (
-        documentId: string
+        documentId: string,
     ): Promise<MultiDocumentDetailsResponse> => {
         const response = await api.get(
-            `/api/documents/multi/${documentId}/details`
+            `/api/documents/multi/${documentId}/details`,
         );
         return response.data;
     },
@@ -124,10 +128,10 @@ export const signingApi = {
      * Create multi-signature session for a document
      */
     createMultiCheckoutSession: async (
-        documentId: string
+        documentId: string,
     ): Promise<MultiSignatureSessionResponse> => {
         const response = await api.post(
-            `/api/documents/multi/${documentId}/checkout`
+            `/api/documents/multi/${documentId}/checkout`,
         );
         return response.data;
     },
@@ -136,10 +140,10 @@ export const signingApi = {
      * Get multi-signature session details
      */
     getMultiSession: async (
-        sessionId: string
+        sessionId: string,
     ): Promise<MultiSessionDetailsResponse> => {
         const response = await api.get(
-            `/api/documents/multi-sessions/${sessionId}`
+            `/api/documents/multi-sessions/${sessionId}`,
         );
         return response.data;
     },
@@ -149,11 +153,11 @@ export const signingApi = {
      */
     submitMultiSignatures: async (
         sessionId: string,
-        data: MultiSignatureSubmitRequest
+        data: MultiSignatureSubmitRequest,
     ): Promise<MultiSignatureSubmitResponse> => {
         const response = await api.post(
             `/api/documents/multi-sessions/${sessionId}/sign`,
-            data
+            data,
         );
         return response.data;
     },
@@ -169,7 +173,7 @@ export const signingApi = {
      * Get pending document detail (for signing preparation)
      */
     getPendingDocumentDetail: async (
-        documentId: string
+        documentId: string,
     ): Promise<PendingDocumentDetail> => {
         const response = await api.get(`/api/documents/${documentId}/pending`);
         return response.data;
@@ -179,10 +183,10 @@ export const signingApi = {
      * Get completed document detail (for review)
      */
     getCompletedDocumentDetail: async (
-        documentId: string
+        documentId: string,
     ): Promise<CompletedDocumentDetail> => {
         const response = await api.get(
-            `/api/documents/${documentId}/completed`
+            `/api/documents/${documentId}/completed`,
         );
         return response.data;
     },
@@ -195,11 +199,15 @@ export const signingApi = {
         page = 0,
         limit = 10,
         sortBy: "createdAt" | "deadline" | "title" = "createdAt",
-        sortOrder: "ASC" | "DESC" = "DESC"
+        sortOrder: "ASC" | "DESC" = "DESC",
+        title?: string,
+        signingMode?: "INDIVIDUAL" | "SHARED",
     ): Promise<PageDto<CompletedDocumentListItem>> => {
-        const response = await api.get("/api/documents/completed", {
-            params: { page, limit, sortBy, sortOrder },
-        });
+        const params: any = { page, limit, sortBy, sortOrder };
+        if (title) params.title = title;
+        if (signingMode) params.signingMode = signingMode;
+
+        const response = await api.get("/api/documents/completed", { params });
         return response.data;
     },
 };

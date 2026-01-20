@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { FileText, Calendar, CheckCircle, Users } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Pagination from '../components/Pagination';
+import DocumentFilters, { DocumentFilterParams } from '../components/DocumentFilters';
 import { signingApi } from '../services/signingApi';
 import type { CompletedDocumentListItem, PageDto } from '../types';
 
@@ -12,16 +13,30 @@ const CompletedDocumentsPage: React.FC = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const [currentPage, setCurrentPage] = useState(0);
-    const pageSize = 10;
+    const pageSize = 9;
+    const [filters, setFilters] = useState<DocumentFilterParams>({
+        sortBy: 'createdAt',
+        sortOrder: 'DESC',
+    });
 
     // Use React Query for data fetching
     const { data: documents, isLoading, error, refetch } = useQuery<PageDto<CompletedDocumentListItem>>({
-        queryKey: ['completedDocuments', currentPage, pageSize],
-        queryFn: () => signingApi.getCompletedDocuments(currentPage, pageSize),
+        queryKey: ['completedDocuments', currentPage, pageSize, filters],
+        queryFn: () => signingApi.getCompletedDocuments(
+            currentPage,
+            pageSize,
+            filters.sortBy || 'createdAt',
+            filters.sortOrder || 'DESC',
+            filters.title,
+            filters.signingMode
+        ),
         staleTime: 30000, // 30 seconds
     });
 
-    console.log('Completed Documents:', documents);
+    const handleFiltersChange = (newFilters: DocumentFilterParams) => {
+        setFilters(newFilters);
+        setCurrentPage(0); // Reset to first page when filters change
+    };
 
     const handleViewDocument = (item: CompletedDocumentListItem) => {
         navigate(`/documents/${item.id}/completed`);
@@ -71,6 +86,13 @@ const CompletedDocumentsPage: React.FC = () => {
                     {t('completed.subtitle', 'Documents you have signed')}
                 </p>
             </div>
+
+            {/* Filters */}
+            <DocumentFilters
+                filters={filters}
+                onFiltersChange={handleFiltersChange}
+                showSigningModeFilter={true}
+            />
 
             {/* Empty State */}
             {isEmpty && (
