@@ -17,6 +17,7 @@ import SigningSuccessPage from './pages/SigningSuccessPage';
 import ProfilePage from './pages/ProfilePage';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
+import NoAuthRoute from './components/NoAuthRoute';
 
 const queryClient = new QueryClient();
 
@@ -26,11 +27,13 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/verify-email" element={<VerifyEmailPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+          {/* Auth Routes - Protected from authenticated users */}
+          <Route path="/login" element={<NoAuthRoute><LoginPage /></NoAuthRoute>} />
+          <Route path="/register" element={<NoAuthRoute><RegisterPage /></NoAuthRoute>} />
+          <Route path="/verify-email" element={<NoAuthRoute><VerifyEmailPage /></NoAuthRoute>} />
+          <Route path="/forgot-password" element={<NoAuthRoute><ForgotPasswordPage /></NoAuthRoute>} />
+          <Route path="/reset-password" element={<NoAuthRoute><ResetPasswordPage /></NoAuthRoute>} />
 
           {/* Signing Workflow */}
           <Route path="/sign/:sessionId" element={<ProtectedRoute><SigningPage /></ProtectedRoute>} />

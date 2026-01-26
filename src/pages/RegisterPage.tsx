@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { Eye, EyeOff } from 'lucide-react';
@@ -6,6 +6,7 @@ import api from '../services/api';
 import { showToast } from '../utils/toast';
 import { User } from '../types';
 import { useTranslation } from 'react-i18next';
+import { useAuthStore } from '../store/authStore';
 
 const RegisterPage: React.FC = () => {
   const location = useLocation();
@@ -17,6 +18,7 @@ const RegisterPage: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { isAuthenticated } = useAuthStore();
 
   const mutation = useMutation<User, Error, { fullName: string; email: string; password: string }>({
     mutationFn: (newUser) => api.post('/api/users/register', newUser).then(res => res.data),

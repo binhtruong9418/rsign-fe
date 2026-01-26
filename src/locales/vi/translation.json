@@ -293,6 +293,12 @@
     "home": {
         "hero": {
             "badge": "Chữ ký điện tử bảo mật",
+            "title": "Hệ Thống Ký Số Tự Chủ Cho Doanh Nghiệp Việt",
+            "subtitle": "Giải pháp ký điện tử self-hosted, tiết kiệm chi phí, bảo mật tuyệt đối với công nghệ nét ký tay chân thực.",
+            "cta": "Bắt Đầu Ngay",
+            "self_hosted": "Self-hosted - Tự chủ dữ liệu",
+            "low_cost": "Chi phí thấp",
+            "authentic_signature": "Nét ký tay chân thực",
             "title_prefix": "Ký tài liệu,",
             "title_suffix": "Dễ dàng & Bảo mật.",
             "description": "RSign cung cấp giải pháp ký tài liệu điện tử nhanh chóng và có giá trị pháp lý. Được tin dùng bởi các chuyên gia trên toàn thế giới.",
@@ -303,8 +309,24 @@
             "encrypted_storage": "Lưu trữ mã hóa"
         },
         "features": {
-            "title": "Tại sao chọn RSign?",
+            "title": "Tính Năng Chính",
             "subtitle": "Mọi thứ bạn cần để quản lý quy trình tài liệu hiệu quả và an toàn.",
+            "document": {
+                "title": "Quản Lý Tài Liệu",
+                "desc": "Tải lên PDF, quản lý vòng đời tài liệu từ khởi tạo đến hoàn tất."
+            },
+            "workflow": {
+                "title": "Thiết Kế Luồng Ký",
+                "desc": "Kéo thả đơn giản để định nghĩa vị trí ký và danh sách người ký."
+            },
+            "signature": {
+                "title": "Ký Điện Tử Chân Thực",
+                "desc": "Ký bằng nét vẽ tay với công nghệ vector strokes, tái hiện chữ ký chân thực."
+            },
+            "security": {
+                "title": "Tự Chủ & Bảo Mật",
+                "desc": "Self-hosted, kiểm soát 100% dữ liệu, tuân thủ pháp luật Việt Nam."
+            },
             "fast": {
                 "title": "Nhanh chóng & Hiệu quả",
                 "description": "Ký và gửi tài liệu trong vài phút. Không còn in ấn, scan hay fax. Tự động hóa quy trình làm việc của bạn ngay hôm nay."

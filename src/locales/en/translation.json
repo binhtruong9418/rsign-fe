@@ -293,6 +293,12 @@
     "home": {
         "hero": {
             "badge": "Secure e-Signatures",
+            "title": "Self-Hosted Digital Signature System For Vietnamese Businesses",
+            "subtitle": "Self-hosted e-signature solution, cost-effective, highly secure with authentic handwritten signature technology.",
+            "cta": "Get Started",
+            "self_hosted": "Self-hosted - Full data control",
+            "low_cost": "Cost-effective",
+            "authentic_signature": "Authentic handwritten signatures",
             "title_prefix": "Sign Documents,",
             "title_suffix": "Seamlessly & Securely.",
             "description": "RSign provides a fast, legally binding way to sign your documents electronically. Trusted by professionals worldwide.",
@@ -303,8 +309,24 @@
             "encrypted_storage": "Encrypted storage"
         },
         "features": {
-            "title": "Why Choose RSign?",
+            "title": "Core Features",
             "subtitle": "Everything you need to manage your document workflows efficiently and securely.",
+            "document": {
+                "title": "Document Management",
+                "desc": "Upload PDFs, manage document lifecycle from creation to completion."
+            },
+            "workflow": {
+                "title": "Workflow Design",
+                "desc": "Simple drag-and-drop to define signature positions and signer list."
+            },
+            "signature": {
+                "title": "Authentic Digital Signatures",
+                "desc": "Sign with handwritten strokes using vector technology, reproducing authentic signatures."
+            },
+            "security": {
+                "title": "Self-Hosted & Secure",
+                "desc": "Self-hosted, 100% data control, compliant with Vietnamese regulations."
+            },
             "fast": {
                 "title": "Fast & Efficient",
                 "description": "Sign and send documents in minutes. No more printing, scanning, or faxing. Automate your workflow today."

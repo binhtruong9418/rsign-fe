@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useLogin, useHustLogin } from '@/hooks';
 import showToast from "@/utils/toast.ts";
 import { useTranslation } from 'react-i18next';
+import { useAuthStore } from '../store/authStore';
 
 const LoginPage: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -11,6 +12,8 @@ const LoginPage: React.FC = () => {
     const [hustEmail, setHustEmail] = useState('');
     const [hustPassword, setHustPassword] = useState('');
     const { t } = useTranslation();
+    const navigate = useNavigate();
+    const { isAuthenticated } = useAuthStore();
 
     const loginMutation = useLogin();
     const hustMutation = useHustLogin();
