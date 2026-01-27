@@ -18,10 +18,20 @@ export interface SignatureZone {
     label?: string;
 }
 
+export interface SignatureImage {
+    pageNumber: number;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    imageData: string;
+}
+
 interface PdfViewerProps {
     url: string;
     className?: string;
     signatureZones?: SignatureZone[];
+    signatureImages?: SignatureImage[];
     onPageChange?: (page: number) => void;
     initialPage?: number;
     enableTouchGestures?: boolean;
@@ -32,6 +42,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
     url,
     className = '',
     signatureZones = [],
+    signatureImages = [],
     onPageChange,
     initialPage = 1,
     enableTouchGestures = true,
@@ -161,6 +172,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
                             scale={scale}
                             rotation={rotation}
                             signatureZones={showSignatureZones ? signatureZones : []}
+                            signatureImages={signatureImages}
                             currentPage={currentPage}
                         />
                     )}

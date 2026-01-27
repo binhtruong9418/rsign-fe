@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PdfViewer } from './pdf/PdfViewer';
-import type { SignatureZone as PdfSignatureZone } from './pdf/PdfViewer';
+import type { SignatureZone as PdfSignatureZone, SignatureImage as PdfSignatureImage } from './pdf/PdfViewer';
 
 interface SignatureZone {
   pageNumber: number;
@@ -12,12 +12,22 @@ interface SignatureZone {
   label?: string;
 }
 
+interface SignatureImage {
+  pageNumber: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  imageData: string;
+}
+
 interface DocumentContentViewerProps {
   documentUri: string;
   documentTitle: string;
   className?: string;
   signatureZone?: SignatureZone;
   signatureZones?: SignatureZone[];
+  signatureImages?: SignatureImage[];
   onPageChange?: (page: number) => void;
 }
 
@@ -27,6 +37,7 @@ const DocumentContentViewer: React.FC<DocumentContentViewerProps> = ({
   className = '',
   signatureZone,
   signatureZones,
+  signatureImages,
   onPageChange,
 }) => {
   const { t } = useTranslation();
@@ -53,6 +64,7 @@ const DocumentContentViewer: React.FC<DocumentContentViewerProps> = ({
     <PdfViewer
       url={documentUri}
       signatureZones={allZones}
+      signatureImages={signatureImages}
       onPageChange={onPageChange}
       initialPage={1}
       enableTouchGestures={true}
@@ -63,3 +75,4 @@ const DocumentContentViewer: React.FC<DocumentContentViewerProps> = ({
 };
 
 export default DocumentContentViewer;
+export type { SignatureImage };

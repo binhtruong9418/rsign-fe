@@ -11,11 +11,21 @@ interface SignatureZone {
     label?: string;
 }
 
+export interface SignatureImage {
+    pageNumber: number;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    imageData: string;
+}
+
 interface PdfCanvasProps {
     page: PDFPageProxy | null;
     scale: number;
     rotation: number;
     signatureZones?: SignatureZone[];
+    signatureImages?: SignatureImage[];
     currentPage: number;
     onRenderComplete?: () => void;
 }
@@ -25,6 +35,7 @@ export const PdfCanvas: React.FC<PdfCanvasProps> = ({
     scale,
     rotation,
     signatureZones = [],
+    signatureImages = [],
     currentPage,
     onRenderComplete,
 }) => {
@@ -42,6 +53,7 @@ export const PdfCanvas: React.FC<PdfCanvasProps> = ({
 
         const renderPage = async () => {
             try {
+                // ... (existing render logic)
                 const devicePixelRatio = window.devicePixelRatio || 1;
                 const baseScale = Math.min(devicePixelRatio * 1.5, 2.5);
                 const effectiveScale = scale * baseScale;
@@ -82,9 +94,28 @@ export const PdfCanvas: React.FC<PdfCanvasProps> = ({
                 pageWrapper.className = 'relative inline-block w-full flex justify-center';
 
                 const canvasContainer = document.createElement('div');
-                canvasContainer.className = 'relative pdf-canvas-wrapper';
                 canvasContainer.appendChild(canvas);
 
+                // Render Signature Images (Render FIRST so they are behind zones/labels)
+                const imagesOnThisPage = signatureImages.filter(img => img.pageNumber === currentPage);
+                imagesOnThisPage.forEach((sigImage) => {
+                    const imgOverlay = document.createElement('div');
+                    imgOverlay.className = 'pdf-signature-overlay absolute pointer-events-none'; // Standard z-index (auto), handled by DOM order
+                    imgOverlay.style.left = `${sigImage.x}%`;
+                    imgOverlay.style.top = `${sigImage.y}%`;
+                    imgOverlay.style.width = `${sigImage.width}%`;
+                    imgOverlay.style.height = `${sigImage.height}%`;
+
+                    const img = document.createElement('img');
+                    img.src = sigImage.imageData;
+                    img.alt = 'Signature';
+                    img.className = 'w-full h-full object-contain';
+                    imgOverlay.appendChild(img);
+
+                    canvasContainer.appendChild(imgOverlay);
+                });
+
+                // Render Signature Zones (Render SECOND so they overlay images, keeping labels visible)
                 const zonesOnThisPage = signatureZones.filter(zone => zone.pageNumber === currentPage);
                 zonesOnThisPage.forEach((zone) => {
                     const overlay = document.createElement('div');
@@ -101,7 +132,6 @@ export const PdfCanvas: React.FC<PdfCanvasProps> = ({
 
                     canvasContainer.appendChild(overlay);
                 });
-
 
                 pageWrapper.appendChild(canvasContainer);
                 container.appendChild(pageWrapper);
@@ -124,7 +154,7 @@ export const PdfCanvas: React.FC<PdfCanvasProps> = ({
                 renderTaskRef.current.cancel?.();
             }
         };
-    }, [page, scale, rotation, signatureZones, currentPage, onRenderComplete]);
+    }, [page, scale, rotation, signatureZones, signatureImages, currentPage, onRenderComplete]);
 
     return (
         <div className="relative w-full flex flex-col items-center">
