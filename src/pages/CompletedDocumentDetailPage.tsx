@@ -130,6 +130,16 @@ const CompletedDocumentDetailPage: React.FC = () => {
                         <DocumentContentViewer
                             documentUri={details.signedFile}
                             documentTitle={document.title}
+                            signatureZones={details.signatures
+                                .filter(sig => sig.zone)
+                                .map(sig => ({
+                                    pageNumber: sig.zone!.page,
+                                    x: sig.zone!.position.x,
+                                    y: sig.zone!.position.y,
+                                    width: sig.zone!.position.w,
+                                    height: sig.zone!.position.h,
+                                    label: 'Signed',
+                                }))}
                         />
                     </div>
                 </div>

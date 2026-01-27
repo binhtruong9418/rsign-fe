@@ -1,7 +1,7 @@
+
 import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { CheckCircle, Clock, Home, FileText } from 'lucide-react';
+import { CheckCircle, Clock, Home, FileText, ArrowRight } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 interface LocationState {
@@ -14,11 +14,16 @@ interface LocationState {
 const SigningSuccessPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { t } = useTranslation();
 
   const state = (location.state as LocationState) || {};
   const { documentComplete = false, documentTitle = 'Document', totalSignatures = 1, documentId } = state;
-  const signedAt = new Date().toLocaleString();
+  const signedAt = new Date().toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
 
   useEffect(() => {
     // Trigger confetti animation
@@ -56,125 +61,106 @@ const SigningSuccessPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-primary-50 to-secondary-50 flex items-center justify-center px-4">
-      <div className="max-w-2xl w-full">
-        <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 text-center">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 flex items-center justify-center p-4">
+      <div className="max-w-lg w-full animate-scale-in">
+        <div className="bg-white rounded-2xl shadow-xl border border-secondary-100 p-8 md:p-10 text-center relative overflow-hidden">
+          {/* Top Decoration */}
+          <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-success-400 to-success-600"></div>
+
           {/* Success Icon */}
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-6">
-            <CheckCircle className="w-12 h-12 text-green-600" />
+          <div className="inline-flex items-center justify-center w-24 h-24 bg-success-50 rounded-full mb-8 animate-float">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-success-100 rounded-full">
+              <CheckCircle className="w-8 h-8 text-success-600" />
+            </div>
           </div>
 
           {/* Title */}
-          <h1 className="text-3xl md:text-4xl font-bold text-secondary-900 mb-4">
-            {t('success.title', 'Signature Submitted Successfully!')}
+          <h1 className="text-3xl font-bold text-secondary-900 mb-2 font-heading">
+            Signed Successfully!
           </h1>
+          <p className="text-secondary-500 mb-8">
+            Your signature has been securely recorded.
+          </p>
 
-          {/* Document Title */}
-          <p className="text-xl text-secondary-700 mb-6">{documentTitle}</p>
+          {/* Document Info Card */}
+          <div className="bg-secondary-50 rounded-xl p-5 mb-8 border border-secondary-200">
+            <h3 className="font-semibold text-secondary-900 mb-4 text-lg truncate" title={documentTitle}>
+              {documentTitle}
+            </h3>
 
-          {/* Document Details */}
-          <div className="bg-secondary-50 border border-secondary-200 rounded-xl p-5 mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+            <div className="grid grid-cols-2 gap-4 text-left text-sm border-t border-secondary-200 pt-4">
               <div>
-                <p className="text-sm text-secondary-500 mb-1">
-                  {t('success.signatures_submitted', 'Signatures Submitted')}
-                </p>
-                <p className="text-lg font-semibold text-secondary-900">
-                  {totalSignatures} {totalSignatures === 1 ? t('success.signature', 'signature') : t('success.signatures', 'signatures')}
-                </p>
+                <p className="text-secondary-500 mb-1">Signed By You</p>
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-secondary-900">{totalSignatures} signature{totalSignatures !== 1 ? 's' : ''}</span>
+                </div>
               </div>
               <div>
-                <p className="text-sm text-secondary-500 mb-1">
-                  {t('success.signed_at', 'Signed At')}
-                </p>
-                <p className="text-lg font-semibold text-secondary-900">
-                  {signedAt}
-                </p>
+                <p className="text-secondary-500 mb-1">Time</p>
+                <p className="font-medium text-secondary-900">{signedAt}</p>
               </div>
             </div>
           </div>
 
           {/* Status Message */}
           {documentComplete ? (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-8">
-              <div className="flex items-center justify-center gap-3 mb-2">
-                <CheckCircle className="w-6 h-6 text-green-600" />
-                <h2 className="text-lg font-semibold text-green-900">
-                  {t('success.all_signatures_collected', '✨ All Signatures Collected!')}
-                </h2>
+            <div className="bg-success-50 border border-success-200 rounded-xl p-4 mb-8 text-left flex gap-3 items-start">
+              <div className="shrink-0 mt-0.5">
+                <CheckCircle className="w-5 h-5 text-success-600" />
               </div>
-              <p className="text-green-800">
-                {t(
-                  'success.document_complete_message',
-                  'The document is now complete and will be processed shortly. You will receive a notification when the final document is ready.'
-                )}
-              </p>
+              <div>
+                <h4 className="font-semibold text-success-900 text-sm">Document Complete</h4>
+                <p className="text-success-800 text-sm mt-1">
+                  All parties have signed. The final document is ready for download.
+                </p>
+              </div>
             </div>
           ) : (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
-              <div className="flex items-center justify-center gap-3 mb-2">
-                <Clock className="w-6 h-6 text-blue-600" />
-                <h2 className="text-lg font-semibold text-blue-900">
-                  {t('success.waiting_for_others', '⏳ Waiting for Other Signers')}
-                </h2>
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-8 text-left flex gap-3 items-start">
+              <div className="shrink-0 mt-0.5">
+                <Clock className="w-5 h-5 text-blue-600" />
               </div>
-              <p className="text-blue-800">
-                {t(
-                  'success.waiting_message',
-                  "You'll be notified when all required signatures have been collected and the document is fully signed."
-                )}
-              </p>
+              <div>
+                <h4 className="font-semibold text-blue-900 text-sm">Waiting for Others</h4>
+                <p className="text-blue-800 text-sm mt-1">
+                  We'll notify you once all other parties have completed signing.
+                </p>
+              </div>
             </div>
           )}
 
           {/* Actions */}
           <div className="space-y-3">
-            {documentComplete && documentId && (
+            {documentComplete && documentId ? (
+              <>
+                <button
+                  onClick={() => navigate(`/documents/${documentId}/completed`)}
+                  className="w-full btn-primary py-3 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all"
+                >
+                  <FileText className="w-5 h-5" />
+                  View Final Document
+                </button>
+                <button
+                  onClick={() => navigate('/dashboard')}
+                  className="w-full btn-secondary py-3 flex items-center justify-center gap-2"
+                >
+                  <Home className="w-5 h-5" />
+                  Back to Dashboard
+                </button>
+              </>
+            ) : (
               <button
-                onClick={() => navigate(`/documents/${documentId}/completed`)}
-                className="w-full btn-primary flex items-center justify-center gap-2"
+                onClick={() => navigate('/dashboard')}
+                className="w-full btn-primary py-3 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all"
               >
-                <FileText className="w-5 h-5" />
-                {t('success.view_document_details', 'View Document Details')}
-              </button>
-            )}
-
-            <button
-              onClick={() => navigate('/dashboard')}
-              className={`w-full ${documentComplete && documentId ? 'btn-secondary' : 'btn-primary'} flex items-center justify-center gap-2`}
-            >
-              <Home className="w-5 h-5" />
-              {t('success.back_to_dashboard', 'Back to Dashboard')}
-            </button>
-
-            {documentComplete && (
-              <button
-                onClick={() => navigate('/documents')}
-                className="w-full btn-secondary"
-              >
-                {t('success.view_documents', 'View All Documents')}
+                <Home className="w-5 h-5" />
+                Back to Dashboard
               </button>
             )}
           </div>
 
-          {/* Additional Info */}
-          <div className="mt-8 pt-6 border-t border-secondary-200">
-            <p className="text-sm text-secondary-600">
-              {t(
-                'success.confirmation_email',
-                'A confirmation email has been sent to your registered email address.'
-              )}
-            </p>
-          </div>
-        </div>
-
-        {/* Help Text */}
-        <div className="mt-6 text-center">
-          <p className="text-sm text-secondary-600">
-            {t('success.questions', 'Have questions?')}{' '}
-            <a href="/support" className="text-primary-600 hover:text-primary-700 font-medium">
-              {t('success.contact_support', 'Contact Support')}
-            </a>
+          <p className="mt-8 text-xs text-secondary-400">
+            A confirmation has been sent to your email.
           </p>
         </div>
       </div>

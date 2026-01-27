@@ -156,6 +156,14 @@ const DocumentDetailPage: React.FC = () => {
                         <DocumentContentViewer
                             documentUri={details.file}
                             documentTitle={document.title}
+                            signatureZones={details.zones.map(zone => ({
+                                pageNumber: zone.page,
+                                x: zone.position.x,
+                                y: zone.position.y,
+                                width: zone.position.w,
+                                height: zone.position.h,
+                                label: zone.label,
+                            }))}
                             className="h-full w-full"
                         />
                     </div>
