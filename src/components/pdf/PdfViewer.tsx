@@ -160,6 +160,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
                 minScale={0.5}
                 maxScale={3}
                 enabled={enableTouchGestures}
+                className="grow flex flex-col min-h-0 relative"
             >
                 <div className="grow overflow-auto p-4 flex items-start justify-center min-h-[400px]">
                     {isLoading ? (

@@ -8,6 +8,7 @@ interface PdfTouchHandlerProps {
     minScale: number;
     maxScale: number;
     enabled?: boolean;
+    className?: string;
 }
 
 interface TouchState {
@@ -26,6 +27,7 @@ export const PdfTouchHandler: React.FC<PdfTouchHandlerProps> = ({
     minScale,
     maxScale,
     enabled = true,
+    className = '',
 }) => {
     const touchStateRef = useRef<TouchState | null>(null);
     const lastTapRef = useRef<number>(0);
@@ -113,6 +115,7 @@ export const PdfTouchHandler: React.FC<PdfTouchHandlerProps> = ({
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
             style={{ touchAction: 'none' }}
+            className={className}
         >
             {children}
         </div>

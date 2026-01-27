@@ -117,11 +117,12 @@ export interface CompletedDocumentDetail {
     document: {
         id: string;
         title: string;
-        status: "COMPLETED";
-        completedAt: string;
+        status: string; // "COMPLETED" | "PENDING"
+        completedAt: string | null;
         createdAt: string;
+        originalFileUrl?: string; // Fallback if signedFile is null
     };
-    signedFile: string;
+    signedFile: string | null;
     signatures: Array<{
         id: string;
         signedAt: string;
