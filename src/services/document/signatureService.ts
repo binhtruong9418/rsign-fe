@@ -4,7 +4,7 @@ import { API_ENDPOINTS } from "../../constants/app";
 
 export const signatureService = {
     /**
-     * Sign a document with signature strokes (legacy token-based)
+     * Sign a document with signature strokes
      */
     signDocument: async (signatureData: {
         strokes: Stroke[];

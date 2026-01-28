@@ -17,7 +17,13 @@ export interface Document {
     signedAt: string | null;
     deadline: string | null;
     status: DocumentStatus;
-    fileUrl?: string;
+    
+    // File URLs
+    originalFileUrl: string;      // Original uploaded file
+    currentFileUrl?: string;      // Current file with inserted signatures
+    signedFileUrl?: string;       // Final signed file (when COMPLETED)
+    displayFileUrl: string;       // URL to display (original or current)
+    
     competentAuthority: string;
 }
 
@@ -78,6 +84,11 @@ export interface PendingDocumentDetail {
         createdAt: string;
         deadline: string;
         isOverdue: boolean;
+        
+        // File URLs
+        originalFileUrl: string;
+        currentFileUrl?: string;
+        displayFileUrl: string;
     };
     file: string;
     status: {
@@ -120,7 +131,13 @@ export interface CompletedDocumentDetail {
         status: string; // "COMPLETED" | "PENDING"
         completedAt: string | null;
         createdAt: string;
-        originalFileUrl?: string; // Fallback if signedFile is null
+        
+        // File URLs
+        originalFileUrl: string;
+        currentFileUrl?: string;
+        signedFileUrl?: string;
+        displayFileUrl: string;
+        
     };
     signedFile: string | null;
     signatures: Array<{
@@ -256,6 +273,7 @@ export interface SessionDetailsResponse {
         id: string;
         title: string;
         originalFileUrl: string;
+        displayFileUrl: string;
         signatureZone: SignatureZone;
         deadline?: string;
     };

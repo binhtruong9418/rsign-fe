@@ -154,7 +154,7 @@ const DocumentDetailPage: React.FC = () => {
                             {t('document_detail.document_preview', 'Document Preview')}
                         </h2>
                         <DocumentContentViewer
-                            documentUri={details.file}
+                            documentUri={document.displayFileUrl}
                             documentTitle={document.title}
                             signatureZones={details.zones.map(zone => ({
                                 pageNumber: zone.page,

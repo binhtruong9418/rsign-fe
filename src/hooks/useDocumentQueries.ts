@@ -53,7 +53,7 @@ export const useCreateDocument = () => {
     });
 };
 
-// Hook for signing documents (legacy token-based)
+// Hook for signing documents
 export const useSignDocument = () => {
     return useMutation<
         void,

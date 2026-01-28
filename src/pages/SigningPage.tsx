@@ -303,7 +303,7 @@ const SigningPage: React.FC = () => {
 
               <div className="flex-grow min-h-0 p-0 sm:p-2 lg:p-4 bg-secondary-50">
                 <DocumentContentViewer
-                  documentUri={document.originalFileUrl}
+                  documentUri={document.displayFileUrl}
                   documentTitle={document.title}
                   className="h-full w-full shadow-sm bg-white rounded-none sm:rounded"
                   signatureZones={pendingSignatures.map(sig => sig.signatureZone)}
@@ -336,7 +336,7 @@ const SigningPage: React.FC = () => {
               }))}
               documentTitle={document.title}
               sessionExpiresAt={session.expiresAt}
-              documentUrl={document.originalFileUrl}
+              documentUrl={document.displayFileUrl}
             />
           )}
         </div>

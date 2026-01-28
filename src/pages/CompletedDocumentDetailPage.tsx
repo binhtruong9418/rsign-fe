@@ -22,7 +22,6 @@ const CompletedDocumentDetailPage: React.FC = () => {
     const [details, setDetails] = useState<CompletedDocumentDetail | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [signatureImages, setSignatureImages] = useState<SignatureImage[]>([]);
 
     useEffect(() => {
         if (documentId) {
@@ -30,66 +29,7 @@ const CompletedDocumentDetailPage: React.FC = () => {
         }
     }, [documentId]);
 
-    // Fetch and process signature images whenever details change
-    useEffect(() => {
-        if (!details) return;
 
-        let isMounted = true;
-        const blobUrls: string[] = [];
-
-        const fetchSignatureImages = async () => {
-            const promises = details.signatures
-                .filter(sig => sig.signature?.previewUrl && sig.zone)
-                .map(async (sig) => {
-                    try {
-                        // Fetch image data using authenticated API client
-                        const response = await api.get(sig.signature!.previewUrl, {
-                            responseType: 'blob'
-                        });
-
-                        if (!isMounted) return null;
-
-                        const blobUrl = URL.createObjectURL(response.data);
-                        blobUrls.push(blobUrl);
-
-                        return {
-                            pageNumber: sig.zone!.page,
-                            x: sig.zone!.position.x,
-                            y: sig.zone!.position.y,
-                            width: sig.zone!.position.w,
-                            height: sig.zone!.position.h,
-                            imageData: blobUrl
-                        } as SignatureImage;
-                    } catch (err) {
-                        console.error(`Failed to fetch signature image for ${sig.id}:`, err);
-                        return null;
-                    }
-                });
-
-            const results = await Promise.all(promises);
-            if (isMounted) {
-                setSignatureImages(results.filter((img): img is SignatureImage => img !== null));
-            }
-        };
-
-        // Only fetch if we don't have a signed file (meaning we need overlays)
-        // OR if user specifically wants to see overlays even on signed files (design choice).
-        // For partial documents (signedFile is null), this is MANDATORY.
-        if (!details.signedFile) {
-            fetchSignatureImages();
-        } else {
-            // If signed file exists, we usually don't need overlays unless we want to show them anyway.
-            // Given the requirements "display info ... and document with signature attached", 
-            // let's fetch them only if signedFile is null to save requests.
-            setSignatureImages([]);
-        }
-
-        return () => {
-            isMounted = false;
-            // Cleanup blob URLs to prevent memory leaks
-            blobUrls.forEach(url => URL.revokeObjectURL(url));
-        };
-    }, [details]);
 
     const loadDocumentDetails = async () => {
         if (!documentId) return;
@@ -99,21 +39,6 @@ const CompletedDocumentDetailPage: React.FC = () => {
             setError(null);
             const data = await signingApi.getCompletedDocumentDetail(documentId);
 
-            // UX Optimization: If document is partial (no signedFile) and originalFileUrl is missing,
-            // attempt to fetch the original file URL from the pending endpoint.
-            // This ensures we can display the document with signature overlays.
-            if (!data.signedFile && !data.document.originalFileUrl && data.document.status !== 'COMPLETED') {
-                try {
-                    // Try to get original file from pending details
-                    const pendingData = await signingApi.getPendingDocumentDetail(documentId);
-                    if (pendingData.file) {
-                        data.document.originalFileUrl = pendingData.file;
-                    }
-                } catch (pendingErr) {
-                    // Start of fallback chain failure, user might see "Document not found" or empty viewer
-                    console.warn('Could not retrieve original file from pending endpoint:', pendingErr);
-                }
-            }
 
             setDetails(data);
         } catch (err: any) {
@@ -168,7 +93,7 @@ const CompletedDocumentDetailPage: React.FC = () => {
 
     const { document } = details;
     const isCompleted = document.status === 'COMPLETED';
-    const documentUrl = details.signedFile || document.originalFileUrl || '';
+    const documentUrl = document.displayFileUrl;
 
     return (
         <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 pb-10">
@@ -232,11 +157,6 @@ const CompletedDocumentDetailPage: React.FC = () => {
                                 documentUri={documentUrl}
                                 documentTitle={document.title}
                                 className="h-full w-full rounded-none border-0"
-                                signatureImages={signatureImages}
-                                // Pass zones primarily for highlight ONLY if using overlays,
-                                // or if you want to highlight where signatures are.
-                                // If displaying overlays, we typically don't need the empty zones unless we want the "Sign Here" indicators.
-                                // Let's keep existing logic but filtered for non-duplicate display if needed.
                                 signatureZones={details.signatures
                                     .filter(sig => sig.zone)
                                     .map(sig => ({
