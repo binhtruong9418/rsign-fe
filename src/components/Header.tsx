@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { LogOut, User as UserIcon, Menu, X, ChevronDown, FileText, CheckCircle, Settings } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { queryClient } from '../App';
 
 const Header: React.FC = () => {
   const { isAuthenticated, user, logout } = useAuthStore();
@@ -14,6 +15,7 @@ const Header: React.FC = () => {
   const { t } = useTranslation();
 
   const handleLogout = () => {
+    queryClient.clear();
     logout();
     setIsMenuOpen(false);
     setIsProfileOpen(false);
