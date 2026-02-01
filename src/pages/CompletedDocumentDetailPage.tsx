@@ -168,6 +168,7 @@ const CompletedDocumentDetailPage: React.FC = () => {
                                         // Change label based on status
                                         label: sig.signature ? (isCompleted ? '' : 'Signed') : 'Pending',
                                     }))}
+                                
                             />
                         </div>
                     </div>

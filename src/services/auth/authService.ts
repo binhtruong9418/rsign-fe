@@ -3,8 +3,10 @@ import { User } from "../../types";
 import { API_ENDPOINTS } from "../../constants/app";
 
 export interface LoginResponse {
-    token: string;
+    accessToken: string;
+    refreshToken: string;
     user: User;
+    expiresIn?: number;
 }
 
 export interface VerifyEmailResponse {

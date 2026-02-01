@@ -23,6 +23,7 @@ export const DOCUMENT_STATUS = {
 // Local storage keys
 export const STORAGE_KEYS = {
     TOKEN: "rsign_token",
+    REFRESH_TOKEN: "rsign_refresh_token",
     USER: "rsign_user",
     REDIRECT_AFTER_LOGIN: "redirectAfterLogin",
 } as const;
@@ -34,6 +35,7 @@ export const API_ENDPOINTS = {
     REGISTER: "/api/users/register",
     VERIFY_EMAIL: "/api/users/verify-email",
     RESEND_VERIFICATION: "/api/users/resend-verification",
+    REFRESH_TOKEN: "/api/users/refresh-token",
     MY_DOCUMENTS: "/api/documents/created/me",
     DOCUMENTS: "/api/documents",
     DOCUMENT_BY_TOKEN: "/api/documents/get-by-token",
