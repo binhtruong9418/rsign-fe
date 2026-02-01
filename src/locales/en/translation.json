@@ -1,5 +1,19 @@
 {
     "locale": "en-US",
+    "decline": {
+        "button": "Decline Signature",
+        "title": "Decline Signature",
+        "warning_title": "You are about to decline:",
+        "warning_message": "This action cannot be undone and will notify the document sender.",
+        "reason_label": "Reason for declining",
+        "reason_placeholder": "Please provide a reason (minimum 10 characters)...",
+        "error_too_short": "Reason must be at least 10 characters",
+        "error_too_long": "Reason must be less than 500 characters",
+        "error_failed": "Failed to decline document",
+        "submitting": "Declining...",
+        "confirm": "Confirm Decline",
+        "success": "Document declined successfully"
+    },
     "sign_components": {
         "completed_view": {
             "title": "Document Completed",

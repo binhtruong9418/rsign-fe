@@ -1,5 +1,19 @@
 {
     "locale": "vi-VN",
+    "decline": {
+        "button": "Từ chối ký",
+        "title": "Từ chối ký tài liệu",
+        "warning_title": "Bạn sắp từ chối:",
+        "warning_message": "Hành động này không thể hoàn tác và sẽ thông báo cho người gửi tài liệu.",
+        "reason_label": "Lý do từ chối",
+        "reason_placeholder": "Vui lòng cung cấp lý do (ít nhất 10 ký tự)...",
+        "error_too_short": "Lý do phải có ít nhất 10 ký tự",
+        "error_too_long": "Lý do phải ít hơn 500 ký tự",
+        "error_failed": "Từ chối tài liệu thất bại",
+        "submitting": "Đang từ chối...",
+        "confirm": "Xác nhận từ chối",
+        "success": "Từ chối tài liệu thành công"
+    },
     "sign_components": {
         "completed_view": {
             "title": "Tài liệu đã hoàn thành",

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { ArrowLeft, FileText, Calendar, Users, AlertCircle, PenTool, CheckCircle } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
 import DocumentContentViewer from '../components/DocumentContentViewer';
+import DeclineModal from '../components/DeclineModal';
 import { signingApi } from '../services/signingApi';
 import { handleSigningError } from '../utils/errorHandler';
 import { showToast } from '../utils/toast';
@@ -75,6 +76,11 @@ const DocumentDetailPage: React.FC = () => {
         } finally {
             setCreating(false);
         }
+    };
+
+    const handleDeclineSuccess = () => {
+        showToast.success(t('decline.success', 'Document declined successfully'));
+        navigate('/dashboard');
     };
 
     const formatDate = (dateString?: string) => {
@@ -358,7 +364,15 @@ const DocumentDetailPage: React.FC = () => {
                             {t('document_detail.actions', 'Actions')}
                         </h2>
 
-                        <div className="space-y-2 sm:space-y-3">
+                        <div className="flex flex-col gap-2 sm:gap-3">
+
+                            {canSign && details.status.pending > 0 && (
+                                <DeclineModal
+                                    documentId={documentId!}
+                                    documentTitle={document.title}
+                                    onSuccess={handleDeclineSuccess}
+                                />
+                            )}
                             <button
                                 onClick={handleStartSigning}
                                 disabled={creating || !canSign}
