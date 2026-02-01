@@ -16,12 +16,17 @@ export const useLogin = () => {
     >({
         mutationFn: authService.login,
         onSuccess: (data) => {
-            login(data.user, data.accessToken, data.refreshToken);
             const redirectAfterLogin = sessionStorage.getItem(
-                STORAGE_KEYS.REDIRECT_AFTER_LOGIN
+                STORAGE_KEYS.REDIRECT_AFTER_LOGIN,
             );
-            navigate(redirectAfterLogin || "/dashboard");
+            const targetPath = redirectAfterLogin || "/dashboard";
+            
+            login(data.user, data.accessToken, data.refreshToken);
             sessionStorage.removeItem(STORAGE_KEYS.REDIRECT_AFTER_LOGIN);
+            
+            setTimeout(() => {
+                navigate(targetPath, { replace: true });
+            }, 0);
         },
     });
 };
@@ -38,12 +43,17 @@ export const useHustLogin = () => {
     >({
         mutationFn: authService.loginHust,
         onSuccess: (data) => {
-            login(data.user, data.accessToken, data.refreshToken);
             const redirectAfterLogin = sessionStorage.getItem(
-                STORAGE_KEYS.REDIRECT_AFTER_LOGIN
+                STORAGE_KEYS.REDIRECT_AFTER_LOGIN,
             );
-            navigate(redirectAfterLogin || "/dashboard");
+            const targetPath = redirectAfterLogin || "/dashboard";
+            
+            login(data.user, data.accessToken, data.refreshToken);
             sessionStorage.removeItem(STORAGE_KEYS.REDIRECT_AFTER_LOGIN);
+            
+            setTimeout(() => {
+                navigate(targetPath, { replace: true });
+            }, 0);
         },
     });
 };
