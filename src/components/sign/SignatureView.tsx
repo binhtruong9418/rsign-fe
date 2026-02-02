@@ -252,6 +252,14 @@ const SignatureView: React.FC<SignatureViewProps> = ({
                                         documentTitle={documentTitle}
                                         className="rounded-lg shadow-lg border-2 border-secondary-200 min-h-[400px]"
                                         onPageChange={setCurrentDocPage}
+                                        signatureZones={signatureZones.map(zone => ({
+                                            pageNumber: zone.signatureZone.pageNumber,
+                                            x: zone.signatureZone.x,
+                                            y: zone.signatureZone.y,
+                                            width: zone.signatureZone.width,
+                                            height: zone.signatureZone.height,
+                                            label: zone.signatureZone.label,
+                                        }))}
                                         signatureImages={Array.from(signatures.entries()).map(([documentSignerId, _]) => {
                                             const zone = signatureZones.find(z => z.documentSignerId === documentSignerId);
                                             const imgData = signatureImages.get(documentSignerId);
