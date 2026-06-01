@@ -21,4 +21,5 @@ View your app in AI Studio: https://ai.studio/apps/drive/1DWsvoyO8rN7qE74GSusfKb
 
 ## Deploy
 1. Install Vercel CLI:
+test
    `npm install -g vercel`
